@@ -75,6 +75,36 @@
       return iconMap[emoji] || <span className="text-4xl">{emoji}</span>;
     };
 
+    // Icon picker component for selecting workout icons
+    const IconPicker = ({selectedEmoji, onSelect, darkMode}) => {
+      const availableIcons = [
+        {emoji: '🦵', name: 'Dumbbell'},
+        {emoji: '💪', name: 'Activity'},
+        {emoji: '⚡', name: 'Zap'},
+        {emoji: '🎯', name: 'Target'},
+        {emoji: '🔥', name: 'Flame'}
+      ];
+
+      return (
+        <div className="grid grid-cols-5 gap-2 mt-2">
+          {availableIcons.map(icon => (
+            <button
+              key={icon.emoji}
+              type="button"
+              onClick={() => onSelect(icon.emoji)}
+              className={`p-3 rounded-lg transition-colors ${
+                selectedEmoji === icon.emoji
+                  ? 'bg-blue-600 ring-2 ring-blue-400'
+                  : darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
+              }`}
+            >
+              <WorkoutIcon emoji={icon.emoji} size={24} className={selectedEmoji === icon.emoji ? 'text-white' : (darkMode ? 'text-gray-300' : 'text-gray-700')} />
+            </button>
+          ))}
+        </div>
+      );
+    };
+
 // IndexedDB wrapper
 const DB_NAME = 'WorkoutTrackerDB';
 const DB_VERSION = 1;
@@ -157,6 +187,118 @@ const dbOperations = {
   }
 };
 
+// Markdown parser - supports multiple formats
+const parseMarkdownWorkout = (markdownText) => {
+  const workouts = [];
+  let currentWorkout = null;
+  let currentExercise = null;
+
+  const lines = markdownText.split('\n');
+
+  for (let line of lines) {
+    line = line.trim();
+    if (!line || line.startsWith('|---')) continue;  // Skip empty lines and table dividers
+
+    // H1 = Workout day
+    if (line.startsWith('# ')) {
+      if (currentWorkout && currentWorkout.exercises.length > 0) {
+        workouts.push(currentWorkout);
+      }
+
+      // Extract emoji if present
+      const emojiMatch = line.match(/[\u{1F300}-\u{1F9FF}]/u);
+      const emoji = emojiMatch ? emojiMatch[0] : '🔥';
+      const name = line.replace('# ', '').replace(emoji, '').trim();
+
+      currentWorkout = {
+        id: Date.now() + workouts.length,
+        name: name || 'New Workout',
+        emoji: emoji,
+        exercises: []
+      };
+      currentExercise = null;
+    }
+
+    // H2 = Exercise name
+    else if (line.startsWith('## ')) {
+      if (!currentWorkout) {
+        currentWorkout = {
+          id: Date.now(),
+          name: 'Imported Workout',
+          emoji: '🔥',
+          exercises: []
+        };
+      }
+
+      currentExercise = {
+        name: line.replace('## ', '').trim(),
+        sets: 3,
+        reps: 10,
+        notes: ''
+      };
+      currentWorkout.exercises.push(currentExercise);
+    }
+
+    // Parse sets/reps from various formats
+    else if (currentExercise) {
+      // Pattern 1: "Sets: 3" or "- Sets: 3"
+      const setsMatch = line.match(/[-*]?\s*Sets?:\s*(\d+)/i);
+      if (setsMatch) {
+        currentExercise.sets = parseInt(setsMatch[1]);
+      }
+
+      // Pattern 2: "Reps: 8" or "- Reps: 8-10" or "- Reps: 30s"
+      const repsMatch = line.match(/[-*]?\s*Reps?:\s*([\d\-s]+)/i);
+      if (repsMatch) {
+        currentExercise.reps = repsMatch[1];
+      }
+
+      // Pattern 3: "Notes: xyz"
+      const notesMatch = line.match(/[-*]?\s*Notes?:\s*(.+)/i);
+      if (notesMatch) {
+        currentExercise.notes = notesMatch[1];
+      }
+
+      // Pattern 4: Compact "3x8" or "3 x 8"
+      const compactMatch = line.match(/^(\d+)\s*x\s*([\d\-s]+)/i);
+      if (compactMatch) {
+        currentExercise.sets = parseInt(compactMatch[1]);
+        currentExercise.reps = compactMatch[2];
+      }
+    }
+
+    // Pattern 5: Table row "| Exercise Name | 3 | 8 |"
+    const tableMatch = line.match(/\|\s*([^|]+)\s*\|\s*(\d+)\s*\|\s*([\d\-s]+)\s*\|/);
+    if (tableMatch && currentWorkout) {
+      const exerciseName = tableMatch[1].trim();
+      // Skip header row
+      if (exerciseName.toLowerCase() !== 'exercise' && exerciseName.toLowerCase() !== 'name') {
+        currentWorkout.exercises.push({
+          name: exerciseName,
+          sets: parseInt(tableMatch[2]),
+          reps: tableMatch[3].trim(),
+          notes: ''
+        });
+      }
+    }
+  }
+
+  // Add last workout
+  if (currentWorkout && currentWorkout.exercises.length > 0) {
+    workouts.push(currentWorkout);
+  }
+
+  // Auto-assign icons cyclically if default emoji
+  const defaultIcons = ['🦵', '💪', '⚡', '🎯', '🔥'];
+  workouts.forEach((workout, idx) => {
+    if (workout.emoji === '🔥') {
+      workout.emoji = defaultIcons[idx % defaultIcons.length];
+    }
+  });
+
+  return workouts;
+};
+
 const WorkoutTracker = () => {
   const [workouts, setWorkouts] = useState([
     {
@@ -228,6 +370,9 @@ const WorkoutTracker = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [showAddDay, setShowAddDay] = useState(false);
   const [showDeleteHistory, setShowDeleteHistory] = useState(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [parsedWorkouts, setParsedWorkouts] = useState([]);
+  const fileInputRef = React.useRef(null);
 
   useEffect(() => {
     loadData();
@@ -434,6 +579,59 @@ const WorkoutTracker = () => {
     await saveWorkouts(updatedWorkouts);
     setShowAddDay(false);
     startEditWorkout(newWorkout);
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.md')) {
+      alert('Please upload a markdown (.md) file');
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const parsed = parseMarkdownWorkout(text);
+
+      if (parsed && parsed.length > 0) {
+        setParsedWorkouts(parsed);
+        setShowUploadModal(true);
+      } else {
+        alert('No valid workouts found in the markdown file. Please check the format.');
+      }
+    } catch (error) {
+      console.error('Error parsing markdown:', error);
+      alert('Failed to parse markdown file. Please check the file format.');
+    }
+
+    // Reset input
+    e.target.value = '';
+  };
+
+  const handleImportChoice = async (choice) => {
+    let finalWorkouts;
+
+    if (choice === 'replace') {
+      finalWorkouts = parsedWorkouts;
+    } else {
+      // Add to existing - ensure unique IDs
+      const maxId = Math.max(...workouts.map(w => w.id), 0);
+      const updatedParsed = parsedWorkouts.map((w, idx) => ({
+        ...w,
+        id: maxId + idx + 1
+      }));
+      finalWorkouts = [...workouts, ...updatedParsed];
+    }
+
+    await saveWorkouts(finalWorkouts);
+    setShowUploadModal(false);
+    setParsedWorkouts([]);
+    alert(`Successfully imported ${parsedWorkouts.length} workout day(s)!`);
   };
 
   const deleteHistoryEntry = async (entryId) => {
@@ -789,14 +987,32 @@ const WorkoutTracker = () => {
                 <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center gap-2`}>
                   <span>Your Program</span>
                 </h2>
-                <button
-                  onClick={() => setShowAddDay(true)}
-                  className={`px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold transition-colors`}
-                >
-                  <Plus size={18} />
-                  Add Day
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={triggerFileUpload}
+                    className={`px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold transition-colors`}
+                  >
+                    <Download size={18} />
+                    Upload MD
+                  </button>
+                  <button
+                    onClick={() => setShowAddDay(true)}
+                    className={`px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold transition-colors`}
+                  >
+                    <Plus size={18} />
+                    Add Day
+                  </button>
+                </div>
               </div>
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".md"
+                onChange={handleFileChange}
+                style={{display: 'none'}}
+              />
               <div className="grid gap-4">
                 {workouts.map(workout => (
                   <div 
@@ -1173,14 +1389,12 @@ const WorkoutTracker = () => {
                   className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg text-lg focus:border-gray-500 focus:outline-none`}
                   placeholder="Workout name"
                 />
-                <div className="flex items-center gap-2">
-                  <label className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Emoji:</label>
-                  <input
-                    type="text"
-                    value={editingWorkout.emoji || '💪'}
-                    onChange={(e) => setEditingWorkout({ ...editingWorkout, emoji: e.target.value })}
-                    className={`w-20 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg text-center text-2xl focus:border-gray-500 focus:outline-none`}
-                    maxLength={2}
+                <div>
+                  <label className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2 block`}>Select Icon:</label>
+                  <IconPicker
+                    selectedEmoji={editingWorkout.emoji || '💪'}
+                    onSelect={(emoji) => setEditingWorkout({ ...editingWorkout, emoji })}
+                    darkMode={darkMode}
                   />
                 </div>
               </div>
@@ -1301,6 +1515,49 @@ const WorkoutTracker = () => {
                 Add Day
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upload Markdown Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-md w-full shadow-2xl`}>
+            <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-2`}>
+              Upload Workout Routine
+            </h3>
+            <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
+              Found {parsedWorkouts.length} workout day(s) in the file.
+            </p>
+
+            <div className="mb-6">
+              <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                How would you like to import these workouts?
+              </label>
+              <div className="space-y-2">
+                <button
+                  onClick={() => handleImportChoice('replace')}
+                  className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-xl text-left transition-colors`}
+                >
+                  <div className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Replace All</div>
+                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Clear existing workouts and use only these</div>
+                </button>
+                <button
+                  onClick={() => handleImportChoice('add')}
+                  className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-xl text-left transition-colors`}
+                >
+                  <div className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Add to Existing</div>
+                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Keep current workouts and add these</div>
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowUploadModal(false)}
+              className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-xl font-semibold`}
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
