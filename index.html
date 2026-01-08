@@ -1132,13 +1132,19 @@ const WorkoutTracker = () => {
 
   const updateSet = (exerciseIndex, setIndex, field, value) => {
     const updated = { ...currentLog };
-    
+
     // If updating weight, replace comma with dot for decimal support
     if (field === 'weight' && value) {
       value = value.replace(',', '.');
     }
-    
+
     updated.exercises[exerciseIndex].sets[setIndex][field] = value;
+    setCurrentLog(updated);
+  };
+
+  const updateExerciseName = (exerciseIndex, newName) => {
+    const updated = { ...currentLog };
+    updated.exercises[exerciseIndex].name = newName;
     setCurrentLog(updated);
   };
 
@@ -2286,7 +2292,13 @@ const WorkoutTracker = () => {
             {/* Exercises */}
             {currentLog.exercises.map((exercise, exIdx) => (
               <div key={exIdx} className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5 shadow-sm transform-gpu`}>
-                <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-1`}>{exercise.name}</h3>
+                <input
+                  type="text"
+                  value={exercise.name}
+                  onChange={(e) => updateExerciseName(exIdx, e.target.value)}
+                  className={`font-bold text-lg ${darkMode ? 'text-white bg-gray-900 border-gray-700' : 'text-gray-900 bg-gray-50 border-gray-300'} border rounded-lg px-3 py-2 mb-2 w-full focus:border-gray-500 focus:outline-none`}
+                  placeholder="Exercise name"
+                />
                 <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Target: {exercise.plannedSets} × {exercise.plannedReps}</div>
                 
                 <div className="space-y-3">
@@ -2304,9 +2316,10 @@ const WorkoutTracker = () => {
                         value={set.weight}
                         onChange={(e) => updateSet(exIdx, setIdx, 'weight', e.target.value)}
                         className={`w-20 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg text-center font-semibold focus:border-gray-500 focus:outline-none`}
-                        disabled={exercise.name.toLowerCase().includes('core') || 
+                        disabled={exercise.name.toLowerCase().includes('core') ||
                                  exercise.name.toLowerCase().includes('plank') ||
-                                 exercise.name.toLowerCase().includes('hanging')}
+                                 exercise.name.toLowerCase().includes('hanging') ||
+                                 exercise.name.toLowerCase().includes('rollout')}
                       />
                       
                       <span className={`${darkMode ? 'text-gray-500' : 'text-gray-400'} font-bold`}>×</span>
