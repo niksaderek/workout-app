@@ -1166,7 +1166,10 @@ const WorkoutTracker = () => {
   if (loading) {
     return (
       <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-br from-gray-100 via-white to-gray-100'} flex items-center justify-center`}>
-        <div className={`text-2xl ${darkMode ? 'text-white' : 'text-gray-900'} animate-pulse`}>💪 Loading...</div>
+        <div className="flex flex-col items-center gap-4">
+          <Dumbbell size={64} className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} animate-pulse`} />
+          <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} animate-pulse`}>Loading...</div>
+        </div>
       </div>
     );
   }
