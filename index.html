@@ -51,7 +51,9 @@
     const Calendar = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>;
     
     const Download = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>;
-    
+
+    const Upload = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>;
+
     const Edit2 = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>;
     
     const Plus = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14"/><path d="M12 5v14"/></svg>;
@@ -960,6 +962,7 @@ const WorkoutTracker = () => {
   const [selectedTimelinePoint, setSelectedTimelinePoint] = useState(null);
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
   const fileInputRef = React.useRef(null);
+  const restoreBackupInputRef = React.useRef(null);
   const dragExerciseRef = React.useRef(null);
 
   useEffect(() => {
@@ -1056,15 +1059,49 @@ const WorkoutTracker = () => {
       setLoading(true);
       const savedWorkouts = await dbOperations.getWorkouts();
       const savedHistory = await dbOperations.getHistory();
-      
-      if (savedWorkouts && savedWorkouts.length > 0) {
-        setWorkouts(savedWorkouts);
+
+      // Check if IndexedDB is empty but localStorage has backup
+      const hasIndexedDBData = (savedWorkouts && savedWorkouts.length > 0) || (savedHistory && savedHistory.length > 0);
+      const workoutsBackup = localStorage.getItem('workouts_backup');
+      const historyBackup = localStorage.getItem('history_backup');
+      const hasBackupData = workoutsBackup || historyBackup;
+
+      if (!hasIndexedDBData && hasBackupData) {
+        console.log('Restoring data from localStorage backup...');
+
+        // Restore workouts
+        if (workoutsBackup) {
+          const parsedWorkouts = JSON.parse(workoutsBackup);
+          await dbOperations.saveWorkouts(parsedWorkouts);
+          setWorkouts(parsedWorkouts);
+        }
+
+        // Restore history
+        if (historyBackup) {
+          const parsedHistory = JSON.parse(historyBackup);
+          for (const item of parsedHistory) {
+            await dbOperations.saveHistory(item);
+          }
+          setCompletedWorkouts(parsedHistory);
+        }
+
+        console.log('Data restored successfully!');
       } else {
-        await dbOperations.saveWorkouts(workouts);
-      }
-      
-      if (savedHistory && savedHistory.length > 0) {
-        setCompletedWorkouts(savedHistory);
+        // Normal load path
+        if (savedWorkouts && savedWorkouts.length > 0) {
+          setWorkouts(savedWorkouts);
+          // Update backup
+          localStorage.setItem('workouts_backup', JSON.stringify(savedWorkouts));
+        } else {
+          await dbOperations.saveWorkouts(workouts);
+          localStorage.setItem('workouts_backup', JSON.stringify(workouts));
+        }
+
+        if (savedHistory && savedHistory.length > 0) {
+          setCompletedWorkouts(savedHistory);
+          // Update backup
+          localStorage.setItem('history_backup', JSON.stringify(savedHistory));
+        }
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -1077,6 +1114,8 @@ const WorkoutTracker = () => {
     try {
       await dbOperations.saveWorkouts(newWorkouts);
       setWorkouts(newWorkouts);
+      // Auto-backup to localStorage
+      localStorage.setItem('workouts_backup', JSON.stringify(newWorkouts));
     } catch (error) {
       console.error('Error saving workouts:', error);
     }
@@ -1087,6 +1126,8 @@ const WorkoutTracker = () => {
       await dbOperations.saveHistory(newHistoryItem);
       const allHistory = await dbOperations.getHistory();
       setCompletedWorkouts(allHistory);
+      // Auto-backup to localStorage
+      localStorage.setItem('history_backup', JSON.stringify(allHistory));
     } catch (error) {
       console.error('Error saving history:', error);
     }
@@ -1113,7 +1154,11 @@ const WorkoutTracker = () => {
       workoutEmoji: workout.emoji,
       date: new Date().toISOString(),
       exercises: workout.exercises.map(ex => {
-        const lastWeight = getLastWeight(ex.name);
+        const isCoreExercise = ex.name.toLowerCase().includes('core') ||
+                               ex.name.toLowerCase().includes('plank') ||
+                               ex.name.toLowerCase().includes('hanging') ||
+                               ex.name.toLowerCase().includes('rollout');
+        const lastWeight = isCoreExercise ? '0' : getLastWeight(ex.name);
         return {
           name: ex.name,
           plannedSets: ex.sets,
@@ -1481,6 +1526,57 @@ const WorkoutTracker = () => {
     }
   };
 
+  const exportBackupToFile = () => {
+    const backupData = {
+      workouts: workouts,
+      history: completedWorkouts,
+      exportDate: new Date().toISOString(),
+      version: '1.0'
+    };
+
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `workout-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const restoreBackupFromFile = (file) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const backupData = JSON.parse(e.target.result);
+
+        if (!backupData.workouts || !backupData.history) {
+          alert('Invalid backup file format');
+          return;
+        }
+
+        // Restore workouts
+        await dbOperations.saveWorkouts(backupData.workouts);
+        setWorkouts(backupData.workouts);
+        localStorage.setItem('workouts_backup', JSON.stringify(backupData.workouts));
+
+        // Restore history
+        for (const item of backupData.history) {
+          await dbOperations.saveHistory(item);
+        }
+        setCompletedWorkouts(backupData.history);
+        localStorage.setItem('history_backup', JSON.stringify(backupData.history));
+
+        alert('Backup restored successfully!');
+      } catch (error) {
+        console.error('Error restoring backup:', error);
+        alert('Failed to restore backup. Please check the file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const getWeekStats = () => {
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
@@ -1493,9 +1589,10 @@ const WorkoutTracker = () => {
     
     recentWorkouts.forEach(workout => {
       workout.exercises.forEach(exercise => {
-        const isCoreExercise = exercise.name.toLowerCase().includes('core') || 
+        const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
                                exercise.name.toLowerCase().includes('plank') ||
-                               exercise.name.toLowerCase().includes('hanging');
+                               exercise.name.toLowerCase().includes('hanging') ||
+                               exercise.name.toLowerCase().includes('rollout');
         
         exercise.sets.forEach(set => {
           const weight = parseFloat(set.weight) || 0;
@@ -1543,9 +1640,10 @@ const WorkoutTracker = () => {
       
       workouts.forEach(workout => {
         workout.exercises.forEach(exercise => {
-          const isCoreExercise = exercise.name.toLowerCase().includes('core') || 
+          const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
                                  exercise.name.toLowerCase().includes('plank') ||
-                                 exercise.name.toLowerCase().includes('hanging');
+                                 exercise.name.toLowerCase().includes('hanging') ||
+                                 exercise.name.toLowerCase().includes('rollout');
           
           exercise.sets.forEach(set => {
             const weight = parseFloat(set.weight) || 0;
@@ -1658,9 +1756,10 @@ const WorkoutTracker = () => {
     let allTimeVolume = 0;
     completedWorkouts.forEach(workout => {
       workout.exercises.forEach(exercise => {
-        const isCoreExercise = exercise.name.toLowerCase().includes('core') || 
+        const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
                                exercise.name.toLowerCase().includes('plank') ||
-                               exercise.name.toLowerCase().includes('hanging');
+                               exercise.name.toLowerCase().includes('hanging') ||
+                               exercise.name.toLowerCase().includes('rollout');
         
         exercise.sets.forEach(set => {
           const weight = parseFloat(set.weight) || 0;
@@ -1784,7 +1883,8 @@ const WorkoutTracker = () => {
       workout.exercises.forEach(exercise => {
         const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
                                exercise.name.toLowerCase().includes('plank') ||
-                               exercise.name.toLowerCase().includes('hanging');
+                               exercise.name.toLowerCase().includes('hanging') ||
+                               exercise.name.toLowerCase().includes('rollout');
 
         exercise.sets.forEach(set => {
           const weight = parseFloat(set.weight) || 0;
@@ -1810,8 +1910,10 @@ const WorkoutTracker = () => {
           }
         });
       });
+    });
 
-      // Get max weight for each main lift
+    // Get max weight for each main lift (after processing all workouts)
+    Object.keys(grouped).forEach(key => {
       Object.keys(grouped[key].mainLifts).forEach(lift => {
         if (grouped[key].mainLifts[lift].length > 0) {
           grouped[key].mainLifts[lift] = Math.max(...grouped[key].mainLifts[lift]);
@@ -1844,7 +1946,25 @@ const WorkoutTracker = () => {
   }
 
   const stats = getWeekStats();
-  const detailedStats = getDetailedStats();
+  let detailedStats;
+  try {
+    detailedStats = getDetailedStats();
+  } catch (error) {
+    console.error('Error calculating detailed stats:', error);
+    detailedStats = {
+      thisWeek: { volume: 0, reps: 0, sets: 0, coreSets: 0, workouts: 0 },
+      lastWeek: { volume: 0, reps: 0, sets: 0, coreSets: 0, workouts: 0 },
+      thisMonth: { volume: 0, reps: 0, sets: 0, coreSets: 0, workouts: 0 },
+      lastMonth: { volume: 0, reps: 0, sets: 0, coreSets: 0, workouts: 0 },
+      volumeChange: 0,
+      monthVolumeChange: 0,
+      exerciseMaxes: {},
+      avgVolumePerWorkout: 0,
+      totalWorkouts: 0,
+      allTimeVolume: 0,
+      avgWorkoutsPerWeek: 0
+    };
+  }
 
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-br from-gray-100 via-white to-gray-100'} pb-24`}>
@@ -1985,6 +2105,35 @@ const WorkoutTracker = () => {
                     Add Day
                   </button>
                 </div>
+
+              </div>
+
+              {/* Backup/Restore Section */}
+              <div className={`${darkMode ? 'bg-gray-800/30 border-gray-700' : 'bg-blue-50 border-blue-200'} border rounded-xl p-4 mt-4`}>
+                <div className={`flex items-center gap-2 mb-3`}>
+                  <div className={`text-sm font-semibold ${darkMode ? 'text-blue-400' : 'text-blue-700'}`}>
+                    Data Protection
+                  </div>
+                </div>
+                <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>
+                  Your data is auto-backed up to browser storage. Download a backup file for extra safety.
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={exportBackupToFile}
+                    className={`flex-1 px-3 py-2 ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-lg flex items-center justify-center gap-2 font-semibold transition-colors text-sm`}
+                  >
+                    <Download size={16} />
+                    Backup to File
+                  </button>
+                  <label
+                    htmlFor="restore-backup-input"
+                    className={`flex-1 px-3 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-300 hover:bg-gray-400'} text-white rounded-lg flex items-center justify-center gap-2 font-semibold transition-colors cursor-pointer text-sm`}
+                  >
+                    <Upload size={16} />
+                    Restore
+                  </label>
+                </div>
               </div>
 
               {/* Mobile-friendly file input using both hidden input and id-based label */}
@@ -1994,6 +2143,19 @@ const WorkoutTracker = () => {
                 type="file"
                 accept="*/*"
                 onChange={handleFileChange}
+                style={{display: 'none'}}
+              />
+              <input
+                id="restore-backup-input"
+                ref={restoreBackupInputRef}
+                type="file"
+                accept=".json,application/json"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    restoreBackupFromFile(e.target.files[0]);
+                  }
+                  e.target.value = ''; // Reset input
+                }}
                 style={{display: 'none'}}
               />
               <div className="grid gap-4">
@@ -2443,9 +2605,10 @@ const WorkoutTracker = () => {
                       const completedSets = ex.sets.filter(set => {
                         const weight = parseFloat(set.weight) || 0;
                         const reps = parseFloat(set.reps) || 0;
-                        const isCoreExercise = ex.name.toLowerCase().includes('core') || 
+                        const isCoreExercise = ex.name.toLowerCase().includes('core') ||
                                               ex.name.toLowerCase().includes('plank') ||
-                                              ex.name.toLowerCase().includes('hanging');
+                                              ex.name.toLowerCase().includes('hanging') ||
+                                              ex.name.toLowerCase().includes('rollout');
                         
                         // For core exercises, only check reps
                         if (isCoreExercise) return reps > 0;
