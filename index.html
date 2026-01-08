@@ -845,20 +845,7 @@ const WorkoutTracker = () => {
   };
 
   const triggerFileUpload = () => {
-    alert('Supported formats:\n\n' +
-          'MARKDOWN (.md):\n' +
-          '• Simple headers with Sets/Reps\n' +
-          '• Compact format (3x8)\n' +
-          '• Tables (any format)\n' +
-          '• Croatian/English\n\n' +
-          'CSV (.csv):\n' +
-          '• Workout, Exercise, Sets, Reps, Notes\n' +
-          '• Auto-detects column order\n' +
-          '• Works with any spreadsheet export\n\n' +
-          'EXCEL (.xlsx): Export to CSV first');
-    setTimeout(() => {
-      fileInputRef.current?.click();
-    }, 100);
+    fileInputRef.current?.click();
   };
 
   const handleFileChange = async (e) => {
