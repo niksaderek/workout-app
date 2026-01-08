@@ -583,6 +583,21 @@ const WorkoutTracker = () => {
   };
 
   const triggerFileUpload = () => {
+    alert('Supported formats:\n\n' +
+          '1. Simple Headers:\n' +
+          '   # Workout Day\n' +
+          '   ## Exercise\n' +
+          '   Sets: 3\n' +
+          '   Reps: 8\n\n' +
+          '2. Bulleted Lists:\n' +
+          '   ## Exercise\n' +
+          '   - Sets: 3\n' +
+          '   - Reps: 8-10\n\n' +
+          '3. Table Format:\n' +
+          '   | Exercise | Sets | Reps |\n\n' +
+          '4. Compact Notation:\n' +
+          '   ## Exercise\n' +
+          '   3x8');
     fileInputRef.current?.click();
   };
 
