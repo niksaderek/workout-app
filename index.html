@@ -1149,6 +1149,72 @@ const WorkoutTracker = () => {
     return '';
   };
 
+  const calculateEstimated1RM = (weight, reps) => {
+    // Epley formula: 1RM = weight × (1 + reps / 30)
+    return weight * (1 + reps / 30);
+  };
+
+  const getSmartWeightSuggestion = (exerciseName) => {
+    // Find last workout with this exercise
+    for (let i = completedWorkouts.length - 1; i >= 0; i--) {
+      const workout = completedWorkouts[i];
+      const exercise = workout.exercises.find(ex => ex.name === exerciseName);
+
+      if (exercise && exercise.sets.length > 0) {
+        // Find best set (highest estimated 1RM)
+        let bestSet = null;
+        let bestEstimated1RM = 0;
+
+        exercise.sets.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          const reps = parseFloat(set.reps) || 0;
+
+          if (weight > 0 && reps > 0) {
+            const estimated1RM = calculateEstimated1RM(weight, reps);
+            if (estimated1RM > bestEstimated1RM) {
+              bestEstimated1RM = estimated1RM;
+              bestSet = set;
+            }
+          }
+        });
+
+        if (bestSet) {
+          const lastWeight = parseFloat(bestSet.weight);
+          const difficulty = exercise.difficulty;
+
+          // Smart progression based on difficulty
+          if (difficulty === 'easy') {
+            // Easy → +2.5 kg
+            return {
+              weight: (lastWeight + 2.5).toFixed(1),
+              reason: 'felt easy last time (+2.5 kg)'
+            };
+          } else if (difficulty === 'medium') {
+            // Medium → Keep same
+            return {
+              weight: lastWeight.toFixed(1),
+              reason: 'good weight (same as last time)'
+            };
+          } else if (difficulty === 'hard') {
+            // Hard → Keep same
+            return {
+              weight: lastWeight.toFixed(1),
+              reason: 'felt hard last time (repeat weight)'
+            };
+          } else {
+            // No difficulty rating → return last weight
+            return {
+              weight: lastWeight.toFixed(1),
+              reason: 'based on last workout'
+            };
+          }
+        }
+      }
+    }
+
+    return null;
+  };
+
   const startWorkout = (workout) => {
     soundSystem.workoutStart(); // Play sound
 
@@ -1167,10 +1233,10 @@ const WorkoutTracker = () => {
           name: ex.name,
           plannedSets: ex.sets,
           plannedReps: ex.reps,
+          difficulty: null, // User can optionally rate difficulty
           sets: Array(ex.sets).fill(null).map(() => ({
             weight: lastWeight,
-            reps: ex.reps,
-            completed: false
+            reps: ex.reps
           }))
         };
       })
@@ -1194,13 +1260,6 @@ const WorkoutTracker = () => {
   const updateExerciseName = (exerciseIndex, newName) => {
     const updated = { ...currentLog };
     updated.exercises[exerciseIndex].name = newName;
-    setCurrentLog(updated);
-  };
-
-  const toggleSetComplete = (exerciseIndex, setIndex) => {
-    const updated = { ...currentLog };
-    updated.exercises[exerciseIndex].sets[setIndex].completed = 
-      !updated.exercises[exerciseIndex].sets[setIndex].completed;
     setCurrentLog(updated);
   };
 
@@ -2639,8 +2698,27 @@ const WorkoutTracker = () => {
                   );
                 })()}
 
-                <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Target: {exercise.plannedSets} × {exercise.plannedReps}</div>
-                
+                <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Target: {exercise.plannedSets} × {exercise.plannedReps}</div>
+
+                {/* Smart Weight Suggestion */}
+                {(() => {
+                  const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
+                                        exercise.name.toLowerCase().includes('plank') ||
+                                        exercise.name.toLowerCase().includes('hanging') ||
+                                        exercise.name.toLowerCase().includes('rollout');
+                  if (isCoreExercise) return null;
+
+                  const suggestion = getSmartWeightSuggestion(exercise.name);
+                  if (!suggestion) return null;
+
+                  return (
+                    <div className={`text-xs ${darkMode ? 'text-blue-400' : 'text-blue-600'} mb-4 flex items-center gap-1`}>
+                      <Zap size={14} />
+                      <span>Suggestion: <strong>{suggestion.weight} kg</strong> — {suggestion.reason}</span>
+                    </div>
+                  );
+                })()}
+
                 <div className="space-y-3">
                   {exercise.sets.map((set, setIdx) => (
                     <div key={setIdx} className="flex items-center gap-2">
@@ -2671,17 +2749,6 @@ const WorkoutTracker = () => {
                         onChange={(e) => updateSet(exIdx, setIdx, 'reps', e.target.value)}
                         className={`w-20 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg text-center font-semibold focus:border-gray-500 focus:outline-none`}
                       />
-                      
-                      <button
-                        onClick={() => toggleSetComplete(exIdx, setIdx)}
-                        className={`ml-auto p-3 rounded-lg transition-colors transform-gpu ${
-                          set.completed
-                            ? 'bg-green-600'
-                            : darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
-                        }`}
-                      >
-                        <Check size={20} className={set.completed ? 'text-white' : darkMode ? 'text-gray-400' : 'text-gray-500'} />
-                      </button>
                     </div>
                   ))}
 
@@ -2692,8 +2759,7 @@ const WorkoutTracker = () => {
                       const lastSet = exercise.sets[exercise.sets.length - 1];
                       updatedLog.exercises[exIdx].sets.push({
                         weight: lastSet?.weight || '',
-                        reps: lastSet?.reps || exercise.plannedReps,
-                        completed: false
+                        reps: lastSet?.reps || exercise.plannedReps
                       });
                       setCurrentLog(updatedLog);
                       soundSystem.buttonPress();
@@ -2703,6 +2769,41 @@ const WorkoutTracker = () => {
                     <Plus size={16} />
                     Add Set
                   </button>
+
+                  {/* Difficulty Rating */}
+                  <div className={`mt-4 pt-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <div className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>
+                      How was it? (optional)
+                    </div>
+                    <div className="flex gap-2">
+                      {[
+                        { value: 'easy', label: 'Easy' },
+                        { value: 'medium', label: 'Medium' },
+                        { value: 'hard', label: 'Hard' }
+                      ].map(option => (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            const updated = { ...currentLog };
+                            updated.exercises[exIdx].difficulty =
+                              exercise.difficulty === option.value ? null : option.value;
+                            setCurrentLog(updated);
+                          }}
+                          className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                            exercise.difficulty === option.value
+                              ? darkMode
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-blue-500 text-white'
+                              : darkMode
+                                ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -2986,10 +3087,6 @@ const WorkoutTracker = () => {
                           onChange={(e) => updateHistorySet(exIdx, setIdx, 'reps', e.target.value)}
                           className={`w-20 px-3 py-2 ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded-lg text-center font-semibold focus:border-gray-500 focus:outline-none`}
                         />
-
-                        <div className={`ml-auto px-3 py-2 rounded-lg ${set.completed ? 'bg-green-600 text-white' : darkMode ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'}`}>
-                          {set.completed ? 'Done' : 'Skipped'}
-                        </div>
                       </div>
                     ))}
                   </div>
