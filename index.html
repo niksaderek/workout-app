@@ -200,10 +200,10 @@ const parseMarkdownWorkout = (markdownText) => {
 
   for (let line of lines) {
     line = line.trim();
-    if (!line || line.startsWith('|---')) continue;  // Skip empty lines and table dividers
+    if (!line || line.startsWith('|---') || line.startsWith('---')) continue;  // Skip empty lines, table dividers, and horizontal rules
 
-    // H1 = Workout day
-    if (line.startsWith('# ')) {
+    // H1 or H2 starting with "DAY" = Workout day
+    if (line.startsWith('# ') || (line.startsWith('## ') && line.toUpperCase().includes('DAY'))) {
       if (currentWorkout && currentWorkout.exercises.length > 0) {
         workouts.push(currentWorkout);
       }
@@ -211,7 +211,9 @@ const parseMarkdownWorkout = (markdownText) => {
       // Extract emoji if present
       const emojiMatch = line.match(/[\u{1F300}-\u{1F9FF}]/u);
       const emoji = emojiMatch ? emojiMatch[0] : '🔥';
-      const name = line.replace('# ', '').replace(emoji, '').trim();
+
+      // Remove header markers and emoji to get name
+      let name = line.replace(/^#+\s*/, '').replace(emoji, '').trim();
 
       currentWorkout = {
         id: Date.now() + workouts.length,
@@ -222,8 +224,17 @@ const parseMarkdownWorkout = (markdownText) => {
       currentExercise = null;
     }
 
-    // H2 = Exercise name
-    else if (line.startsWith('## ')) {
+    // H3 = Workout description (e.g., "PUSH A — Teški Bench & Kvadriceps")
+    // We append this to the workout name for clarity
+    else if (line.startsWith('### ')) {
+      if (currentWorkout) {
+        const description = line.replace('### ', '').trim();
+        currentWorkout.name = `${currentWorkout.name} - ${description}`;
+      }
+    }
+
+    // H2 (not a DAY) = Exercise name (fallback for simple formats)
+    else if (line.startsWith('## ') && !line.toUpperCase().includes('DAY')) {
       if (!currentWorkout) {
         currentWorkout = {
           id: Date.now(),
@@ -270,17 +281,45 @@ const parseMarkdownWorkout = (markdownText) => {
       }
     }
 
-    // Pattern 5: Table row "| Exercise Name | 3 | 8 |"
-    const tableMatch = line.match(/\|\s*([^|]+)\s*\|\s*(\d+)\s*\|\s*([\d\-s]+)\s*\|/);
-    if (tableMatch && currentWorkout) {
-      const exerciseName = tableMatch[1].trim();
-      // Skip header row
-      if (exerciseName.toLowerCase() !== 'exercise' && exerciseName.toLowerCase() !== 'name') {
+    // Pattern 5: Table row - handle both 3-column and 5-column tables
+    // Format: | Exercise | Sets | Reps | ... (optional columns) |
+    if (line.startsWith('|') && line.endsWith('|')) {
+      const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
+
+      // Skip header rows (check if first cell contains common header words)
+      const firstCell = cells[0].toLowerCase();
+      if (firstCell.includes('vježba') || firstCell.includes('exercise') ||
+          firstCell.includes('name') || firstCell.includes('serije')) {
+        continue;
+      }
+
+      // Need at least 3 columns: exercise name, sets, reps
+      if (cells.length >= 3 && currentWorkout) {
+        const exerciseName = cells[0].trim();
+        const setsText = cells[1].trim();
+        const repsText = cells[2].trim();
+
+        // Parse sets (handle ranges like "3–4")
+        const setsMatch = setsText.match(/(\d+)/);
+        const sets = setsMatch ? parseInt(setsMatch[1]) : 3;
+
+        // Parse reps (keep ranges like "8–10" or text like "Do otkaza")
+        let reps = repsText;
+        const repsNumMatch = repsText.match(/^(\d+)/);
+        if (repsNumMatch) {
+          reps = repsText;  // Keep original format (e.g., "15–20")
+        } else if (repsText === '–' || repsText === '') {
+          reps = 10;  // Default for cardio or missing values
+        }
+
+        // Extract notes from 5th column (Napomena) if present
+        const notes = cells.length >= 5 ? cells[4].trim() : '';
+
         currentWorkout.exercises.push({
           name: exerciseName,
-          sets: parseInt(tableMatch[2]),
-          reps: tableMatch[3].trim(),
-          notes: ''
+          sets: sets,
+          reps: reps,
+          notes: notes
         });
       }
     }
