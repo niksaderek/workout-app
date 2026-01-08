@@ -13,7 +13,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/lucide-react@0.294.0/dist/umd/lucide-react.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-icons@5.0.1/cg/index.esm.min.js" type="module"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-icons@5.0.1/bi/index.esm.min.js" type="module"></script>
   <style>
     body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overscroll-behavior-y: contain; }
     *::-webkit-scrollbar { width: 0; background: transparent; }
@@ -25,11 +26,32 @@
   <script src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
   <script type="text/babel">
     const { useState, useEffect } = React;
-    const { 
-      Dumbbell, TrendingUp, Calendar, Download, Edit2, Plus, 
-      Trash2, Check, X, ChevronRight, Sun, Moon, BarChart3, 
-      Zap, Target, Award 
-    } = LucideReact;
+    
+    // Import react-icons
+    import { CgGym } from 'https://cdn.skypack.dev/react-icons/cg';
+    import { 
+      BiTrendingUp, BiCalendar, BiDownload, BiEdit, BiPlus, BiTrash,
+      BiCheck, BiX, BiChevronRight, BiSun, BiMoon, BiBarChart,
+      BiShapeCircle, BiTarget, BiMedal
+    } from 'https://cdn.skypack.dev/react-icons/bi';
+    
+    // Map to original names for compatibility
+    const Dumbbell = CgGym;
+    const TrendingUp = BiTrendingUp;
+    const Calendar = BiCalendar;
+    const Download = BiDownload;
+    const Edit2 = BiEdit;
+    const Plus = BiPlus;
+    const Trash2 = BiTrash;
+    const Check = BiCheck;
+    const X = BiX;
+    const ChevronRight = BiChevronRight;
+    const Sun = BiSun;
+    const Moon = BiMoon;
+    const BarChart3 = BiBarChart;
+    const Zap = BiShapeCircle;
+    const Target = BiTarget;
+    const Award = BiMedal;
 
 
 // IndexedDB wrapper
@@ -659,7 +681,7 @@ const WorkoutTracker = () => {
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Dumbbell className={darkMode ? 'text-gray-400' : 'text-gray-600'} size={28} />
+              <CgGym className={darkMode ? 'text-gray-400' : 'text-gray-600'} size={28} />
               <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Workout Pro</h1>
             </div>
             <div className="flex items-center gap-2">
@@ -667,7 +689,7 @@ const WorkoutTracker = () => {
                 onClick={toggleTheme}
                 className={`p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg transition-colors`}
               >
-                {darkMode ? <Sun size={20} className="text-gray-300" /> : <Moon size={20} className="text-gray-700" />}
+                {darkMode ? <BiSun size={20} className="text-gray-300" /> : <BiMoon size={20} className="text-gray-700" />}
               </button>
               {activeView === 'history' && (
                 <button
@@ -675,7 +697,7 @@ const WorkoutTracker = () => {
                   disabled={completedWorkouts.length === 0}
                   className={`p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg disabled:opacity-50`}
                 >
-                  <Download size={20} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
+                  <BiDownload size={20} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
                 </button>
               )}
             </div>
@@ -690,7 +712,7 @@ const WorkoutTracker = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'} rounded-2xl p-4 shadow-xl border`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                  <BiTrendingUp size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
                   <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium`}>This Week</span>
                 </div>
                 <div className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{stats.count}</div>
@@ -699,7 +721,7 @@ const WorkoutTracker = () => {
               
               <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'} rounded-2xl p-4 shadow-xl border`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Zap size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                  <BiShapeCircle size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
                   <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium`}>Volume</span>
                 </div>
                 <div className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{(stats.totalVolume / 1000).toFixed(1)}k</div>
@@ -708,7 +730,7 @@ const WorkoutTracker = () => {
 
               <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'} rounded-2xl p-4 shadow-xl border`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Dumbbell size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                  <CgGym size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
                   <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium`}>Total Reps</span>
                 </div>
                 <div className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{stats.totalReps}</div>
@@ -717,7 +739,7 @@ const WorkoutTracker = () => {
 
               <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'} rounded-2xl p-4 shadow-xl border`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <Target size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                  <BiTarget size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
                   <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium`}>Core Work</span>
                 </div>
                 <div className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{stats.coreSets}</div>
@@ -731,13 +753,13 @@ const WorkoutTracker = () => {
               className={`w-full ${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 flex items-center justify-between hover:scale-[1.02] transition-all`}
             >
               <div className="flex items-center gap-3">
-                <BarChart3 size={24} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                <BiBarChart size={24} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
                 <div className="text-left">
                   <div className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Detailed Statistics</div>
                   <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Progress tracking & PRs</div>
                 </div>
               </div>
-              <ChevronRight size={20} className={darkMode ? 'text-gray-500' : 'text-gray-400'} />
+              <BiChevronRight size={20} className={darkMode ? 'text-gray-500' : 'text-gray-400'} />
             </button>
 
             {/* Workouts */}
@@ -750,7 +772,7 @@ const WorkoutTracker = () => {
                   onClick={() => setShowAddDay(true)}
                   className={`px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold transition-colors`}
                 >
-                  <Plus size={18} />
+                  <BiPlus size={18} />
                   Add Day
                 </button>
               </div>
@@ -773,13 +795,13 @@ const WorkoutTracker = () => {
                           onClick={() => startEditWorkout(workout)}
                           className={`p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg transition-colors`}
                         >
-                          <Edit2 size={16} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
+                          <BiEdit size={16} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(workout.id)}
                           className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
                         >
-                          <Trash2 size={16} className="text-white" />
+                          <BiTrash size={16} className="text-white" />
                         </button>
                       </div>
                     </div>
@@ -789,7 +811,7 @@ const WorkoutTracker = () => {
                       className={`w-full ${darkMode ? 'bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500' : 'bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600'} text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg`}
                     >
                       Start Workout
-                      <ChevronRight size={20} />
+                      <BiChevronRight size={20} />
                     </button>
                   </div>
                 ))}
@@ -802,14 +824,14 @@ const WorkoutTracker = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center gap-2`}>
-                <BarChart3 size={24} />
+                <BiBarChart size={24} />
                 Statistics
               </h2>
               <button
                 onClick={() => setActiveView('home')}
                 className={`p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg`}
               >
-                <X size={20} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
+                <BiX size={20} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
               </button>
             </div>
 
@@ -888,7 +910,7 @@ const WorkoutTracker = () => {
             {/* Personal Records */}
             <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
               <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4 flex items-center gap-2`}>
-                <Award size={20} />
+                <BiMedal size={20} />
                 Personal Records (Main Lifts)
               </h3>
               
@@ -1006,7 +1028,7 @@ const WorkoutTracker = () => {
                             : darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
                         }`}
                       >
-                        <Check size={20} className="text-white" />
+                        <BiCheck size={20} className="text-white" />
                       </button>
                     </div>
                   ))}
@@ -1038,7 +1060,7 @@ const WorkoutTracker = () => {
         {activeView === 'history' && (
           <div className="space-y-4">
             <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-4 flex items-center gap-2`}>
-              <Calendar size={24} />
+              <BiCalendar size={24} />
               History
             </h2>
             
@@ -1069,7 +1091,7 @@ const WorkoutTracker = () => {
                       onClick={() => setShowDeleteHistory(workout.id)}
                       className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
                     >
-                      <Trash2 size={16} className="text-white" />
+                      <BiTrash size={16} className="text-white" />
                     </button>
                   </div>
                   
@@ -1158,7 +1180,7 @@ const WorkoutTracker = () => {
                       onClick={() => deleteExercise(idx)}
                       className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
                     >
-                      <Trash2 size={20} className="text-white" />
+                      <BiTrash size={20} className="text-white" />
                     </button>
                   </div>
                   <div className="flex gap-2">
@@ -1185,7 +1207,7 @@ const WorkoutTracker = () => {
               onClick={addExercise}
               className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} text-${darkMode ? 'white' : 'gray-900'} rounded-xl flex items-center justify-center gap-2 transition-colors font-semibold`}
             >
-              <Plus size={20} />
+              <BiPlus size={20} />
               Add Exercise
             </button>
 
@@ -1299,7 +1321,7 @@ const WorkoutTracker = () => {
                 : darkMode ? 'text-gray-600' : 'text-gray-400'
             }`}
           >
-            <Dumbbell size={24} />
+            <CgGym size={24} />
             <span className="text-xs font-medium">Workouts</span>
           </button>
           
@@ -1311,7 +1333,7 @@ const WorkoutTracker = () => {
                 : darkMode ? 'text-gray-600' : 'text-gray-400'
             }`}
           >
-            <BarChart3 size={24} />
+            <BiBarChart size={24} />
             <span className="text-xs font-medium">Stats</span>
           </button>
           
@@ -1323,7 +1345,7 @@ const WorkoutTracker = () => {
                 : darkMode ? 'text-gray-600' : 'text-gray-400'
             }`}
           >
-            <Calendar size={24} />
+            <BiCalendar size={24} />
             <span className="text-xs font-medium">History</span>
           </button>
         </div>
