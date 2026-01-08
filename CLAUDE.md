@@ -59,20 +59,26 @@ The application uses a monolithic component architecture with all code embedded 
 - `draggedExerciseIndex` - Current exercise being dragged (for reordering)
 - `timelineRange` - Selected time range for progress timeline
 - `fileInputRef` - React ref for hidden file input element
+- `substituteDropdown` - Controls exercise substitution dropdown visibility
+- `exerciseProgressModal` - Controls exercise progress chart modal
 
 **Core Functions:**
 
-1. **Workout Logging** (lines 420-497):
-   - `startWorkout()` - Initializes workout session with last weights pre-filled
+1. **Workout Logging**:
+   - `startWorkout()` - Initializes workout session with smart weight suggestions
    - `getLastWeight()` - Retrieves previous weight for progressive overload
-   - `updateSet()` / `toggleSetComplete()` - Track sets during workout
+   - `updateSet()` - Update weight/reps for individual sets
    - `finishWorkout()` - Saves completed workout to IndexedDB
+   - `getMuscleGroupSuggestions()` - Returns 5-7 exercise alternatives from same muscle group
+   - `substituteExercise()` - Swaps exercise name while preserving set data
 
-2. **Statistics Calculation** (lines 640-870):
+2. **Statistics Calculation**:
    - `getWeekStats()` - Weekly metrics (count, volume, reps, core sets)
    - `getDetailedStats()` - Comprehensive analytics (weekly/monthly comparisons, PRs)
    - Volume calculation: `weight × reps` (excludes core exercises)
    - Personal Records tracking for main lifts (deadlift, squat, bench, OHP, lat pulldown)
+   - `getExerciseProgress()` - Returns weight/volume progression data for any exercise
+   - `getMostTrainedExercises()` - Returns top 10 exercises by frequency
 
 3. **Template Management**:
    - `startEditWorkout()` / `saveEditedWorkout()` - Modify workout day templates
@@ -105,11 +111,38 @@ The application uses a monolithic component architecture with all code embedded 
    - Filters as you type, shows up to 8 suggestions
    - Still allows custom exercise names
 
+9. **Smart Auto-Regulation**:
+   - `calculateEstimated1RM()` - Epley formula: weight × (1 + reps / 30)
+   - `getSmartWeightSuggestion()` - Returns weight suggestion based on difficulty rating
+   - Difficulty-based progression:
+     - Easy → +2.5 kg ("felt easy last time")
+     - Medium → same weight ("good weight")
+     - Hard → same weight ("felt hard last time, repeat")
+     - No rating → last weight ("based on last workout")
+   - Shows suggestion with Zap icon during logging
+   - Optional difficulty rating per exercise (3 buttons: Easy/Medium/Hard)
+   - No completion checkboxes needed (removed for simplicity)
+
+10. **Exercise-Specific Progress Charts**:
+   - Tap any exercise in Stats → Exercise Progress section
+   - Modal shows last 10 workouts with 2 charts:
+     - Max Weight Progress (line chart)
+     - Total Volume Progress (line chart)
+   - Core exercises show Total Reps instead of weight
+   - Displays peak weight and total workout count
+   - Fuzzy exercise name matching
+
+11. **Mid-Workout Exercise Substitution**:
+   - Swap button (↻) next to exercise name in logging view
+   - Dropdown shows 5-7 muscle group alternatives
+   - Preserves all set data (weight/reps) when substituting
+   - Handles custom exercises gracefully (no suggestions)
+
 ### UI Views
 
 - **Home** - Dashboard with stats cards, workout day cards, "Upload MD" button
-- **Stats** - Detailed analytics, PRs, weekly/monthly trends, progress timeline with interactive charts
-- **Logging** - Active workout session with set-by-set tracking and "Add Set" button
+- **Stats** - Detailed analytics, PRs, Exercise Progress section, weekly/monthly trends, progress timeline with interactive charts
+- **Logging** - Active workout session with smart weight suggestions, difficulty rating, exercise substitution, and "Add Set" button
 - **History** - Past workout logs with edit, delete, and CSV export functionality
 - **Edit** - Workout template editor with up/down button exercise reordering (mobile-friendly) and ExerciseInput autocomplete
 - **Edit-History** - Edit past workout data (weight/reps) without affecting templates
@@ -119,6 +152,8 @@ The application uses a monolithic component architecture with all code embedded 
 - **Add Day Modal** - Create new workout day with IconPicker
 - **Upload Modal** - Markdown upload confirmation (replace vs add to existing)
 - **Timeline Detail Modal** - Shows workout details for selected week/month on timeline
+- **Exercise Progress Modal** - Shows weight/volume charts for any exercise (last 10 workouts)
+- **Exercise Substitution Dropdown** - Shows muscle group alternatives when swapping exercises
 - **Delete Confirmation Modals** - Confirm before deleting workout days or history entries
 
 ### Key Data Structures
@@ -145,7 +180,8 @@ The application uses a monolithic component architecture with all code embedded 
     name: string,
     plannedSets: number,
     plannedReps: string|number,
-    sets: [{ weight: string, reps: string|number, completed: boolean }]
+    difficulty: 'easy' | 'medium' | 'hard' | null, // Optional difficulty rating
+    sets: [{ weight: string, reps: string|number }]
   }]
 }
 ```
