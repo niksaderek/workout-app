@@ -58,6 +58,22 @@
     
     const Award = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>;
 
+    // Additional workout-specific icons
+    const Activity = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
+
+    const Flame = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>;
+
+    // Icon mapper - maps emoji to icon component
+    const WorkoutIcon = ({emoji, size = 40, className = ""}) => {
+      const iconMap = {
+        '🦵': <Dumbbell size={size} className={className} />,
+        '💪': <Activity size={size} className={className} />,
+        '⚡': <Zap size={size} className={className} />,
+        '🎯': <Target size={size} className={className} />,
+        '🔥': <Flame size={size} className={className} />
+      };
+      return iconMap[emoji] || <span className="text-4xl">{emoji}</span>;
+    };
 
 // IndexedDB wrapper
 const DB_NAME = 'WorkoutTrackerDB';
@@ -789,7 +805,7 @@ const WorkoutTracker = () => {
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="text-4xl">{workout.emoji}</div>
+                        <WorkoutIcon emoji={workout.emoji} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
                         <div>
                           <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{workout.name}</h3>
                           <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{workout.exercises.length} exercises</div>
@@ -974,7 +990,7 @@ const WorkoutTracker = () => {
             {/* Workout Header */}
             <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-100 to-gray-50 border-gray-200'} rounded-2xl p-6 shadow-xl border`}>
               <div className="flex items-center gap-3 mb-2">
-                <div className="text-4xl">{currentLog.workoutEmoji}</div>
+                <WorkoutIcon emoji={currentLog.workoutEmoji} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
                 <div>
                   <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{currentLog.workoutName}</h2>
                   <div className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
@@ -1079,7 +1095,7 @@ const WorkoutTracker = () => {
               completedWorkouts.slice().reverse().map((workout) => (
                 <div key={workout.id} className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur border rounded-2xl p-5 shadow-lg`}>
                   <div className="flex items-start gap-3 mb-4">
-                    <div className="text-3xl">{workout.workoutEmoji}</div>
+                    <WorkoutIcon emoji={workout.workoutEmoji} size={32} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
                     <div className="flex-1">
                       <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{workout.workoutName}</h3>
                       <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
