@@ -46,14 +46,18 @@ The application uses a monolithic component architecture with all code embedded 
 - Auto-assigns icons cyclically from default icon set
 - Handles missing fields with sensible defaults (sets: 3, reps: 10)
 
-**State Management** (lines 373-375, 390-395):
+**State Management**:
 - `workouts` - Workout day templates (4 default days)
 - `completedWorkouts` - Historical workout logs
-- `activeView` - Navigation state (home/stats/history/logging/edit)
+- `activeView` - Navigation state (home/stats/history/logging/edit/edit-history)
 - `currentLog` - Active workout session tracking
+- `editingWorkout` - Template being edited
+- `editingHistory` - Past workout being edited
 - `darkMode` - Theme preference (persisted to localStorage)
 - `showUploadModal` - Controls markdown upload confirmation modal
 - `parsedWorkouts` - Temporarily stores parsed markdown workouts
+- `draggedExerciseIndex` - Current exercise being dragged (for reordering)
+- `timelineRange` - Selected time range for progress timeline
 - `fileInputRef` - React ref for hidden file input element
 
 **Core Functions:**
@@ -70,32 +74,52 @@ The application uses a monolithic component architecture with all code embedded 
    - Volume calculation: `weight × reps` (excludes core exercises)
    - Personal Records tracking for main lifts (deadlift, squat, bench, OHP, lat pulldown)
 
-3. **Template Management** (lines 505-593):
+3. **Template Management**:
    - `startEditWorkout()` / `saveEditedWorkout()` - Modify workout day templates
    - `addExercise()` / `deleteExercise()` - Exercise CRUD
    - `addNewWorkoutDay()` / `deleteWorkoutDay()` - Workout day CRUD
+   - `reorderExercise()` - Reorder exercises via drag-and-drop
 
-4. **Markdown Upload** (lines 584-635):
+4. **History Editing**:
+   - `saveEditedHistory()` - Update completed workout in history
+   - `updateHistorySet()` - Modify weight/reps for individual sets in past workouts
+   - Allows fixing mistakes in logged data without affecting templates
+
+5. **Progress Timeline**:
+   - `getTimelineData()` - Aggregates workout history by week/month
+   - Tracks volume progression, workout frequency, and main lift PRs
+   - Interactive charts with clickable data points
+
+6. **Markdown Upload**:
    - `triggerFileUpload()` - Opens file picker for .md files
    - `handleFileChange()` - Validates and parses uploaded markdown file
    - `handleImportChoice()` - Handles user choice (replace all vs add to existing)
    - Supports multiple markdown formats automatically
 
-5. **Data Export** (lines 499-503):
+7. **Data Export**:
    - `exportToCSV()` - Export history to CSV with Croatian date formatting
+
+8. **Exercise Autocomplete**:
+   - `ExerciseInput` component - Dropdown with 60+ popular exercises
+   - Organized by muscle group (chest, back, shoulders, legs, arms, core, other)
+   - Filters as you type, shows up to 8 suggestions
+   - Still allows custom exercise names
 
 ### UI Views
 
-- **Home** (lines 990-1100) - Dashboard with stats cards, workout day cards, "Upload MD" button
-- **Stats** (lines 1102-1260) - Detailed analytics, PRs, weekly/monthly trends
-- **Logging** (lines 1262-1360) - Active workout session with set-by-set tracking
-- **History** (lines 1362-1450) - Past workout logs with delete and CSV export functionality
-- **Edit** (lines 1380-1490) - Workout template editor with IconPicker integration
+- **Home** - Dashboard with stats cards, workout day cards, "Upload MD" button
+- **Stats** - Detailed analytics, PRs, weekly/monthly trends, progress timeline with interactive charts
+- **Logging** - Active workout session with set-by-set tracking and "Add Set" button
+- **History** - Past workout logs with edit, delete, and CSV export functionality
+- **Edit** - Workout template editor with drag-and-drop exercise reordering and ExerciseInput autocomplete
+- **Edit-History** - Edit past workout data (weight/reps) without affecting templates
 
 ### Modals
 
-- **Add Day Modal** (lines 1455-1522) - Create new workout day with IconPicker
-- **Upload Modal** (lines 1524-1565) - Markdown upload confirmation (replace vs add to existing)
+- **Add Day Modal** - Create new workout day with IconPicker
+- **Upload Modal** - Markdown upload confirmation (replace vs add to existing)
+- **Timeline Detail Modal** - Shows workout details for selected week/month on timeline
+- **Delete Confirmation Modals** - Confirm before deleting workout days or history entries
 
 ### Key Data Structures
 
