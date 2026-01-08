@@ -619,59 +619,52 @@ const WorkoutTracker = () => {
   const [workouts, setWorkouts] = useState([
     {
       id: 1,
-      name: "Dan 1: Fokus na noge i prsa",
+      name: "DAY 1 – PUSH A (Teški Bench & Kvadriceps)",
       emoji: "🦵",
       exercises: [
-        { name: "Čučanj s utegom (Back Squat)", sets: 3, reps: 8, notes: "" },
-        { name: "Bench Press (klupa)", sets: 3, reps: 8, notes: "" },
-        { name: "Cable Lower Chest", sets: 3, reps: 10, notes: "" },
-        { name: "High Pull", sets: 3, reps: 12, notes: "" },
-        { name: "Lateral Raises (bočno podizanje)", sets: 3, reps: 10, notes: "" },
-        { name: "Biceps: Dumbbell Curls", sets: 2, reps: 12, notes: "" },
-        { name: "Core: Plank with Shoulder Taps", sets: 3, reps: "30s", notes: "" }
+        { name: "Bench Press", sets: 3, reps: 5, notes: "Glavni lift. Zadnja serija AMRAP." },
+        { name: "Back Squat (Čučanj)", sets: 3, reps: 8, notes: "Fokus na dubinu i kontrolu." },
+        { name: "Lateral Raises", sets: 4, reps: "15–20", notes: "Mala težina, \"burn\" efekt." },
+        { name: "Triceps Pushdown", sets: 3, reps: 12, notes: "Fokus na puni lockout." },
+        { name: "Ab Wheel Rollout", sets: 3, reps: "8–10", notes: "Anti-extension core (čvrsta leđa)." }
       ]
     },
     {
       id: 2,
-      name: "Dan 2: Fokus na leđa i ramena",
+      name: "DAY 2 – PULL A (Mrtvo dizanje & Širina leđa)",
       emoji: "💪",
       exercises: [
-        { name: "Mrtvo dizanje (Trap Bar)", sets: 3, reps: 6, notes: "" },
-        { name: "Overhead Press (vojnički press)", sets: 3, reps: 8, notes: "" },
-        { name: "Lat Pulldown (ili zgibovi)", sets: 3, reps: "8-10", notes: "" },
-        { name: "Arnold Press", sets: 3, reps: 10, notes: "" },
-        { name: "Face Pulls (sajla/traka)", sets: 3, reps: 12, notes: "" },
-        { name: "Triceps: Triceps Dips (ili s sajlom)", sets: 2, reps: 12, notes: "" },
-        { name: "Core: Russian Twists (s utegom)", sets: 3, reps: 20, notes: "" }
+        { name: "Trap Bar Deadlift", sets: 3, reps: 5, notes: "Eksplozivno s poda." },
+        { name: "Zgibovi / Lat Pulldown", sets: 3, reps: "8–10", notes: "Široki hvat za V-taper." },
+        { name: "Face Pulls", sets: 3, reps: 15, notes: "Pauza 1 s u kontrakciji." },
+        { name: "Hammer Curls", sets: 3, reps: 12, notes: "Za debljinu bicepsa i podlaktice." },
+        { name: "Back Extension", sets: 3, reps: 12, notes: "Jačanje donjeg dijela leđa." },
+        { name: "Dead Bug", sets: 2, reps: "10/str", notes: "Core stabilnost bez pritiska na leđa." }
       ]
     },
     {
       id: 3,
-      name: "Dan 3: Fokus na eksplozivnost i funkcionalnost",
+      name: "DAY 3 – PUSH B (Teški OHP & Gornja prsa)",
       emoji: "⚡",
       exercises: [
-        { name: "Čučanj s utegom (Front Squat)", sets: 3, reps: 6, notes: "" },
-        { name: "Bench Press (Incline)", sets: 3, reps: 8, notes: "" },
-        { name: "Kettlebell Swing", sets: 3, reps: 20, notes: "" },
-        { name: "High Pull", sets: 3, reps: 12, notes: "" },
-        { name: "Lateral Raises (bočno podizanje)", sets: 3, reps: 12, notes: "" },
-        { name: "Farmer's Walk (s bučicama)", sets: 3, reps: "30s", notes: "" },
-        { name: "Biceps: Hammer Curls", sets: 2, reps: 12, notes: "" },
-        { name: "Core: Hanging Leg Raises", sets: 3, reps: "10-15", notes: "" }
+        { name: "Overhead Press (OHP)", sets: 3, reps: "5–6", notes: "Stisnuti gluteusi, bez varanja." },
+        { name: "Bugarski Iskorak", sets: 3, reps: 10, notes: "Po nozi. Ključ za atletski izgled." },
+        { name: "Incline DB Press", sets: 3, reps: "10–12", notes: "Fokus na gornji dio prsa." },
+        { name: "Dips (Propadači)", sets: 3, reps: "Do otkaza", notes: "Nagnut trup prema naprijed." },
+        { name: "Pallof Press", sets: 3, reps: "12/str", notes: "Anti-rotation core snaga." },
+        { name: "Side Plank", sets: 2, reps: "30–45 s", notes: "Stabilnost bočnog trbušnog zida." }
       ]
     },
     {
       id: 4,
-      name: "Dan 4: Fokus na balans i izdržljivost",
+      name: "DAY 4 – PULL B (Zadnja loža & Debljina leđa)",
       emoji: "🎯",
       exercises: [
-        { name: "Mrtvo dizanje s bučicama (Single-Leg Deadlift)", sets: 3, reps: "8 svaka noga", notes: "" },
-        { name: "Overhead Press (sajla ili bučice)", sets: 3, reps: 8, notes: "" },
-        { name: "Zgibovi (Pull-Ups)", sets: 3, reps: "6-10", notes: "" },
-        { name: "Rear Delt Fly (bučice ili sajla)", sets: 3, reps: 12, notes: "" },
-        { name: "Face Pulls", sets: 3, reps: 12, notes: "" },
-        { name: "Triceps: Triceps Pushdown", sets: 2, reps: 12, notes: "" },
-        { name: "Core: Hanging Leg Raises", sets: 3, reps: "10-15", notes: "" }
+        { name: "Rumunjsko Mrtvo (RDL)", sets: 3, reps: 10, notes: "Fokus na istezanje zadnje lože." },
+        { name: "Dumbbell Row", sets: 3, reps: 10, notes: "Lakat vući prema kuku." },
+        { name: "Farmer's Walk", sets: 3, reps: "40 m", notes: "Teške bučice (držanje i trbuh)." },
+        { name: "Hanging Leg Raises", sets: 3, reps: "12–15", notes: "Kontrolirano podizanje nogu." },
+        { name: "Back Extension Hold", sets: 2, reps: "30 s", notes: "Izdržljivost erektora leđa." }
       ]
     }
   ]);
