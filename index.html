@@ -273,8 +273,10 @@ const parseMarkdownWorkout = (markdownText) => {
   for (let line of lines) {
     line = line.trim();
 
-    // Skip empty lines, dividers
-    if (!line || line.startsWith('|---') || line === '---' || line.startsWith('**') && line.endsWith('**') && line.length < 100 && !line.includes(':')) continue;
+    // Skip empty lines, dividers, and markdown table alignment rows
+    if (!line || line.startsWith('|---') || line === '---' ||
+        (line.startsWith('|') && line.includes(':---')) ||  // Markdown table alignment (| :--- | :---: |)
+        (line.startsWith('**') && line.endsWith('**') && line.length < 100 && !line.includes(':'))) continue;
 
     const upperLine = line.toUpperCase();
 
