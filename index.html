@@ -205,163 +205,207 @@ const dbOperations = {
   }
 };
 
-// Markdown parser - supports multiple formats
+// Intelligent markdown parser - auto-detects any format
 const parseMarkdownWorkout = (markdownText) => {
+  // Helper: Check if line is likely a workout day separator
+  const isWorkoutDayHeader = (line, upperLine) => {
+    // Pattern 1: Starts with # or ##
+    if (!line.startsWith('#')) return false;
+
+    // Pattern 2: Contains day indicators
+    const dayIndicators = ['DAY', 'DAN', 'WORKOUT', 'TRAINING', 'TRENING', 'WEEK', 'СЕДМИЦА'];
+    const hasDay = dayIndicators.some(indicator => upperLine.includes(indicator));
+
+    // Pattern 3: Contains numbers (Day 1, Dan 2, etc.)
+    const hasNumber = /\d/.test(line);
+
+    // Pattern 4: Contains common workout types
+    const workoutTypes = ['PUSH', 'PULL', 'LEG', 'UPPER', 'LOWER', 'FULL', 'CARDIO', 'STRENGTH'];
+    const hasWorkoutType = workoutTypes.some(type => upperLine.includes(type));
+
+    // Heuristic: It's a workout day if it has day indicator + number, or H1/H2 with workout type
+    return (hasDay && hasNumber) || (line.match(/^#{1,2}\s/) && hasWorkoutType);
+  };
+
+  // Helper: Extract numeric value (handles ranges like "3-4", "8–10")
+  const extractNumber = (text) => {
+    const match = text.match(/(\d+)/);
+    return match ? parseInt(match[1]) : null;
+  };
+
+  // Helper: Check if text looks like exercise data (sets/reps)
+  const looksLikeExerciseData = (text) => {
+    // Pattern: Contains numbers or x notation (3x8, 3 x 10, etc.)
+    return /\d+\s*[xX×]\s*\d+/.test(text) || /\d+/.test(text);
+  };
+
+  // Helper: Detect if line is likely a table header
+  const isTableHeader = (cells) => {
+    if (!cells || cells.length === 0) return false;
+    const firstCell = cells[0].toLowerCase();
+    const headerWords = ['exercise', 'vježba', 'vjezba', 'name', 'naziv', 'sets', 'serije', 'reps', 'ponavljanja'];
+    return headerWords.some(word => firstCell.includes(word));
+  };
+
+  // Helper: Smart extraction of sets/reps from any text
+  const extractSetsReps = (text) => {
+    // Try compact format first: "3x8", "4 x 10-12"
+    const compactMatch = text.match(/(\d+)\s*[xX×]\s*([\d\-–s]+)/);
+    if (compactMatch) {
+      return { sets: parseInt(compactMatch[1]), reps: compactMatch[2] };
+    }
+
+    // Try separate format: "Sets: 3" "Reps: 8"
+    const setsMatch = text.match(/(?:sets?|serije):\s*(\d+)/i);
+    const repsMatch = text.match(/(?:reps?|ponavljanja):\s*([\d\-–s]+)/i);
+
+    return {
+      sets: setsMatch ? parseInt(setsMatch[1]) : null,
+      reps: repsMatch ? repsMatch[1] : null
+    };
+  };
+
   const workouts = [];
   let currentWorkout = null;
   let currentExercise = null;
-
   const lines = markdownText.split('\n');
 
   for (let line of lines) {
     line = line.trim();
-    if (!line || line.startsWith('|---') || line.startsWith('---')) continue;  // Skip empty lines, table dividers, and horizontal rules
 
-    // H1 or H2 starting with "DAY" or "Dan" = Workout day
+    // Skip empty lines, dividers
+    if (!line || line.startsWith('|---') || line === '---' || line.startsWith('**') && line.endsWith('**') && line.length < 100 && !line.includes(':')) continue;
+
     const upperLine = line.toUpperCase();
-    const isDayHeader = line.startsWith('# ') ||
-                        (line.startsWith('## ') && (upperLine.includes('DAY') || upperLine.includes('DAN ')));
 
-    if (isDayHeader) {
+    // STEP 1: Detect workout day headers using intelligent heuristics
+    if (isWorkoutDayHeader(line, upperLine)) {
+      // Save previous workout
       if (currentWorkout && currentWorkout.exercises.length > 0) {
         workouts.push(currentWorkout);
       }
 
-      // Extract emoji if present
+      // Extract emoji
       const emojiMatch = line.match(/[\u{1F300}-\u{1F9FF}]/u);
       const emoji = emojiMatch ? emojiMatch[0] : '🔥';
 
-      // Remove header markers and emoji to get name
+      // Clean up name
       let name = line.replace(/^#+\s*/, '').replace(emoji, '').trim();
 
       currentWorkout = {
         id: Date.now() + workouts.length,
-        name: name || 'New Workout',
+        name: name || 'Workout',
         emoji: emoji,
         exercises: []
       };
       currentExercise = null;
+      continue;
     }
 
-    // H3 = Workout description (e.g., "PUSH A — Teški Bench & Kvadriceps")
-    // We append this to the workout name for clarity
-    else if (line.startsWith('### ')) {
-      if (currentWorkout) {
-        const description = line.replace('### ', '').trim();
-        currentWorkout.name = `${currentWorkout.name} - ${description}`;
-      }
-    }
+    // STEP 2: Append descriptions (H3, bold lines with "Fokus"/"Focus"/"Description")
+    if (line.startsWith('###') || (line.match(/^\*\*(.+?)\*\*/) && currentWorkout)) {
+      const description = line.replace(/^###\s*/, '').replace(/^\*\*/, '').replace(/\*\*$/, '').trim();
 
-    // Bold lines with "Fokus:" or "Fokus" = Additional workout description
-    else if (line.match(/^\*\*(.+?)\*\*/) && currentWorkout) {
-      const boldText = line.match(/^\*\*(.+?)\*\*/)[1];
-      // Only append if it contains focus/description info
-      if (boldText.toLowerCase().includes('fokus') || boldText.toLowerCase().includes('focus')) {
-        const description = boldText.replace(/^Fokus:\s*/i, '').replace(/^Focus:\s*/i, '').trim();
-        if (description && !currentWorkout.name.includes(description)) {
-          currentWorkout.name = `${currentWorkout.name} - ${description}`;
+      // Only append if it looks like a description (contains keywords or is short)
+      const isDescription = description.length < 80 &&
+                           (description.toLowerCase().includes('fokus') ||
+                            description.toLowerCase().includes('focus') ||
+                            description.toLowerCase().includes(':'));
+
+      if (isDescription && currentWorkout) {
+        const cleanDesc = description.replace(/^(?:fokus|focus):\s*/i, '').trim();
+        if (cleanDesc && !currentWorkout.name.includes(cleanDesc)) {
+          currentWorkout.name = `${currentWorkout.name} - ${cleanDesc}`;
         }
       }
+      continue;
     }
 
-    // H2 (not a DAY/Dan) = Exercise name (fallback for simple formats)
-    else if (line.startsWith('## ') && !upperLine.includes('DAY') && !upperLine.includes('DAN ')) {
+    // STEP 3: Parse table rows (most common format)
+    if (line.startsWith('|') && line.endsWith('|')) {
+      const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
+
+      // Skip headers
+      if (isTableHeader(cells)) continue;
+
+      // Auto-create workout if table appears without header
       if (!currentWorkout) {
         currentWorkout = {
           id: Date.now(),
-          name: 'Imported Workout',
+          name: 'Workout',
           emoji: '🔥',
           exercises: []
         };
       }
 
-      currentExercise = {
-        name: line.replace('## ', '').trim(),
-        sets: 3,
-        reps: 10,
-        notes: ''
-      };
-      currentWorkout.exercises.push(currentExercise);
-    }
-
-    // Parse sets/reps from various formats
-    else if (currentExercise) {
-      // Pattern 1: "Sets: 3" or "- Sets: 3"
-      const setsMatch = line.match(/[-*]?\s*Sets?:\s*(\d+)/i);
-      if (setsMatch) {
-        currentExercise.sets = parseInt(setsMatch[1]);
-      }
-
-      // Pattern 2: "Reps: 8" or "- Reps: 8-10" or "- Reps: 30s"
-      const repsMatch = line.match(/[-*]?\s*Reps?:\s*([\d\-s]+)/i);
-      if (repsMatch) {
-        currentExercise.reps = repsMatch[1];
-      }
-
-      // Pattern 3: "Notes: xyz"
-      const notesMatch = line.match(/[-*]?\s*Notes?:\s*(.+)/i);
-      if (notesMatch) {
-        currentExercise.notes = notesMatch[1];
-      }
-
-      // Pattern 4: Compact "3x8" or "3 x 8"
-      const compactMatch = line.match(/^(\d+)\s*x\s*([\d\-s]+)/i);
-      if (compactMatch) {
-        currentExercise.sets = parseInt(compactMatch[1]);
-        currentExercise.reps = compactMatch[2];
-      }
-    }
-
-    // Pattern 5: Table row - handle both 3-column and 5-column tables
-    // Format: | Exercise | Sets | Reps | ... (optional columns) |
-    if (line.startsWith('|') && line.endsWith('|')) {
-      const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
-
-      // Skip header rows (check if first cell contains common header words)
-      const firstCell = cells[0].toLowerCase();
-      if (firstCell.includes('vježba') || firstCell.includes('exercise') ||
-          firstCell.includes('name') || firstCell.includes('serije')) {
-        continue;
-      }
-
-      // Need at least 3 columns: exercise name, sets, reps
-      if (cells.length >= 3 && currentWorkout) {
+      // Smart column detection - find exercise name, sets, reps
+      if (cells.length >= 2) {
         const exerciseName = cells[0].trim();
-        const setsText = cells[1].trim();
-        const repsText = cells[2].trim();
 
-        // Parse sets (handle ranges like "3–4")
-        const setsMatch = setsText.match(/(\d+)/);
-        const sets = setsMatch ? parseInt(setsMatch[1]) : 3;
+        // Skip if first cell looks like data, not exercise name
+        if (exerciseName.length < 3 || /^\d+$/.test(exerciseName)) continue;
 
-        // Parse reps (keep ranges like "8–10" or text like "Do otkaza")
-        let reps = repsText;
-        const repsNumMatch = repsText.match(/^(\d+)/);
-        if (repsNumMatch) {
-          reps = repsText;  // Keep original format (e.g., "15–20")
-        } else if (repsText === '–' || repsText === '') {
-          reps = 10;  // Default for cardio or missing values
+        let sets = 3, reps = 10, notes = '';
+
+        // Intelligently detect which columns contain sets/reps
+        for (let i = 1; i < cells.length; i++) {
+          const cell = cells[i];
+          const extracted = extractSetsReps(cell);
+
+          if (extracted.sets !== null) sets = extracted.sets;
+          if (extracted.reps !== null) reps = extracted.reps;
+
+          // Check if cell is pure number (likely sets or reps)
+          if (/^\d+$/.test(cell) && i === 1) sets = parseInt(cell);
+          else if (/^[\d\-–s]+$/.test(cell) && i === 2) reps = cell;
+
+          // Last column or cells with text = notes
+          if (i >= 4 && cell.length > 2 && !/^\d/.test(cell)) {
+            notes = cell;
+          }
         }
 
-        // Extract notes from 5th column (Napomena) if present
-        const notes = cells.length >= 5 ? cells[4].trim() : '';
-
-        currentWorkout.exercises.push({
-          name: exerciseName,
-          sets: sets,
-          reps: reps,
-          notes: notes
-        });
+        currentWorkout.exercises.push({ name: exerciseName, sets, reps, notes });
       }
+      continue;
+    }
+
+    // STEP 4: Parse list/heading format exercises (## Exercise or - Exercise)
+    if (line.startsWith('##') && !isWorkoutDayHeader(line, upperLine)) {
+      // Auto-create workout if needed
+      if (!currentWorkout) {
+        currentWorkout = {
+          id: Date.now(),
+          name: 'Workout',
+          emoji: '🔥',
+          exercises: []
+        };
+      }
+
+      const exerciseName = line.replace(/^##\s*/, '').trim();
+      currentExercise = { name: exerciseName, sets: 3, reps: 10, notes: '' };
+      currentWorkout.exercises.push(currentExercise);
+      continue;
+    }
+
+    // STEP 5: Parse exercise details (sets/reps/notes on following lines)
+    if (currentExercise) {
+      const extracted = extractSetsReps(line);
+      if (extracted.sets) currentExercise.sets = extracted.sets;
+      if (extracted.reps) currentExercise.reps = extracted.reps;
+
+      // Notes detection
+      const notesMatch = line.match(/(?:notes?|napomena):\s*(.+)/i);
+      if (notesMatch) currentExercise.notes = notesMatch[1];
     }
   }
 
-  // Add last workout
+  // Save last workout
   if (currentWorkout && currentWorkout.exercises.length > 0) {
     workouts.push(currentWorkout);
   }
 
-  // Auto-assign icons cyclically if default emoji
+  // Auto-assign icons cyclically
   const defaultIcons = ['🦵', '💪', '⚡', '🎯', '🔥'];
   workouts.forEach((workout, idx) => {
     if (workout.emoji === '🔥') {
