@@ -340,7 +340,11 @@ const parseMarkdownWorkout = (markdownText) => {
 
       // Smart column detection - find exercise name, sets, reps
       if (cells.length >= 2) {
-        const exerciseName = cells[0].trim();
+        // Remove bold markers (**text**) and italic markers (*text* or _text_)
+        const exerciseName = cells[0].trim()
+          .replace(/^\*\*/, '').replace(/\*\*$/, '')  // Remove bold
+          .replace(/^\*/, '').replace(/\*$/, '')      // Remove italic (*)
+          .replace(/^_/, '').replace(/_$/, '');       // Remove italic (_)
 
         // Skip if first cell looks like data, not exercise name
         if (exerciseName.length < 3 || /^\d+$/.test(exerciseName)) continue;
@@ -361,7 +365,11 @@ const parseMarkdownWorkout = (markdownText) => {
 
           // Last column or cells with text = notes
           if (i >= 4 && cell.length > 2 && !/^\d/.test(cell)) {
-            notes = cell;
+            // Clean up notes (remove bold/italic markers)
+            notes = cell
+              .replace(/\*\*/g, '')  // Remove all bold markers
+              .replace(/\*/g, '')    // Remove all italic markers (*)
+              .replace(/_/g, '');    // Remove all italic markers (_)
           }
         }
 
@@ -382,7 +390,12 @@ const parseMarkdownWorkout = (markdownText) => {
         };
       }
 
-      const exerciseName = line.replace(/^##\s*/, '').trim();
+      // Remove header marker and formatting (bold/italic)
+      const exerciseName = line.replace(/^##\s*/, '').trim()
+        .replace(/^\*\*/, '').replace(/\*\*$/, '')  // Remove bold
+        .replace(/^\*/, '').replace(/\*$/, '')      // Remove italic (*)
+        .replace(/^_/, '').replace(/_$/, '');       // Remove italic (_)
+
       currentExercise = { name: exerciseName, sets: 3, reps: 10, notes: '' };
       currentWorkout.exercises.push(currentExercise);
       continue;
