@@ -78,7 +78,7 @@ The application uses a monolithic component architecture with all code embedded 
    - `startEditWorkout()` / `saveEditedWorkout()` - Modify workout day templates
    - `addExercise()` / `deleteExercise()` - Exercise CRUD
    - `addNewWorkoutDay()` / `deleteWorkoutDay()` - Workout day CRUD
-   - `reorderExercise()` - Reorder exercises via drag-and-drop
+   - `moveExerciseUp()` / `moveExerciseDown()` - Reorder exercises via up/down buttons (touch-friendly)
 
 4. **History Editing**:
    - `saveEditedHistory()` - Update completed workout in history
@@ -111,7 +111,7 @@ The application uses a monolithic component architecture with all code embedded 
 - **Stats** - Detailed analytics, PRs, weekly/monthly trends, progress timeline with interactive charts
 - **Logging** - Active workout session with set-by-set tracking and "Add Set" button
 - **History** - Past workout logs with edit, delete, and CSV export functionality
-- **Edit** - Workout template editor with drag-and-drop exercise reordering and ExerciseInput autocomplete
+- **Edit** - Workout template editor with up/down button exercise reordering (mobile-friendly) and ExerciseInput autocomplete
 - **Edit-History** - Edit past workout data (weight/reps) without affecting templates
 
 ### Modals
@@ -159,11 +159,11 @@ The application uses a monolithic component architecture with all code embedded 
 - Indexes on `history`: `date`, `workoutId`
 
 ### Core Exercise Detection
-Core exercises (plank, hanging leg raises) are treated differently:
+Core exercises (plank, hanging leg raises, ab rollout) are treated differently:
 - Weight input disabled in UI
 - Excluded from volume calculations
 - Counted separately in statistics
-- Detection: `name.toLowerCase().includes('core'|'plank'|'hanging')`
+- Detection: `name.toLowerCase().includes('core'|'plank'|'hanging'|'rollout')`
 
 ### Data Persistence
 - Workouts: Saved on every template modification
@@ -227,6 +227,26 @@ Visual icon selection component used in:
 - 5 icons displayed in grid: Dumbbell, Activity, Zap, Target, Flame
 - Selected icon highlighted with blue ring
 - Replaces previous text-based emoji input for better UX
+
+### PWA Updates & Service Worker
+The app uses an intelligent service worker update strategy:
+- **Network-first for HTML**: Always fetches latest HTML from network, falls back to cache if offline
+- **Cache-first for CDN resources**: React, Tailwind, and other CDN dependencies served from cache for speed
+- **Automatic update detection**: Service worker checks for updates on every app launch
+- **User-friendly update UI**: Blue banner notification prompts user to update when new version is available
+- **Cache versioning**: Service worker version in `sw.js` (currently `workout-pro-v4`)
+
+**How updates work:**
+1. When you deploy a new version, the service worker detects the change
+2. New service worker installs in background and notifies the app
+3. User sees a blue "New version available!" banner at the top
+4. Clicking "Update Now" reloads the app with the latest version
+5. Old cache is automatically cleared, new version is cached
+
+**To force an update after code changes:**
+- Bump `CACHE_NAME` version in `sw.js` (e.g., `workout-pro-v5`)
+- Deploy to Netlify
+- Users will see the update banner on next app launch or refresh
 
 ## Common Modifications
 

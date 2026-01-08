@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dumbbell, TrendingUp, Calendar, Download, Edit2, Plus, Trash2, Check, X, ChevronRight, Sun, Moon, BarChart3, Zap, Target, Award } from 'lucide-react';
+import { Dumbbell, TrendingUp, Calendar, Download, Edit2, Plus, Trash2, Check, X, ChevronRight, Sun, Moon, BarChart3, Zap, Target, Award, ChevronUp, ChevronDown } from 'lucide-react';
 
 // IndexedDB wrapper
 const DB_NAME = 'WorkoutTrackerDB';
@@ -325,6 +325,24 @@ const WorkoutTracker = () => {
     setEditingWorkout(updated);
   };
 
+  const moveExerciseUp = (index) => {
+    if (index === 0) return; // Already at the top
+    const updated = { ...editingWorkout };
+    const temp = updated.exercises[index];
+    updated.exercises[index] = updated.exercises[index - 1];
+    updated.exercises[index - 1] = temp;
+    setEditingWorkout(updated);
+  };
+
+  const moveExerciseDown = (index) => {
+    const updated = { ...editingWorkout };
+    if (index >= updated.exercises.length - 1) return; // Already at the bottom
+    const temp = updated.exercises[index];
+    updated.exercises[index] = updated.exercises[index + 1];
+    updated.exercises[index + 1] = temp;
+    setEditingWorkout(updated);
+  };
+
   const saveEditedWorkout = async () => {
     const updatedWorkouts = workouts.map(w => 
       w.id === editingWorkout.id ? editingWorkout : w
@@ -396,9 +414,10 @@ const WorkoutTracker = () => {
     
     recentWorkouts.forEach(workout => {
       workout.exercises.forEach(exercise => {
-        const isCoreExercise = exercise.name.toLowerCase().includes('core') || 
+        const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
                                exercise.name.toLowerCase().includes('plank') ||
-                               exercise.name.toLowerCase().includes('hanging');
+                               exercise.name.toLowerCase().includes('hanging') ||
+                               exercise.name.toLowerCase().includes('rollout');
         
         exercise.sets.forEach(set => {
           const weight = parseFloat(set.weight) || 0;
@@ -446,9 +465,10 @@ const WorkoutTracker = () => {
       
       workouts.forEach(workout => {
         workout.exercises.forEach(exercise => {
-          const isCoreExercise = exercise.name.toLowerCase().includes('core') || 
+          const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
                                  exercise.name.toLowerCase().includes('plank') ||
-                                 exercise.name.toLowerCase().includes('hanging');
+                                 exercise.name.toLowerCase().includes('hanging') ||
+                                 exercise.name.toLowerCase().includes('rollout');
           
           exercise.sets.forEach(set => {
             const weight = parseFloat(set.weight) || 0;
@@ -561,9 +581,10 @@ const WorkoutTracker = () => {
     let allTimeVolume = 0;
     completedWorkouts.forEach(workout => {
       workout.exercises.forEach(exercise => {
-        const isCoreExercise = exercise.name.toLowerCase().includes('core') || 
+        const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
                                exercise.name.toLowerCase().includes('plank') ||
-                               exercise.name.toLowerCase().includes('hanging');
+                               exercise.name.toLowerCase().includes('hanging') ||
+                               exercise.name.toLowerCase().includes('rollout');
         
         exercise.sets.forEach(set => {
           const weight = parseFloat(set.weight) || 0;
@@ -952,9 +973,10 @@ const WorkoutTracker = () => {
                         value={set.weight}
                         onChange={(e) => updateSet(exIdx, setIdx, 'weight', e.target.value)}
                         className={`w-20 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg text-center font-semibold focus:border-gray-500 focus:outline-none`}
-                        disabled={exercise.name.toLowerCase().includes('core') || 
+                        disabled={exercise.name.toLowerCase().includes('core') ||
                                  exercise.name.toLowerCase().includes('plank') ||
-                                 exercise.name.toLowerCase().includes('hanging')}
+                                 exercise.name.toLowerCase().includes('hanging') ||
+                                 exercise.name.toLowerCase().includes('rollout')}
                       />
                       
                       <span className={`${darkMode ? 'text-gray-500' : 'text-gray-400'} font-bold`}>×</span>
@@ -1048,9 +1070,10 @@ const WorkoutTracker = () => {
                       const completedSets = ex.sets.filter(set => {
                         const weight = parseFloat(set.weight) || 0;
                         const reps = parseFloat(set.reps) || 0;
-                        const isCoreExercise = ex.name.toLowerCase().includes('core') || 
+                        const isCoreExercise = ex.name.toLowerCase().includes('core') ||
                                               ex.name.toLowerCase().includes('plank') ||
-                                              ex.name.toLowerCase().includes('hanging');
+                                              ex.name.toLowerCase().includes('hanging') ||
+                                              ex.name.toLowerCase().includes('rollout');
                         
                         // For core exercises, only check reps
                         if (isCoreExercise) return reps > 0;
@@ -1116,6 +1139,22 @@ const WorkoutTracker = () => {
               {editingWorkout.exercises.map((ex, idx) => (
                 <div key={idx} className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur border rounded-2xl p-4`}>
                   <div className="flex gap-2 mb-3">
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={() => moveExerciseUp(idx)}
+                        disabled={idx === 0}
+                        className={`p-1 rounded ${idx === 0 ? 'opacity-30 cursor-not-allowed' : darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} transition-colors`}
+                      >
+                        <ChevronUp size={16} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
+                      </button>
+                      <button
+                        onClick={() => moveExerciseDown(idx)}
+                        disabled={idx === editingWorkout.exercises.length - 1}
+                        className={`p-1 rounded ${idx === editingWorkout.exercises.length - 1 ? 'opacity-30 cursor-not-allowed' : darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} transition-colors`}
+                      >
+                        <ChevronDown size={16} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
+                      </button>
+                    </div>
                     <input
                       type="text"
                       value={ex.name}
