@@ -1261,6 +1261,22 @@ const WorkoutTracker = () => {
     setActiveView('home');
   };
 
+  const saveEditedHistory = async () => {
+    const updatedHistory = completedWorkouts.map(w =>
+      w.id === editingHistory.id ? editingHistory : w
+    );
+    setCompletedWorkouts(updatedHistory);
+    await dbOperations.saveHistory(updatedHistory);
+    setEditingHistory(null);
+    setActiveView('history');
+  };
+
+  const updateHistorySet = (exIdx, setIdx, field, value) => {
+    const updated = { ...editingHistory };
+    updated.exercises[exIdx].sets[setIdx][field] = value;
+    setEditingHistory(updated);
+  };
+
   const toggleTheme = () => {
     const newMode = !darkMode;
     setDarkMode(newMode);
@@ -2244,7 +2260,7 @@ const WorkoutTracker = () => {
                       setCurrentLog(updatedLog);
                       soundSystem.buttonPress();
                     }}
-                    className={`w-full mt-2 px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg flex items-center justify-center gap-2 transition-colors text-sm font-medium touch-manipulation`}
+                    className={`w-full mt-2 px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center justify-center gap-2 transition-colors text-sm font-medium touch-manipulation`}
                   >
                     <Plus size={16} />
                     Add Set
@@ -2304,12 +2320,23 @@ const WorkoutTracker = () => {
                         })}
                       </p>
                     </div>
-                    <button
-                      onClick={() => setShowDeleteHistory(workout.id)}
-                      className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-                    >
-                      <Trash2 size={16} className="text-white" />
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setEditingHistory(JSON.parse(JSON.stringify(workout)));
+                          setActiveView('edit-history');
+                        }}
+                        className={`p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg transition-colors`}
+                      >
+                        <Edit2 size={16} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteHistory(workout.id)}
+                        className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={16} className="text-white" />
+                      </button>
+                    </div>
                   </div>
                   
                   <div className="space-y-3">
@@ -2458,6 +2485,87 @@ const WorkoutTracker = () => {
               >
                 Save Changes
               </button>
+            </div>
+          </div>
+        )}
+
+        {activeView === 'edit-history' && editingHistory && (
+          <div className="space-y-4">
+            <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur border rounded-2xl p-5`}>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Edit Workout</h2>
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {new Date(editingHistory.date).toLocaleString('hr-HR', {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Exercises */}
+              {editingHistory.exercises.map((exercise, exIdx) => (
+                <div key={exIdx} className={`${darkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-xl p-4 mb-4`}>
+                  <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-3`}>{exercise.name}</h3>
+
+                  <div className="space-y-3">
+                    {exercise.sets.map((set, setIdx) => (
+                      <div key={setIdx} className="flex items-center gap-2">
+                        <div className="w-12 text-center">
+                          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Set</div>
+                          <div className={`${darkMode ? 'text-white' : 'text-gray-900'} font-bold`}>{setIdx + 1}</div>
+                        </div>
+
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="kg"
+                          value={set.weight}
+                          onChange={(e) => updateHistorySet(exIdx, setIdx, 'weight', e.target.value)}
+                          className={`w-20 px-3 py-2 ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded-lg text-center font-semibold focus:border-gray-500 focus:outline-none`}
+                        />
+
+                        <span className={`${darkMode ? 'text-gray-500' : 'text-gray-400'} font-bold`}>×</span>
+
+                        <input
+                          type="number"
+                          placeholder="reps"
+                          value={set.reps}
+                          onChange={(e) => updateHistorySet(exIdx, setIdx, 'reps', e.target.value)}
+                          className={`w-20 px-3 py-2 ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded-lg text-center font-semibold focus:border-gray-500 focus:outline-none`}
+                        />
+
+                        <div className={`ml-auto px-3 py-2 rounded-lg ${set.completed ? 'bg-green-600 text-white' : darkMode ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'}`}>
+                          {set.completed ? 'Done' : 'Skipped'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setEditingHistory(null);
+                    setActiveView('history');
+                  }}
+                  className={`px-6 py-3 ${darkMode ? 'bg-gray-800 hover:bg-gray-700 border-gray-700' : 'bg-white hover:bg-gray-50 border-gray-300'} border rounded-xl font-semibold transition-colors ${darkMode ? 'text-white' : 'text-gray-900'}`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveEditedHistory}
+                  className={`flex-1 px-6 py-3 ${darkMode ? 'bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500' : 'bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600'} text-white rounded-xl font-semibold transition-all`}
+                >
+                  Save Changes
+                </button>
+              </div>
             </div>
           </div>
         )}
