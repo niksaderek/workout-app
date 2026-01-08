@@ -65,6 +65,8 @@
     const Check = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"/></svg>;
     
     const X = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>;
+
+    const RepeatIcon = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>;
     
     const ChevronRight = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m9 18 6-6-6-6"/></svg>;
 
@@ -961,6 +963,8 @@ const WorkoutTracker = () => {
   const [timelineRange, setTimelineRange] = useState('4weeks'); // '4weeks', '3months', '6months', 'all'
   const [selectedTimelinePoint, setSelectedTimelinePoint] = useState(null);
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
+  const [substituteDropdown, setSubstituteDropdown] = useState(null); // exerciseIndex or null
+  const [exerciseProgressModal, setExerciseProgressModal] = useState(null); // {exerciseName: string} or null
   const fileInputRef = React.useRef(null);
   const restoreBackupInputRef = React.useRef(null);
   const dragExerciseRef = React.useRef(null);
@@ -1526,6 +1530,36 @@ const WorkoutTracker = () => {
     }
   };
 
+  const getMuscleGroupSuggestions = (exerciseName) => {
+    const normalizedName = exerciseName.toLowerCase().trim();
+
+    // Find muscle group for current exercise
+    let muscleGroup = null;
+    for (const [group, exercises] of Object.entries(popularExercises)) {
+      if (exercises.some(ex => ex.toLowerCase() === normalizedName)) {
+        muscleGroup = group;
+        break;
+      }
+    }
+
+    // If not found in popular exercises, return empty array
+    if (!muscleGroup) {
+      return [];
+    }
+
+    // Return suggestions from same muscle group, excluding current exercise
+    return popularExercises[muscleGroup]
+      .filter(ex => ex.toLowerCase() !== normalizedName)
+      .slice(0, 7); // Limit to 7 suggestions
+  };
+
+  const substituteExercise = (exerciseIndex, newExerciseName) => {
+    const updated = { ...currentLog };
+    updated.exercises[exerciseIndex].name = newExerciseName;
+    setCurrentLog(updated);
+    setSubstituteDropdown(null); // Close dropdown after selection
+  };
+
   const exportBackupToFile = () => {
     const backupData = {
       workouts: workouts,
@@ -1934,6 +1968,76 @@ const WorkoutTracker = () => {
     return timelineData;
   };
 
+  const getExerciseProgress = (exerciseName) => {
+    const normalizedInput = exerciseName.toLowerCase().trim();
+    const progressData = [];
+
+    completedWorkouts.forEach(workout => {
+      workout.exercises.forEach(exercise => {
+        // Fuzzy match: check if input is in exercise name or vice versa
+        const exerciseNameLower = exercise.name.toLowerCase();
+        const isMatch = exerciseNameLower.includes(normalizedInput) ||
+                       normalizedInput.includes(exerciseNameLower);
+
+        if (isMatch) {
+          // Check if core exercise
+          const isCoreExercise = exerciseNameLower.includes('core') ||
+                                exerciseNameLower.includes('plank') ||
+                                exerciseNameLower.includes('hanging') ||
+                                exerciseNameLower.includes('rollout');
+
+          exercise.sets.forEach(set => {
+            const weight = parseFloat(set.weight) || 0;
+            const reps = parseFloat(set.reps) || 0;
+
+            // Skip empty sets
+            if (weight === 0 && reps === 0) return;
+
+            // For core exercises, only track reps and volume
+            if (isCoreExercise && reps > 0) {
+              progressData.push({
+                date: workout.date,
+                weight: 0,
+                reps: reps,
+                volume: 0 // No volume for core
+              });
+            } else if (weight > 0 && reps > 0) {
+              progressData.push({
+                date: workout.date,
+                weight: weight,
+                reps: reps,
+                volume: weight * reps
+              });
+            }
+          });
+        }
+      });
+    });
+
+    // Sort by date
+    return progressData.sort((a, b) => new Date(a.date) - new Date(b.date));
+  };
+
+  const getMostTrainedExercises = () => {
+    const exerciseFrequency = {};
+
+    completedWorkouts.forEach(workout => {
+      workout.exercises.forEach(exercise => {
+        const name = exercise.name;
+        if (!exerciseFrequency[name]) {
+          exerciseFrequency[name] = 0;
+        }
+        exerciseFrequency[name] += 1;
+      });
+    });
+
+    // Convert to array and sort by frequency
+    return Object.entries(exerciseFrequency)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10) // Top 10
+      .map(([name, count]) => ({ name, count }));
+  };
+
   if (loading) {
     return (
       <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-br from-gray-100 via-white to-gray-100'} flex items-center justify-center`}>
@@ -2318,6 +2422,41 @@ const WorkoutTracker = () => {
               )}
             </div>
 
+            {/* Exercise Progress */}
+            {(() => {
+              const mostTrained = getMostTrainedExercises();
+              return mostTrained.length > 0 && (
+                <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
+                  <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4 flex items-center gap-2`}>
+                    <TrendingUp size={20} />
+                    Exercise Progress
+                  </h3>
+                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
+                    Tap an exercise to view detailed progress charts
+                  </div>
+                  <div className="space-y-2">
+                    {mostTrained.map((exercise, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setExerciseProgressModal({ exerciseName: exercise.name })}
+                        className={`w-full flex justify-between items-center p-3 ${darkMode ? 'bg-gray-900 hover:bg-gray-800' : 'bg-gray-50 hover:bg-gray-100'} rounded-lg transition-colors text-left`}
+                      >
+                        <div className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {exercise.name}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {exercise.count} workout{exercise.count !== 1 ? 's' : ''}
+                          </div>
+                          <ChevronRight size={16} className={darkMode ? 'text-gray-500' : 'text-gray-400'} />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Total Stats */}
             <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
               <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>All Time</h3>
@@ -2453,14 +2592,53 @@ const WorkoutTracker = () => {
 
             {/* Exercises */}
             {currentLog.exercises.map((exercise, exIdx) => (
-              <div key={exIdx} className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5 shadow-sm transform-gpu`}>
-                <input
-                  type="text"
-                  value={exercise.name}
-                  onChange={(e) => updateExerciseName(exIdx, e.target.value)}
-                  className={`font-bold text-lg ${darkMode ? 'text-white bg-gray-900 border-gray-700' : 'text-gray-900 bg-gray-50 border-gray-300'} border rounded-lg px-3 py-2 mb-2 w-full focus:border-gray-500 focus:outline-none`}
-                  placeholder="Exercise name"
-                />
+              <div key={exIdx} className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5 shadow-sm transform-gpu relative`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={exercise.name}
+                    onChange={(e) => updateExerciseName(exIdx, e.target.value)}
+                    className={`font-bold text-lg ${darkMode ? 'text-white bg-gray-900 border-gray-700' : 'text-gray-900 bg-gray-50 border-gray-300'} border rounded-lg px-3 py-2 flex-1 focus:border-gray-500 focus:outline-none`}
+                    placeholder="Exercise name"
+                  />
+                  <button
+                    onClick={() => setSubstituteDropdown(substituteDropdown === exIdx ? null : exIdx)}
+                    className={`p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg transition-colors flex-shrink-0`}
+                    title="Swap exercise"
+                  >
+                    <RepeatIcon size={18} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
+                  </button>
+                </div>
+
+                {/* Substitution Dropdown */}
+                {substituteDropdown === exIdx && (() => {
+                  const suggestions = getMuscleGroupSuggestions(exercise.name);
+                  return (
+                    <div className={`absolute left-5 right-5 mt-1 ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto`}>
+                      {suggestions.length > 0 ? (
+                        <>
+                          <div className={`px-3 py-2 text-xs font-semibold ${darkMode ? 'text-gray-400 border-gray-700' : 'text-gray-600 border-gray-200'} border-b`}>
+                            Suggestions (same muscle group):
+                          </div>
+                          {suggestions.map((suggestion, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => substituteExercise(exIdx, suggestion)}
+                              className={`w-full text-left px-3 py-2 ${darkMode ? 'hover:bg-gray-800 text-white' : 'hover:bg-gray-50 text-gray-900'} transition-colors`}
+                            >
+                              {suggestion}
+                            </button>
+                          ))}
+                        </>
+                      ) : (
+                        <div className={`px-3 py-3 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} text-center`}>
+                          No suggestions (custom exercise)
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Target: {exercise.plannedSets} × {exercise.plannedReps}</div>
                 
                 <div className="space-y-3">
@@ -2999,6 +3177,123 @@ const WorkoutTracker = () => {
           </div>
         </div>
       )}
+
+      {/* Exercise Progress Modal */}
+      {exerciseProgressModal && (() => {
+        const progressData = getExerciseProgress(exerciseProgressModal.exerciseName);
+        const isCoreExercise = exerciseProgressModal.exerciseName.toLowerCase().includes('core') ||
+                              exerciseProgressModal.exerciseName.toLowerCase().includes('plank') ||
+                              exerciseProgressModal.exerciseName.toLowerCase().includes('hanging') ||
+                              exerciseProgressModal.exerciseName.toLowerCase().includes('rollout');
+
+        // Group by workout date and get max values
+        const grouped = {};
+        progressData.forEach(point => {
+          const dateKey = new Date(point.date).toLocaleDateString('hr-HR');
+          if (!grouped[dateKey]) {
+            grouped[dateKey] = { date: point.date, maxWeight: point.weight, totalVolume: point.volume, totalReps: point.reps };
+          } else {
+            if (point.weight > grouped[dateKey].maxWeight) {
+              grouped[dateKey].maxWeight = point.weight;
+            }
+            grouped[dateKey].totalVolume += point.volume;
+            grouped[dateKey].totalReps += point.reps;
+          }
+        });
+
+        const chartData = Object.values(grouped);
+        const last10 = chartData.slice(-10);
+
+        return (
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+            onClick={() => setExerciseProgressModal(null)}
+          >
+            <div
+              className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {exerciseProgressModal.exerciseName}
+                </h3>
+                <button
+                  onClick={() => setExerciseProgressModal(null)}
+                  className={`p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg transition-colors`}
+                >
+                  <X size={20} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
+                </button>
+              </div>
+
+              {chartData.length === 0 ? (
+                <div className={`text-center py-12 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                  No workout data found for this exercise
+                </div>
+              ) : (
+                <>
+                  {/* Max Weight Chart (skip for core exercises) */}
+                  {!isCoreExercise && (
+                    <div className="mb-8">
+                      <h4 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+                        Max Weight Progress
+                      </h4>
+                      <LineChart
+                        data={last10}
+                        dataKey="maxWeight"
+                        label="kg"
+                        darkMode={darkMode}
+                        height={200}
+                      />
+                      <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-2 text-center`}>
+                        Last {last10.length} workouts
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Total Volume Chart */}
+                  <div className="mb-8">
+                    <h4 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+                      {isCoreExercise ? 'Total Reps Progress' : 'Total Volume Progress'}
+                    </h4>
+                    <LineChart
+                      data={last10}
+                      dataKey={isCoreExercise ? 'totalReps' : 'totalVolume'}
+                      label={isCoreExercise ? 'reps' : 'kg'}
+                      darkMode={darkMode}
+                      height={200}
+                    />
+                    <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-2 text-center`}>
+                      Last {last10.length} workouts
+                    </div>
+                  </div>
+
+                  {/* Stats Summary */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-4`}>
+                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>
+                        Total Workouts
+                      </div>
+                      <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                        {chartData.length}
+                      </div>
+                    </div>
+                    {!isCoreExercise && (
+                      <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-4`}>
+                        <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>
+                          Peak Weight
+                        </div>
+                        <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {Math.max(...chartData.map(d => d.maxWeight))} kg
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Timeline Detail Modal */}
       {selectedTimelinePoint && (
