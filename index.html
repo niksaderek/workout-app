@@ -18,6 +18,21 @@
     body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overscroll-behavior-y: contain; }
     *::-webkit-scrollbar { width: 0; background: transparent; }
     * { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Mobile scrolling performance optimizations */
+    .transform-gpu {
+      transform: translateZ(0);
+      will-change: transform;
+      -webkit-transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+    }
+
+    /* Smooth scrolling with hardware acceleration */
+    #root {
+      -webkit-overflow-scrolling: touch;
+      transform: translateZ(0);
+    }
   </style>
 </head>
 <body>
@@ -943,7 +958,7 @@ const WorkoutTracker = () => {
 
   if (loading) {
     return (
-      <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-br from-gray-100 via-white to-gray-100'} flex items-center justify-center`}>
+      <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} flex items-center justify-center`}>
         <div className={`text-2xl ${darkMode ? 'text-white' : 'text-gray-900'} animate-pulse`}>💪 Loading...</div>
       </div>
     );
@@ -953,9 +968,9 @@ const WorkoutTracker = () => {
   const detailedStats = getDetailedStats();
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-br from-gray-100 via-white to-gray-100'} pb-24`}>
+    <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} pb-24`}>
       {/* Header */}
-      <div className={`sticky top-0 z-10 ${darkMode ? 'bg-gray-900/80' : 'bg-white/80'} backdrop-blur-lg ${darkMode ? 'border-gray-800' : 'border-gray-200'} border-b`}>
+      <div className={`sticky top-0 z-10 ${darkMode ? 'bg-gray-900/95' : 'bg-white/95'} ${darkMode ? 'border-gray-800' : 'border-gray-200'} border-b transform-gpu`}>
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -988,7 +1003,7 @@ const WorkoutTracker = () => {
           <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-2 gap-4">
-              <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'} rounded-2xl p-4 shadow-xl border`}>
+              <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} rounded-2xl p-4 shadow-md border transform-gpu`}>
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
                   <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium`}>This Week</span>
@@ -997,7 +1012,7 @@ const WorkoutTracker = () => {
                 <div className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>Workouts</div>
               </div>
               
-              <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'} rounded-2xl p-4 shadow-xl border`}>
+              <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} rounded-2xl p-4 shadow-md border transform-gpu`}>
                 <div className="flex items-center gap-2 mb-2">
                   <Zap size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
                   <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium`}>Volume</span>
@@ -1006,7 +1021,7 @@ const WorkoutTracker = () => {
                 <div className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>kg lifted</div>
               </div>
 
-              <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'} rounded-2xl p-4 shadow-xl border`}>
+              <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} rounded-2xl p-4 shadow-md border transform-gpu`}>
                 <div className="flex items-center gap-2 mb-2">
                   <Dumbbell size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
                   <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium`}>Total Reps</span>
@@ -1015,7 +1030,7 @@ const WorkoutTracker = () => {
                 <div className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>{stats.totalSets} sets</div>
               </div>
 
-              <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'} rounded-2xl p-4 shadow-xl border`}>
+              <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} rounded-2xl p-4 shadow-md border transform-gpu`}>
                 <div className="flex items-center gap-2 mb-2">
                   <Target size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
                   <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium`}>Core Work</span>
@@ -1074,9 +1089,9 @@ const WorkoutTracker = () => {
               />
               <div className="grid gap-4">
                 {workouts.map(workout => (
-                  <div 
-                    key={workout.id} 
-                    className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur border rounded-2xl p-5 shadow-xl hover:shadow-2xl transition-all`}
+                  <div
+                    key={workout.id}
+                    className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5 shadow-lg transform-gpu`}
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
