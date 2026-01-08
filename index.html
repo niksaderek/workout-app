@@ -938,6 +938,7 @@ const WorkoutTracker = () => {
   const [activeView, setActiveView] = useState('home');
   const [currentLog, setCurrentLog] = useState(null);
   const [editingWorkout, setEditingWorkout] = useState(null);
+  const [editingHistory, setEditingHistory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
   const [showStats, setShowStats] = useState(false);
@@ -1187,6 +1188,10 @@ const WorkoutTracker = () => {
   };
 
   const handleExerciseDragStart = (e, index) => {
+    // Prevent default and stop propagation for touch events
+    if (e.type === 'touchstart') {
+      e.preventDefault();
+    }
     e.stopPropagation();
 
     const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
