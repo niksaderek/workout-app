@@ -2082,6 +2082,25 @@ const WorkoutTracker = () => {
                       </button>
                     </div>
                   ))}
+
+                  {/* Add Set Button */}
+                  <button
+                    onClick={() => {
+                      const updatedLog = { ...currentLog };
+                      const lastSet = exercise.sets[exercise.sets.length - 1];
+                      updatedLog.exercises[exIdx].sets.push({
+                        weight: lastSet?.weight || '',
+                        reps: lastSet?.reps || exercise.plannedReps,
+                        completed: false
+                      });
+                      setCurrentLog(updatedLog);
+                      soundSystem.buttonPress();
+                    }}
+                    className={`w-full mt-2 px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg flex items-center justify-center gap-2 transition-colors text-sm font-medium touch-manipulation`}
+                  >
+                    <Plus size={16} />
+                    Add Set
+                  </button>
                 </div>
               </div>
             ))}
