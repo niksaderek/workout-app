@@ -1,21 +1,62 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#111827"/>
-  <g transform="translate(106,106)">
-    <!-- Main bar -->
-    <path d="M85 85 L215 215" stroke="#10b981" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="#111827" rx="180"/>
 
-    <!-- Top right weight -->
-    <path d="M265 265 L250 250" stroke="#10b981" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <path d="M35 35 L50 50" stroke="#10b981" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Dumbbell icon - scaled up for maximum sharpness -->
+  <g transform="translate(212,212)">
+    <!-- Main diagonal bar -->
+    <path d="M170 170 L430 430"
+          stroke="#10b981"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"/>
 
-    <!-- Bottom right corner -->
-    <path d="M230 280 L280 230" stroke="#10b981" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <!-- Top right weight end -->
+    <path d="M530 530 L500 500"
+          stroke="#10b981"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"/>
 
-    <!-- Top left corner -->
-    <path d="M20 70 L70 20" stroke="#10b981" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <!-- Bottom left weight end -->
+    <path d="M70 70 L100 100"
+          stroke="#10b981"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"/>
 
-    <!-- Middle weights -->
-    <path d="M35 125 L125 35" stroke="#10b981" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <path d="M175 265 L265 175" stroke="#10b981" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <!-- Bottom right weight plate -->
+    <path d="M460 560 L560 460"
+          stroke="#10b981"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"/>
+
+    <!-- Top left weight plate -->
+    <path d="M40 140 L140 40"
+          stroke="#10b981"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"/>
+
+    <!-- Middle weight connectors -->
+    <path d="M70 250 L250 70"
+          stroke="#10b981"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"/>
+
+    <path d="M350 530 L530 350"
+          stroke="#10b981"
+          stroke-width="32"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"/>
   </g>
 </svg>
