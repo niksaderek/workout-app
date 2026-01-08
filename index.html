@@ -1547,7 +1547,7 @@ const WorkoutTracker = () => {
         {activeView === 'logging' && currentLog && (
           <div className="space-y-4">
             {/* Workout Header */}
-            <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-100 to-gray-50 border-gray-200'} rounded-2xl p-6 shadow-xl border`}>
+            <div className={`${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-100 to-gray-50 border-gray-200'} rounded-2xl p-6 shadow-md border transform-gpu`}>
               <div className="flex items-center gap-3 mb-2">
                 <WorkoutIcon emoji={currentLog.workoutEmoji} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
                 <div>
@@ -1566,7 +1566,7 @@ const WorkoutTracker = () => {
 
             {/* Exercises */}
             {currentLog.exercises.map((exercise, exIdx) => (
-              <div key={exIdx} className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur border rounded-2xl p-5 shadow-lg`}>
+              <div key={exIdx} className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5 shadow-sm transform-gpu`}>
                 <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-1`}>{exercise.name}</h3>
                 <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Target: {exercise.plannedSets} × {exercise.plannedReps}</div>
                 
@@ -1602,13 +1602,13 @@ const WorkoutTracker = () => {
                       
                       <button
                         onClick={() => toggleSetComplete(exIdx, setIdx)}
-                        className={`ml-auto p-3 rounded-lg transition-all ${
-                          set.completed 
-                            ? 'bg-green-600 shadow-lg shadow-green-600/50' 
+                        className={`ml-auto p-3 rounded-lg transition-colors transform-gpu ${
+                          set.completed
+                            ? 'bg-green-600'
                             : darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
                         }`}
                       >
-                        <Check size={20} className="text-white" />
+                        <Check size={20} className={set.completed ? 'text-white' : darkMode ? 'text-gray-400' : 'text-gray-500'} />
                       </button>
                     </div>
                   ))}
@@ -1629,7 +1629,7 @@ const WorkoutTracker = () => {
               </button>
               <button
                 onClick={finishWorkout}
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl font-semibold transition-all shadow-lg"
+                className="flex-1 px-6 py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-colors transform-gpu"
               >
                 Finish Workout
               </button>
@@ -1932,7 +1932,7 @@ const WorkoutTracker = () => {
       )}
 
       {/* Bottom Navigation */}
-      <div className={`fixed bottom-0 left-0 right-0 ${darkMode ? 'bg-gray-900/95' : 'bg-white/95'} backdrop-blur-lg border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'} px-4 py-3`}>
+      <div className={`fixed bottom-0 left-0 right-0 ${darkMode ? 'bg-gray-900' : 'bg-white'} border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'} px-4 py-3 transform-gpu`}>
         <div className="max-w-6xl mx-auto flex justify-around">
           <button
             onClick={() => setActiveView('home')}
