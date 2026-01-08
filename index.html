@@ -81,6 +81,8 @@
     // Additional workout-specific icons
     const Activity = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>;
 
+    const GripVertical = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>;
+
     const Flame = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>;
 
     // Icon mapper - maps emoji to icon component
@@ -93,6 +95,126 @@
         '🔥': <Flame size={size} className={className} />
       };
       return iconMap[emoji] || <span className="text-4xl">{emoji}</span>;
+    };
+
+    // LineChart component for timeline visualization
+    const LineChart = ({data, metric, darkMode, onPointClick, selectedPoint}) => {
+      if (!data || data.length === 0) return null;
+
+      const width = 350;
+      const height = 200;
+      const padding = {top: 20, right: 20, bottom: 30, left: 50};
+
+      const chartWidth = width - padding.left - padding.right;
+      const chartHeight = height - padding.top - padding.bottom;
+
+      // Get values for the selected metric
+      const values = data.map(d => {
+        if (metric === 'volume') return d.volume;
+        if (metric === 'frequency') return d.frequency;
+        return 0;
+      });
+
+      const maxValue = Math.max(...values, 1);
+      const minValue = Math.min(...values, 0);
+
+      // Scale functions
+      const scaleX = (index) => padding.left + (index / (data.length - 1)) * chartWidth;
+      const scaleY = (value) => padding.top + chartHeight - ((value - minValue) / (maxValue - minValue)) * chartHeight;
+
+      // Generate path for line
+      const pathData = data.map((point, i) => {
+        const x = scaleX(i);
+        const y = scaleY(values[i]);
+        return i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
+      }).join(' ');
+
+      // Format date labels
+      const formatDate = (dateStr) => {
+        const date = new Date(dateStr);
+        const month = date.toLocaleDateString('en-US', {month: 'short'});
+        const day = date.getDate();
+        return `${month} ${day}`;
+      };
+
+      // Y-axis labels
+      const yAxisLabels = [maxValue, Math.round(maxValue / 2), 0];
+
+      return (
+        <svg width={width} height={height} className="touch-manipulation">
+          {/* Grid lines */}
+          {yAxisLabels.map((value, i) => {
+            const y = scaleY(value);
+            return (
+              <g key={i}>
+                <line
+                  x1={padding.left}
+                  y1={y}
+                  x2={width - padding.right}
+                  y2={y}
+                  stroke={darkMode ? '#374151' : '#E5E7EB'}
+                  strokeWidth="1"
+                  strokeDasharray="3,3"
+                />
+                <text
+                  x={padding.left - 10}
+                  y={y + 4}
+                  textAnchor="end"
+                  fontSize="12"
+                  fill={darkMode ? '#9CA3AF' : '#6B7280'}
+                >
+                  {value}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Line */}
+          <path
+            d={pathData}
+            fill="none"
+            stroke={darkMode ? '#60A5FA' : '#3B82F6'}
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* Data points */}
+          {data.map((point, i) => {
+            const x = scaleX(i);
+            const y = scaleY(values[i]);
+            const isSelected = selectedPoint && selectedPoint.date === point.date;
+
+            return (
+              <g key={i}>
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={isSelected ? 8 : 5}
+                  fill={darkMode ? '#60A5FA' : '#3B82F6'}
+                  stroke={darkMode ? '#1F2937' : '#FFFFFF'}
+                  strokeWidth="2"
+                  style={{cursor: 'pointer'}}
+                  onClick={() => onPointClick(point)}
+                  className="transition-all"
+                />
+                {/* X-axis label */}
+                {(i === 0 || i === data.length - 1 || i === Math.floor(data.length / 2)) && (
+                  <text
+                    x={x}
+                    y={height - 5}
+                    textAnchor="middle"
+                    fontSize="11"
+                    fill={darkMode ? '#9CA3AF' : '#6B7280'}
+                  >
+                    {formatDate(point.date)}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+        </svg>
+      );
     };
 
     // Icon picker component for selecting workout icons
@@ -681,6 +803,10 @@ const WorkoutTracker = () => {
   const [showDeleteHistory, setShowDeleteHistory] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [parsedWorkouts, setParsedWorkouts] = useState([]);
+  const [draggedExerciseIndex, setDraggedExerciseIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [timelineRange, setTimelineRange] = useState('4weeks'); // '4weeks', '3months', '6months', 'all'
+  const [selectedTimelinePoint, setSelectedTimelinePoint] = useState(null);
   const fileInputRef = React.useRef(null);
 
   useEffect(() => {
@@ -861,8 +987,40 @@ const WorkoutTracker = () => {
     setEditingWorkout(updated);
   };
 
+  const reorderExercise = (fromIndex, toIndex) => {
+    if (fromIndex === toIndex) return;
+
+    const updated = { ...editingWorkout };
+    const exercises = [...updated.exercises];
+    const [movedExercise] = exercises.splice(fromIndex, 1);
+    exercises.splice(toIndex, 0, movedExercise);
+    updated.exercises = exercises;
+    setEditingWorkout(updated);
+  };
+
+  const handleDragStart = (index) => {
+    setDraggedExerciseIndex(index);
+    soundSystem.buttonPress(); // Haptic feedback
+  };
+
+  const handleDragOver = (index) => {
+    if (draggedExerciseIndex === null) return;
+    if (index !== dragOverIndex) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragEnd = () => {
+    if (draggedExerciseIndex !== null && dragOverIndex !== null && draggedExerciseIndex !== dragOverIndex) {
+      reorderExercise(draggedExerciseIndex, dragOverIndex);
+      soundSystem.setComplete(); // Success feedback
+    }
+    setDraggedExerciseIndex(null);
+    setDragOverIndex(null);
+  };
+
   const saveEditedWorkout = async () => {
-    const updatedWorkouts = workouts.map(w => 
+    const updatedWorkouts = workouts.map(w =>
       w.id === editingWorkout.id ? editingWorkout : w
     );
     await saveWorkouts(updatedWorkouts);
@@ -899,12 +1057,27 @@ const WorkoutTracker = () => {
   };
 
   const triggerFileUpload = () => {
-    fileInputRef.current?.click();
+    // Mobile-friendly file input trigger
+    if (fileInputRef.current) {
+      // Reset the input first to allow re-uploading the same file
+      fileInputRef.current.value = '';
+
+      // Use setTimeout to ensure the click happens in a fresh event loop
+      // This helps with iOS Safari compatibility
+      setTimeout(() => {
+        fileInputRef.current?.click();
+      }, 100);
+    }
   };
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+
+    console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
 
     const fileName = file.name.toLowerCase();
     const isMarkdown = fileName.endsWith('.md');
@@ -913,6 +1086,7 @@ const WorkoutTracker = () => {
 
     if (!isMarkdown && !isCSV && !isExcel) {
       alert('Please upload a markdown (.md), CSV (.csv), or Excel (.xlsx/.xls) file');
+      e.target.value = '';
       return;
     }
 
@@ -921,10 +1095,15 @@ const WorkoutTracker = () => {
 
       if (isMarkdown) {
         const text = await file.text();
+        console.log('Markdown text length:', text.length);
+        console.log('First 200 chars:', text.substring(0, 200));
         parsed = parseMarkdownWorkout(text);
+        console.log('Parsed workouts:', parsed.length, parsed);
       } else if (isCSV) {
         const text = await file.text();
+        console.log('CSV text length:', text.length);
         parsed = parseCSVWorkout(text);
+        console.log('Parsed workouts:', parsed.length, parsed);
       } else if (isExcel) {
         alert('Excel files (.xlsx/.xls) support coming soon! For now, please export to CSV and upload that file.');
         e.target.value = '';
@@ -932,14 +1111,15 @@ const WorkoutTracker = () => {
       }
 
       if (parsed && parsed.length > 0) {
+        console.log('Setting parsed workouts and showing modal');
         setParsedWorkouts(parsed);
         setShowUploadModal(true);
       } else {
-        alert('No valid workouts found in the file. Please check the format.');
+        alert(`No valid workouts found in the file. Please check the format.\n\nFile: ${file.name}\nSize: ${file.size} bytes`);
       }
     } catch (error) {
       console.error('Error parsing file:', error);
-      alert('Failed to parse file. Please check the file format.');
+      alert(`Failed to parse file: ${error.message}\n\nFile: ${file.name}\nPlease check the console for details.`);
     }
 
     // Reset input
@@ -1215,6 +1395,131 @@ const WorkoutTracker = () => {
     };
   };
 
+  const getTimelineData = () => {
+    if (completedWorkouts.length === 0) return [];
+
+    const now = new Date();
+    let startDate;
+    let groupBy = 'week'; // 'week' or 'month'
+
+    // Determine date range based on timelineRange
+    switch (timelineRange) {
+      case '4weeks':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 28);
+        groupBy = 'week';
+        break;
+      case '3months':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 3);
+        groupBy = 'week';
+        break;
+      case '6months':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 6);
+        groupBy = 'month';
+        break;
+      case 'all':
+        const sortedWorkouts = [...completedWorkouts].sort((a, b) => new Date(a.date) - new Date(b.date));
+        startDate = new Date(sortedWorkouts[0].date);
+        // Determine groupBy based on data span
+        const daysDiff = (now - startDate) / (1000 * 60 * 60 * 24);
+        groupBy = daysDiff > 180 ? 'month' : 'week';
+        break;
+    }
+
+    // Group workouts by week or month
+    const grouped = {};
+
+    completedWorkouts.forEach(workout => {
+      const workoutDate = new Date(workout.date);
+      if (workoutDate < startDate) return;
+
+      let key;
+      if (groupBy === 'week') {
+        // Get start of week (Monday)
+        const weekStart = new Date(workoutDate);
+        const day = weekStart.getDay();
+        const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
+        weekStart.setDate(diff);
+        weekStart.setHours(0, 0, 0, 0);
+        key = weekStart.toISOString().split('T')[0];
+      } else {
+        // Get start of month
+        const monthStart = new Date(workoutDate.getFullYear(), workoutDate.getMonth(), 1);
+        key = monthStart.toISOString().split('T')[0];
+      }
+
+      if (!grouped[key]) {
+        grouped[key] = {
+          date: key,
+          workouts: [],
+          volume: 0,
+          frequency: 0,
+          mainLifts: {
+            deadlift: [],
+            squat: [],
+            bench: [],
+            ohp: []
+          }
+        };
+      }
+
+      grouped[key].workouts.push(workout);
+      grouped[key].frequency += 1;
+
+      // Calculate volume and track main lifts
+      workout.exercises.forEach(exercise => {
+        const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
+                               exercise.name.toLowerCase().includes('plank') ||
+                               exercise.name.toLowerCase().includes('hanging');
+
+        exercise.sets.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          const reps = parseFloat(set.reps) || 0;
+
+          if (weight === 0 && reps === 0) return; // Skip empty sets
+
+          if (!isCoreExercise && weight > 0 && reps > 0) {
+            grouped[key].volume += weight * reps;
+          }
+
+          // Track main lifts
+          if (weight > 0) {
+            if (exercise.name.toLowerCase().includes('deadlift') || exercise.name.toLowerCase().includes('mrtvo')) {
+              grouped[key].mainLifts.deadlift.push(weight);
+            } else if (exercise.name.toLowerCase().includes('squat') || exercise.name.toLowerCase().includes('čučanj')) {
+              grouped[key].mainLifts.squat.push(weight);
+            } else if (exercise.name.toLowerCase().includes('bench press')) {
+              grouped[key].mainLifts.bench.push(weight);
+            } else if (exercise.name.toLowerCase().includes('overhead press') || exercise.name.toLowerCase().includes('ohp')) {
+              grouped[key].mainLifts.ohp.push(weight);
+            }
+          }
+        });
+      });
+
+      // Get max weight for each main lift
+      Object.keys(grouped[key].mainLifts).forEach(lift => {
+        if (grouped[key].mainLifts[lift].length > 0) {
+          grouped[key].mainLifts[lift] = Math.max(...grouped[key].mainLifts[lift]);
+        } else {
+          grouped[key].mainLifts[lift] = null;
+        }
+      });
+    });
+
+    // Convert to array and sort by date
+    const timelineData = Object.values(grouped).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Round volume
+    timelineData.forEach(point => {
+      point.volume = Math.round(point.volume);
+    });
+
+    return timelineData;
+  };
+
   if (loading) {
     return (
       <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-br from-gray-100 via-white to-gray-100'} flex items-center justify-center`}>
@@ -1324,13 +1629,14 @@ const WorkoutTracker = () => {
                   <span>Your Program</span>
                 </h2>
                 <div className="flex gap-2">
-                  <button
-                    onClick={triggerFileUpload}
-                    className={`px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold transition-colors`}
+                  {/* Mobile-friendly file upload using label */}
+                  <label
+                    htmlFor="workout-file-input"
+                    className={`px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold transition-colors cursor-pointer active:scale-95 touch-manipulation`}
                   >
                     <Download size={18} />
                     Upload Program
-                  </button>
+                  </label>
                   <button
                     onClick={() => setShowAddDay(true)}
                     className={`px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold transition-colors`}
@@ -1341,11 +1647,12 @@ const WorkoutTracker = () => {
                 </div>
               </div>
 
-              {/* Hidden file input */}
+              {/* Mobile-friendly file input using both hidden input and id-based label */}
               <input
+                id="workout-file-input"
                 ref={fileInputRef}
                 type="file"
-                accept=".md,.csv,.xlsx,.xls"
+                accept="*/*"
                 onChange={handleFileChange}
                 style={{display: 'none'}}
               />
@@ -1533,6 +1840,91 @@ const WorkoutTracker = () => {
                   <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Avg Per Week</div>
                 </div>
               </div>
+            </div>
+
+            {/* Progress Timeline */}
+            <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
+              <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4 flex items-center gap-2`}>
+                <TrendingUp size={20} />
+                Progress Timeline
+              </h3>
+
+              {/* Time Range Selector */}
+              <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                {[
+                  { value: '4weeks', label: '4 Weeks' },
+                  { value: '3months', label: '3 Months' },
+                  { value: '6months', label: '6 Months' },
+                  { value: 'all', label: 'All Time' }
+                ].map(range => (
+                  <button
+                    key={range.value}
+                    onClick={() => {
+                      setTimelineRange(range.value);
+                      setSelectedTimelinePoint(null);
+                    }}
+                    className={`px-4 py-2 rounded-lg whitespace-nowrap font-medium transition-all touch-manipulation ${
+                      timelineRange === range.value
+                        ? darkMode
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-blue-500 text-white'
+                        : darkMode
+                          ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                          : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                    }`}
+                  >
+                    {range.label}
+                  </button>
+                ))}
+              </div>
+
+              {(() => {
+                const timelineData = getTimelineData();
+
+                if (timelineData.length === 0) {
+                  return (
+                    <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      No workout data available for this time range.
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-6">
+                    {/* Volume Chart */}
+                    <div>
+                      <div className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+                        Total Volume (kg)
+                      </div>
+                      <div className="flex justify-center">
+                        <LineChart
+                          data={timelineData}
+                          metric="volume"
+                          darkMode={darkMode}
+                          onPointClick={setSelectedTimelinePoint}
+                          selectedPoint={selectedTimelinePoint}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Frequency Chart */}
+                    <div>
+                      <div className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+                        Workout Frequency (sessions)
+                      </div>
+                      <div className="flex justify-center">
+                        <LineChart
+                          data={timelineData}
+                          metric="frequency"
+                          darkMode={darkMode}
+                          onPointClick={setSelectedTimelinePoint}
+                          selectedPoint={selectedTimelinePoint}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         )}
@@ -1738,8 +2130,43 @@ const WorkoutTracker = () => {
             
             <div className="space-y-3">
               {editingWorkout.exercises.map((ex, idx) => (
-                <div key={idx} className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur border rounded-2xl p-4`}>
+                <div
+                  key={idx}
+                  className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur border rounded-2xl p-4 transition-all duration-200 ${
+                    draggedExerciseIndex === idx ? 'opacity-50 scale-95' : ''
+                  } ${
+                    dragOverIndex === idx && draggedExerciseIndex !== idx ? 'ring-2 ring-gray-500 scale-105' : ''
+                  }`}
+                  draggable
+                  onDragStart={() => handleDragStart(idx)}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    handleDragOver(idx);
+                  }}
+                  onDragEnd={handleDragEnd}
+                  onTouchStart={(e) => {
+                    // Mobile touch support
+                    handleDragStart(idx);
+                  }}
+                  onTouchMove={(e) => {
+                    e.preventDefault();
+                    // Find element under touch point
+                    const touch = e.touches[0];
+                    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+                    const exerciseDiv = element?.closest('[data-exercise-index]');
+                    if (exerciseDiv) {
+                      const overIdx = parseInt(exerciseDiv.dataset.exerciseIndex);
+                      handleDragOver(overIdx);
+                    }
+                  }}
+                  onTouchEnd={handleDragEnd}
+                  data-exercise-index={idx}
+                >
                   <div className="flex gap-2 mb-3">
+                    {/* Drag Handle */}
+                    <div className={`flex items-center justify-center cursor-grab active:cursor-grabbing ${darkMode ? 'text-gray-500' : 'text-gray-400'} touch-manipulation`}>
+                      <GripVertical size={20} />
+                    </div>
                     <input
                       type="text"
                       value={ex.name}
@@ -1749,12 +2176,12 @@ const WorkoutTracker = () => {
                     />
                     <button
                       onClick={() => deleteExercise(idx)}
-                      className="p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                      className="p-2 bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg transition-colors touch-manipulation"
                     >
                       <Trash2 size={20} className="text-white" />
                     </button>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 pl-7">
                     <input
                       type="number"
                       value={ex.sets}
@@ -1857,8 +2284,16 @@ const WorkoutTracker = () => {
 
       {/* Upload Markdown Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-md w-full shadow-2xl`}>
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 overflow-y-auto"
+          onClick={(e) => {
+            // Close modal if clicking backdrop
+            if (e.target === e.currentTarget) {
+              setShowUploadModal(false);
+            }
+          }}
+        >
+          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-md w-full shadow-2xl my-8`}>
             <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-2`}>
               Upload Workout Routine
             </h3>
@@ -1873,14 +2308,14 @@ const WorkoutTracker = () => {
               <div className="space-y-2">
                 <button
                   onClick={() => handleImportChoice('replace')}
-                  className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-xl text-left transition-colors`}
+                  className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 active:bg-gray-500' : 'bg-gray-200 hover:bg-gray-300 active:bg-gray-400'} rounded-xl text-left transition-colors touch-manipulation`}
                 >
                   <div className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Replace All</div>
                   <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Clear existing workouts and use only these</div>
                 </button>
                 <button
                   onClick={() => handleImportChoice('add')}
-                  className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-xl text-left transition-colors`}
+                  className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 active:bg-gray-500' : 'bg-gray-200 hover:bg-gray-300 active:bg-gray-400'} rounded-xl text-left transition-colors touch-manipulation`}
                 >
                   <div className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Add to Existing</div>
                   <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Keep current workouts and add these</div>
@@ -1890,7 +2325,7 @@ const WorkoutTracker = () => {
 
             <button
               onClick={() => setShowUploadModal(false)}
-              className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-xl font-semibold`}
+              className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 active:bg-gray-500 text-white' : 'bg-gray-200 hover:bg-gray-300 active:bg-gray-400 text-gray-900'} rounded-xl font-semibold touch-manipulation`}
             >
               Cancel
             </button>
@@ -1920,6 +2355,131 @@ const WorkoutTracker = () => {
                 Delete
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Timeline Detail Modal */}
+      {selectedTimelinePoint && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 overflow-y-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSelectedTimelinePoint(null);
+            }
+          }}
+        >
+          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-md w-full shadow-2xl my-8`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                Week of {new Date(selectedTimelinePoint.date).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </h3>
+              <button
+                onClick={() => setSelectedTimelinePoint(null)}
+                className={`p-2 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-lg transition-colors`}
+              >
+                <X size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+              </button>
+            </div>
+
+            {/* Summary Stats */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-4`}>
+                <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Total Volume</div>
+                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {(selectedTimelinePoint.volume / 1000).toFixed(1)}k
+                </div>
+                <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>kg</div>
+              </div>
+
+              <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-4`}>
+                <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Workouts</div>
+                <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {selectedTimelinePoint.frequency}
+                </div>
+                <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>sessions</div>
+              </div>
+            </div>
+
+            {/* Main Lifts PRs */}
+            {(selectedTimelinePoint.mainLifts.deadlift || selectedTimelinePoint.mainLifts.squat ||
+              selectedTimelinePoint.mainLifts.bench || selectedTimelinePoint.mainLifts.ohp) && (
+              <div className="mb-6">
+                <h4 className={`text-sm font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>
+                  Main Lifts (Max Weight)
+                </h4>
+                <div className="space-y-2">
+                  {selectedTimelinePoint.mainLifts.deadlift && (
+                    <div className="flex justify-between items-center">
+                      <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Deadlift</span>
+                      <span className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                        {selectedTimelinePoint.mainLifts.deadlift} kg
+                      </span>
+                    </div>
+                  )}
+                  {selectedTimelinePoint.mainLifts.squat && (
+                    <div className="flex justify-between items-center">
+                      <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Squat</span>
+                      <span className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                        {selectedTimelinePoint.mainLifts.squat} kg
+                      </span>
+                    </div>
+                  )}
+                  {selectedTimelinePoint.mainLifts.bench && (
+                    <div className="flex justify-between items-center">
+                      <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Bench Press</span>
+                      <span className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                        {selectedTimelinePoint.mainLifts.bench} kg
+                      </span>
+                    </div>
+                  )}
+                  {selectedTimelinePoint.mainLifts.ohp && (
+                    <div className="flex justify-between items-center">
+                      <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Overhead Press</span>
+                      <span className={`text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                        {selectedTimelinePoint.mainLifts.ohp} kg
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Workouts List */}
+            <div>
+              <h4 className={`text-sm font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>
+                Workouts Completed ({selectedTimelinePoint.workouts.length})
+              </h4>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {selectedTimelinePoint.workouts.map((workout, idx) => (
+                  <div
+                    key={idx}
+                    className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-3 flex items-center justify-between`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <WorkoutIcon emoji={workout.workoutEmoji} className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`} size={16} />
+                      <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {workout.workoutName}
+                      </span>
+                    </div>
+                    <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                      {new Date(workout.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setSelectedTimelinePoint(null)}
+              className={`w-full mt-6 px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-xl font-semibold transition-colors touch-manipulation`}
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
