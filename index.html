@@ -217,8 +217,12 @@ const parseMarkdownWorkout = (markdownText) => {
     line = line.trim();
     if (!line || line.startsWith('|---') || line.startsWith('---')) continue;  // Skip empty lines, table dividers, and horizontal rules
 
-    // H1 or H2 starting with "DAY" = Workout day
-    if (line.startsWith('# ') || (line.startsWith('## ') && line.toUpperCase().includes('DAY'))) {
+    // H1 or H2 starting with "DAY" or "Dan" = Workout day
+    const upperLine = line.toUpperCase();
+    const isDayHeader = line.startsWith('# ') ||
+                        (line.startsWith('## ') && (upperLine.includes('DAY') || upperLine.includes('DAN ')));
+
+    if (isDayHeader) {
       if (currentWorkout && currentWorkout.exercises.length > 0) {
         workouts.push(currentWorkout);
       }
@@ -248,8 +252,20 @@ const parseMarkdownWorkout = (markdownText) => {
       }
     }
 
-    // H2 (not a DAY) = Exercise name (fallback for simple formats)
-    else if (line.startsWith('## ') && !line.toUpperCase().includes('DAY')) {
+    // Bold lines with "Fokus:" or "Fokus" = Additional workout description
+    else if (line.match(/^\*\*(.+?)\*\*/) && currentWorkout) {
+      const boldText = line.match(/^\*\*(.+?)\*\*/)[1];
+      // Only append if it contains focus/description info
+      if (boldText.toLowerCase().includes('fokus') || boldText.toLowerCase().includes('focus')) {
+        const description = boldText.replace(/^Fokus:\s*/i, '').replace(/^Focus:\s*/i, '').trim();
+        if (description && !currentWorkout.name.includes(description)) {
+          currentWorkout.name = `${currentWorkout.name} - ${description}`;
+        }
+      }
+    }
+
+    // H2 (not a DAY/Dan) = Exercise name (fallback for simple formats)
+    else if (line.startsWith('## ') && !upperLine.includes('DAY') && !upperLine.includes('DAN ')) {
       if (!currentWorkout) {
         currentWorkout = {
           id: Date.now(),
