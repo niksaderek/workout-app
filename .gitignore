@@ -18,6 +18,8 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+.mcp.json
+.claude/
 
 # Temporary files
 create-html.js
