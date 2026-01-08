@@ -598,7 +598,9 @@ const WorkoutTracker = () => {
           '4. Compact Notation:\n' +
           '   ## Exercise\n' +
           '   3x8');
-    fileInputRef.current?.click();
+    setTimeout(() => {
+      fileInputRef.current?.click();
+    }, 100);
   };
 
   const handleFileChange = async (e) => {
