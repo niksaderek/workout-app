@@ -804,10 +804,14 @@ const WorkoutTracker = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [parsedWorkouts, setParsedWorkouts] = useState([]);
   const [draggedExerciseIndex, setDraggedExerciseIndex] = useState(null);
-  const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [draggedExercisePosition, setDraggedExercisePosition] = useState({ x: 0, y: 0 });
+  const [dragStartPosition, setDragStartPosition] = useState({ x: 0, y: 0 });
+  const [isDraggingExercise, setIsDraggingExercise] = useState(false);
+  const [dropTargetIndex, setDropTargetIndex] = useState(null);
   const [timelineRange, setTimelineRange] = useState('4weeks'); // '4weeks', '3months', '6months', 'all'
   const [selectedTimelinePoint, setSelectedTimelinePoint] = useState(null);
   const fileInputRef = React.useRef(null);
+  const dragExerciseRef = React.useRef(null);
 
   useEffect(() => {
     loadData();
@@ -822,6 +826,47 @@ const WorkoutTracker = () => {
       soundSystem.appLaunch();
     }, 500);
   }, []);
+
+  // Global drag event listeners
+  useEffect(() => {
+    const handleGlobalMouseMove = (e) => {
+      if (draggedExerciseIndex !== null) {
+        handleExerciseDragMove(e);
+      }
+    };
+
+    const handleGlobalMouseUp = (e) => {
+      if (draggedExerciseIndex !== null) {
+        handleExerciseDragEnd();
+      }
+    };
+
+    const handleGlobalTouchMove = (e) => {
+      if (draggedExerciseIndex !== null) {
+        handleExerciseDragMove(e);
+      }
+    };
+
+    const handleGlobalTouchEnd = (e) => {
+      if (draggedExerciseIndex !== null) {
+        handleExerciseDragEnd();
+      }
+    };
+
+    if (draggedExerciseIndex !== null) {
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+      document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false });
+      document.addEventListener('touchend', handleGlobalTouchEnd);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      document.removeEventListener('touchmove', handleGlobalTouchMove);
+      document.removeEventListener('touchend', handleGlobalTouchEnd);
+    };
+  }, [draggedExerciseIndex, dragStartPosition]);
 
   const loadData = async () => {
     try {
@@ -998,25 +1043,65 @@ const WorkoutTracker = () => {
     setEditingWorkout(updated);
   };
 
-  const handleDragStart = (index) => {
+  const handleExerciseDragStart = (e, index) => {
+    e.stopPropagation();
+
+    const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+
     setDraggedExerciseIndex(index);
-    soundSystem.buttonPress(); // Haptic feedback
+    setDragStartPosition({ x: clientX, y: clientY });
+    setDraggedExercisePosition({ x: clientX, y: clientY });
+    setIsDraggingExercise(false); // Not dragging until moved a bit
+    soundSystem.buttonPress();
   };
 
-  const handleDragOver = (index) => {
+  const handleExerciseDragMove = (e) => {
     if (draggedExerciseIndex === null) return;
-    if (index !== dragOverIndex) {
-      setDragOverIndex(index);
+
+    e.preventDefault();
+    const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+
+    // Start dragging if moved more than 5px
+    const distance = Math.sqrt(
+      Math.pow(clientX - dragStartPosition.x, 2) +
+      Math.pow(clientY - dragStartPosition.y, 2)
+    );
+
+    if (distance > 5) {
+      setIsDraggingExercise(true);
     }
+
+    setDraggedExercisePosition({ x: clientX, y: clientY });
+
+    // Find which exercise we're hovering over
+    const exerciseElements = document.querySelectorAll('[data-exercise-index]');
+    let foundTarget = null;
+
+    exerciseElements.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      const elIndex = parseInt(el.dataset.exerciseIndex);
+
+      if (elIndex !== draggedExerciseIndex &&
+          clientY >= rect.top && clientY <= rect.bottom) {
+        foundTarget = elIndex;
+      }
+    });
+
+    setDropTargetIndex(foundTarget);
   };
 
-  const handleDragEnd = () => {
-    if (draggedExerciseIndex !== null && dragOverIndex !== null && draggedExerciseIndex !== dragOverIndex) {
-      reorderExercise(draggedExerciseIndex, dragOverIndex);
-      soundSystem.setComplete(); // Success feedback
+  const handleExerciseDragEnd = () => {
+    if (draggedExerciseIndex !== null && dropTargetIndex !== null && isDraggingExercise) {
+      reorderExercise(draggedExerciseIndex, dropTargetIndex);
+      soundSystem.setComplete();
     }
+
     setDraggedExerciseIndex(null);
-    setDragOverIndex(null);
+    setIsDraggingExercise(false);
+    setDropTargetIndex(null);
+    setDraggedExercisePosition({ x: 0, y: 0 });
   };
 
   const saveEditedWorkout = async () => {
@@ -2133,38 +2218,20 @@ const WorkoutTracker = () => {
                 <div
                   key={idx}
                   className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur border rounded-2xl p-4 transition-all duration-200 ${
-                    draggedExerciseIndex === idx ? 'opacity-50 scale-95' : ''
+                    draggedExerciseIndex === idx && isDraggingExercise ? 'opacity-30' : ''
                   } ${
-                    dragOverIndex === idx && draggedExerciseIndex !== idx ? 'ring-2 ring-gray-500 scale-105' : ''
+                    dropTargetIndex === idx && draggedExerciseIndex !== idx ? 'ring-2 ring-blue-500' : ''
                   }`}
-                  draggable
-                  onDragStart={() => handleDragStart(idx)}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    handleDragOver(idx);
-                  }}
-                  onDragEnd={handleDragEnd}
-                  onTouchStart={(e) => {
-                    // Mobile touch support
-                    handleDragStart(idx);
-                  }}
-                  onTouchMove={(e) => {
-                    e.preventDefault();
-                    // Find element under touch point
-                    const touch = e.touches[0];
-                    const element = document.elementFromPoint(touch.clientX, touch.clientY);
-                    const exerciseDiv = element?.closest('[data-exercise-index]');
-                    if (exerciseDiv) {
-                      const overIdx = parseInt(exerciseDiv.dataset.exerciseIndex);
-                      handleDragOver(overIdx);
-                    }
-                  }}
-                  onTouchEnd={handleDragEnd}
                   data-exercise-index={idx}
                 >
                   <div className="flex gap-2 mb-3">
                     {/* Drag Handle */}
-                    <div className={`flex items-center justify-center cursor-grab active:cursor-grabbing ${darkMode ? 'text-gray-500' : 'text-gray-400'} touch-manipulation`}>
+                    <div
+                      className={`flex items-center justify-center cursor-grab active:cursor-grabbing ${darkMode ? 'text-gray-500 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600'} touch-manipulation select-none`}
+                      onMouseDown={(e) => handleExerciseDragStart(e, idx)}
+                      onTouchStart={(e) => handleExerciseDragStart(e, idx)}
+                      style={{ touchAction: 'none' }}
+                    >
                       <GripVertical size={20} />
                     </div>
                     <input
@@ -2229,6 +2296,37 @@ const WorkoutTracker = () => {
           </div>
         )}
       </div>
+
+      {/* Floating Drag Ghost */}
+      {isDraggingExercise && draggedExerciseIndex !== null && editingWorkout && (
+        <div
+          style={{
+            position: 'fixed',
+            left: draggedExercisePosition.x,
+            top: draggedExercisePosition.y,
+            transform: 'translate(-50%, -50%)',
+            pointerEvents: 'none',
+            zIndex: 10000,
+            width: '90%',
+            maxWidth: '400px'
+          }}
+        >
+          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 shadow-2xl opacity-90`}>
+            <div className="flex gap-2 mb-2">
+              <GripVertical size={20} className={darkMode ? 'text-gray-500' : 'text-gray-400'} />
+              <div className={`flex-1 font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                {editingWorkout.exercises[draggedExerciseIndex].name || 'Exercise'}
+              </div>
+            </div>
+            <div className="flex gap-2 pl-7">
+              <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                {editingWorkout.exercises[draggedExerciseIndex].sets} sets ×{' '}
+                {editingWorkout.exercises[draggedExerciseIndex].reps} reps
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
