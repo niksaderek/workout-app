@@ -1885,21 +1885,28 @@ const WorkoutTracker = () => {
       ? Math.round(thisWeek.volume / thisWeek.workouts) 
       : 0;
     
-    // Calculate all-time total volume
+    // Calculate all-time stats
     let allTimeVolume = 0;
+    let allTimeReps = 0;
+    let allTimeCoreSets = 0;
     completedWorkouts.forEach(workout => {
       workout.exercises.forEach(exercise => {
         const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
                                exercise.name.toLowerCase().includes('plank') ||
                                exercise.name.toLowerCase().includes('hanging') ||
                                exercise.name.toLowerCase().includes('rollout');
-        
+
         exercise.sets.forEach(set => {
           const weight = parseFloat(set.weight) || 0;
           const rep = parseFloat(set.reps) || 0;
-          
+
           if (!isCoreExercise && weight > 0 && rep > 0) {
             allTimeVolume += weight * rep;
+            allTimeReps += rep;
+          }
+
+          if (isCoreExercise && rep > 0) {
+            allTimeCoreSets++;
           }
         });
       });
@@ -1935,6 +1942,8 @@ const WorkoutTracker = () => {
       avgVolumePerWorkout,
       totalWorkouts: completedWorkouts.length,
       allTimeVolume: Math.round(allTimeVolume),
+      allTimeReps,
+      allTimeCoreSets,
       avgWorkoutsPerWeek
     };
   };
@@ -2165,6 +2174,8 @@ const WorkoutTracker = () => {
       avgVolumePerWorkout: 0,
       totalWorkouts: 0,
       allTimeVolume: 0,
+      allTimeReps: 0,
+      allTimeCoreSets: 0,
       avgWorkoutsPerWeek: 0
     };
   }
@@ -2485,7 +2496,7 @@ const WorkoutTracker = () => {
                   ? detailedStats.thisWeek
                   : statsPeriod === 'month'
                   ? detailedStats.thisMonth
-                  : { volume: detailedStats.allTimeVolume, workouts: detailedStats.totalWorkouts, reps: 0, sets: 0, coreSets: 0 };
+                  : { volume: detailedStats.allTimeVolume, workouts: detailedStats.totalWorkouts, reps: detailedStats.allTimeReps, sets: 0, coreSets: detailedStats.allTimeCoreSets };
 
                 const volumeChange = statsPeriod === 'week' ? detailedStats.volumeChange : statsPeriod === 'month' ? detailedStats.monthVolumeChange : 0;
 
@@ -2511,7 +2522,12 @@ const WorkoutTracker = () => {
                         <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                           {(periodData.volume / 1000).toFixed(1)}k kg
                         </div>
-                        {volumeChange !== 0 && statsPeriod !== 'all' && (
+                        {statsPeriod === 'week' && (
+                          <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                            {(detailedStats.avgVolumePerWorkout / 1000).toFixed(1)}k avg/workout
+                          </div>
+                        )}
+                        {volumeChange !== 0 && statsPeriod !== 'all' && statsPeriod !== 'week' && (
                           <div className={`text-sm ${volumeChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
                             {volumeChange > 0 ? '↑' : '↓'} {Math.abs(volumeChange)}% vs last {statsPeriod}
                           </div>
@@ -2519,31 +2535,26 @@ const WorkoutTracker = () => {
                       </div>
                     </div>
 
-                    {statsPeriod !== 'all' && (
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-3`}>
-                          <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Total Reps</div>
-                          <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                            {periodData.reps}
-                          </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-3`}>
+                        <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Total Reps</div>
+                        <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {periodData.reps}
+                        </div>
+                        {statsPeriod !== 'all' && (
                           <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
                             {periodData.sets} weighted sets
                           </div>
-                        </div>
+                        )}
+                      </div>
 
-                        <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-3`}>
-                          <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Core Sets</div>
-                          <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                            {periodData.coreSets}
-                          </div>
-                          {statsPeriod === 'week' && (
-                            <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                              {(detailedStats.avgVolumePerWorkout / 1000).toFixed(1)}k avg/workout
-                            </div>
-                          )}
+                      <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-3`}>
+                        <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Core Sets</div>
+                        <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {periodData.coreSets}
                         </div>
                       </div>
-                    )}
+                    </div>
                   </>
                 );
               })()}
