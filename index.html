@@ -968,6 +968,7 @@ const WorkoutTracker = () => {
   const [showExerciseProgress, setShowExerciseProgress] = useState(false); // collapsible Exercise Progress section (default: hidden)
   const [showProgressTimeline, setShowProgressTimeline] = useState(false); // collapsible Progress Timeline (default: hidden)
   const [expandedWorkouts, setExpandedWorkouts] = useState({}); // {workoutId: boolean} - track which workout previews are expanded
+  const [statsPeriod, setStatsPeriod] = useState('week'); // 'week', 'month', 'all' - period selector for stats
   const fileInputRef = React.useRef(null);
   const restoreBackupInputRef = React.useRef(null);
   const dragExerciseRef = React.useRef(null);
@@ -2449,76 +2450,103 @@ const WorkoutTracker = () => {
               </button>
             </div>
 
-            {/* Weekly Progress */}
+            {/* Performance Overview */}
             <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
-              <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>Weekly Progress</h3>
-              
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Volume</div>
-                  <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {(detailedStats.thisWeek.volume / 1000).toFixed(1)}k kg
-                  </div>
-                  {detailedStats.volumeChange !== 0 && (
-                    <div className={`text-sm ${detailedStats.volumeChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {detailedStats.volumeChange > 0 ? '↑' : '↓'} {Math.abs(detailedStats.volumeChange)}% vs last week
+              <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>Performance Overview</h3>
+
+              {/* Period Selector */}
+              <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                {[
+                  { value: 'week', label: 'This Week' },
+                  { value: 'month', label: 'This Month' },
+                  { value: 'all', label: 'All Time' }
+                ].map(period => (
+                  <button
+                    key={period.value}
+                    onClick={() => setStatsPeriod(period.value)}
+                    className={`px-4 py-2 rounded-lg whitespace-nowrap font-medium transition-all touch-manipulation ${
+                      statsPeriod === period.value
+                        ? darkMode
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-blue-500 text-white'
+                        : darkMode
+                          ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                          : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                    }`}
+                  >
+                    {period.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Dynamic Stats Display */}
+              {(() => {
+                const periodData = statsPeriod === 'week'
+                  ? detailedStats.thisWeek
+                  : statsPeriod === 'month'
+                  ? detailedStats.thisMonth
+                  : { volume: detailedStats.allTimeVolume, workouts: detailedStats.totalWorkouts, reps: 0, sets: 0, coreSets: 0 };
+
+                const volumeChange = statsPeriod === 'week' ? detailedStats.volumeChange : statsPeriod === 'month' ? detailedStats.monthVolumeChange : 0;
+
+                return (
+                  <>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>
+                          {statsPeriod === 'all' ? 'Total Workouts' : 'Workouts'}
+                        </div>
+                        <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {periodData.workouts || detailedStats.thisWeek.count}
+                        </div>
+                        {statsPeriod === 'all' && (
+                          <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {detailedStats.avgWorkoutsPerWeek} avg/week
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Volume</div>
+                        <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                          {(periodData.volume / 1000).toFixed(1)}k kg
+                        </div>
+                        {volumeChange !== 0 && statsPeriod !== 'all' && (
+                          <div className={`text-sm ${volumeChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                            {volumeChange > 0 ? '↑' : '↓'} {Math.abs(volumeChange)}% vs last {statsPeriod}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
-                
-                <div>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Total Reps</div>
-                  <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {detailedStats.thisWeek.reps}
-                  </div>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {detailedStats.thisWeek.sets} weighted sets
-                  </div>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-3`}>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Core Sets</div>
-                  <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {detailedStats.thisWeek.coreSets}
-                  </div>
-                </div>
+                    {statsPeriod !== 'all' && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-3`}>
+                          <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Total Reps</div>
+                          <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                            {periodData.reps}
+                          </div>
+                          <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                            {periodData.sets} weighted sets
+                          </div>
+                        </div>
 
-                <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-3`}>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Avg per workout</div>
-                  <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {(detailedStats.avgVolumePerWorkout / 1000).toFixed(1)}k kg
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Monthly Overview */}
-            <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
-              <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>Monthly Overview</h3>
-              
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>This Month</div>
-                  <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {detailedStats.thisMonth.workouts}
-                  </div>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>workouts</div>
-                </div>
-                
-                <div>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Volume</div>
-                  <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {(detailedStats.thisMonth.volume / 1000).toFixed(1)}k
-                  </div>
-                  {detailedStats.monthVolumeChange !== 0 && (
-                    <div className={`text-sm ${detailedStats.monthVolumeChange > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {detailedStats.monthVolumeChange > 0 ? '↑' : '↓'} {Math.abs(detailedStats.monthVolumeChange)}%
-                    </div>
-                  )}
-                </div>
-              </div>
+                        <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-3`}>
+                          <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Core Sets</div>
+                          <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                            {periodData.coreSets}
+                          </div>
+                          {statsPeriod === 'week' && (
+                            <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                              {(detailedStats.avgVolumePerWorkout / 1000).toFixed(1)}k avg/workout
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
 
             {/* Personal Records */}
@@ -2598,32 +2626,6 @@ const WorkoutTracker = () => {
                 </div>
               );
             })()}
-
-            {/* Total Stats */}
-            <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
-              <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>All Time</h3>
-              
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {detailedStats.totalWorkouts}
-                  </div>
-                  <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Workouts</div>
-                </div>
-                <div>
-                  <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {(detailedStats.allTimeVolume / 1000).toFixed(0)}k
-                  </div>
-                  <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Volume (kg)</div>
-                </div>
-                <div>
-                  <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {detailedStats.avgWorkoutsPerWeek}
-                  </div>
-                  <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Avg Per Week</div>
-                </div>
-              </div>
-            </div>
 
             {/* Progress Timeline */}
             <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
