@@ -596,8 +596,7 @@ const parseMarkdownWorkout = (markdownText) => {
 
     // Skip empty lines, dividers, and markdown table alignment rows
     if (!line || line.startsWith('|---') || line === '---' ||
-        (line.startsWith('|') && line.includes(':---')) ||  // Markdown table alignment (| :--- | :---: |)
-        (line.startsWith('**') && line.endsWith('**') && line.length < 100 && !line.includes(':'))) continue;
+        (line.startsWith('|') && line.includes(':---'))) continue;  // Markdown table alignment (| :--- | :---: |)
 
     const upperLine = line.toUpperCase();
 
@@ -625,9 +624,9 @@ const parseMarkdownWorkout = (markdownText) => {
       continue;
     }
 
-    // STEP 2: Append descriptions (H3, bold lines with "Fokus"/"Focus"/"Description")
-    if (line.startsWith('###') || (line.match(/^\*\*(.+?)\*\*/) && currentWorkout)) {
-      const description = line.replace(/^###\s*/, '').replace(/^\*\*/, '').replace(/\*\*$/, '').trim();
+    // STEP 2: Append descriptions (H3 headers only - NOT bold exercise names)
+    if (line.startsWith('###')) {
+      const description = line.replace(/^###\s*/, '').trim();
 
       // Only append if it looks like a description (contains keywords or is short)
       const isDescription = description.length < 80 &&
@@ -701,7 +700,34 @@ const parseMarkdownWorkout = (markdownText) => {
       continue;
     }
 
-    // STEP 4: Parse list/heading format exercises (## Exercise or - Exercise)
+    // STEP 4: Parse bold exercise format (common in workout logs)
+    // Pattern: **Exercise Name**
+    //          70kg — 3x5
+    // Also handles: **Exercise** *(notes in italics)*
+    const boldExerciseMatch = line.match(/^\*\*(.+?)\*\*/);
+    if (boldExerciseMatch) {
+      // Auto-create workout if needed
+      if (!currentWorkout) {
+        currentWorkout = {
+          id: Date.now(),
+          name: 'Workout Log',
+          emoji: '🔥',
+          exercises: []
+        };
+      }
+
+      const exerciseName = boldExerciseMatch[1].trim();
+
+      // Extract inline notes (e.g., *(superset with X)*)
+      const inlineNotesMatch = line.match(/\*\*\s*\*(.+?)\*/);
+      const inlineNotes = inlineNotesMatch ? inlineNotesMatch[1].trim() : '';
+
+      currentExercise = { name: exerciseName, sets: 3, reps: 10, notes: inlineNotes };
+      currentWorkout.exercises.push(currentExercise);
+      continue;
+    }
+
+    // STEP 5: Parse list/heading format exercises (## Exercise or - Exercise)
     if (line.startsWith('##') && !isWorkoutDayHeader(line, upperLine)) {
       // Auto-create workout if needed
       if (!currentWorkout) {
@@ -724,8 +750,38 @@ const parseMarkdownWorkout = (markdownText) => {
       continue;
     }
 
-    // STEP 5: Parse exercise details (sets/reps/notes on following lines)
+    // STEP 6: Parse exercise details (sets/reps/notes on following lines)
     if (currentExercise) {
+      // Try to extract weight + sets×reps format: "70kg — 3x5" or "20kg — 2x5, 1x10"
+      const weightSetsMatch = line.match(/(\d+(?:\.\d+)?)\s*kg\s*[—–-]\s*(.+)/i);
+      if (weightSetsMatch) {
+        const weight = weightSetsMatch[1];
+        const setsRepsText = weightSetsMatch[2].trim();
+
+        // Extract RPE/notes if present (e.g., "@ RPE 9.5" or "(superset with X)")
+        const notesMatch = setsRepsText.match(/[@\(](.+)/);
+        if (notesMatch) {
+          currentExercise.notes = notesMatch[1].trim().replace(/^\s*RPE\s*/i, 'RPE ').replace(/[\(\)]/g, '');
+        }
+
+        // Parse sets×reps (handles "3x5" or "2x5, 1x10")
+        const cleanSetsReps = setsRepsText.split(/[@\(]/)[0].trim();
+        const extracted = extractSetsReps(cleanSetsReps);
+
+        if (extracted.sets) currentExercise.sets = extracted.sets;
+        if (extracted.reps) currentExercise.reps = extracted.reps;
+
+        // Store weight in notes if not already present
+        if (!currentExercise.notes || !currentExercise.notes.includes(weight)) {
+          const weightNote = `${weight}kg`;
+          currentExercise.notes = currentExercise.notes
+            ? `${weightNote} | ${currentExercise.notes}`
+            : weightNote;
+        }
+        continue;
+      }
+
+      // Fallback: standard sets/reps extraction
       const extracted = extractSetsReps(line);
       if (extracted.sets) currentExercise.sets = extracted.sets;
       if (extracted.reps) currentExercise.reps = extracted.reps;
