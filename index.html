@@ -1655,9 +1655,12 @@ const WorkoutTracker = () => {
   };
 
   const updateExercise = (index, field, value) => {
-    const updated = { ...editingWorkout };
-    updated.exercises[index][field] = value;
-    setEditingWorkout(updated);
+    setEditingWorkout(prev => ({
+      ...prev,
+      exercises: prev.exercises.map((ex, idx) =>
+        idx === index ? { ...ex, [field]: value } : ex
+      )
+    }));
   };
 
   const addExercise = () => {
@@ -3583,7 +3586,7 @@ const WorkoutTracker = () => {
             <div className="space-y-3">
               {editingWorkout.exercises.map((ex, idx) => (
                 <div
-                  key={`exercise-${idx}-${ex.name}`}
+                  key={`exercise-${idx}`}
                   className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 ${
                     draggedExerciseIndex === idx && isDraggingExercise ? 'opacity-30' : ''
                   } ${
