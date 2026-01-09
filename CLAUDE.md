@@ -37,8 +37,8 @@ The application uses a monolithic component architecture with all code embedded 
 
 **Data Layer** (lines 108-166):
 - `initDB()` - IndexedDB initialization with schema versioning
-- `dbOperations` - CRUD operations for workouts and history
-- Two object stores: `workouts` (workout templates) and `history` (completed workouts)
+- `dbOperations` - CRUD operations for workouts, history, and body weight
+- Three object stores: `workouts` (workout templates), `history` (completed workouts), and `bodyWeight` (body weight tracking)
 
 **Markdown Parser** (lines 190-300):
 - `parseMarkdownWorkout()` - Intelligent parser supporting multiple markdown formats
@@ -61,6 +61,9 @@ The application uses a monolithic component architecture with all code embedded 
 - `fileInputRef` - React ref for hidden file input element
 - `substituteDropdown` - Controls exercise substitution dropdown visibility
 - `exerciseProgressModal` - Controls exercise progress chart modal
+- `bodyWeight` - Current body weight in kg (for strength standards)
+- `showBodyWeightInput` - Show/hide body weight input field
+- `show1RMModal` - Controls 1RM progression modal
 
 **Core Functions:**
 
@@ -138,10 +141,26 @@ The application uses a monolithic component architecture with all code embedded 
    - Preserves all set data (weight/reps) when substituting
    - Handles custom exercises gracefully (no suggestions)
 
+12. **Body Weight Tracking**:
+   - `handleSaveBodyWeight()` - Saves body weight entry with timestamp to IndexedDB
+   - `dbOperations.saveBodyWeight()` - Stores weight in kg with date
+   - `dbOperations.getLatestBodyWeight()` - Retrieves most recent weight entry
+   - Used for calculating strength standards (bodyweight-relative metrics)
+
+13. **1RM Calculator & Strength Standards**:
+   - `getAll1RMs()` - Calculates estimated 1RM for all exercises in history using Epley formula
+   - `getMainLifts1RMs()` - Extracts 1RMs for main compound lifts (Squat, Bench, Deadlift, Overhead Press)
+   - `get1RMProgression()` - Returns 1RM history for a specific exercise (last 20 workouts)
+   - `getStrengthStandard()` - Calculates strength level (Untrained/Novice/Intermediate/Advanced/Elite) based on Symmetric Strength standards
+   - `STRENGTH_STANDARDS` - Male bodyweight-relative strength standards data
+   - Only uses sets with ≤12 reps for accurate strength calculations
+   - Excludes core exercises (plank, hanging leg raises, etc.) from 1RM calculations
+   - Fuzzy exercise name matching (e.g., "Front Squat" maps to "Squat" category)
+
 ### UI Views
 
 - **Home** - Dashboard with stats cards, workout day cards, "Upload MD" button
-- **Stats** - Detailed analytics, PRs, Exercise Progress section, weekly/monthly trends, progress timeline with interactive charts
+- **Stats** - Detailed analytics, Body Weight Tracker, Estimated 1RM, Strength Standards, PRs, Exercise Progress section, weekly/monthly trends, progress timeline with interactive charts
 - **Logging** - Active workout session with smart weight suggestions, difficulty rating, exercise substitution, and "Add Set" button
 - **History** - Past workout logs with edit, delete, and CSV export functionality
 - **Edit** - Workout template editor with up/down button exercise reordering (mobile-friendly) and ExerciseInput autocomplete
@@ -154,6 +173,7 @@ The application uses a monolithic component architecture with all code embedded 
 - **Timeline Detail Modal** - Shows workout details for selected week/month on timeline
 - **Exercise Progress Modal** - Shows weight/volume charts for any exercise (last 10 workouts)
 - **Exercise Substitution Dropdown** - Shows muscle group alternatives when swapping exercises
+- **1RM Progression Modal** - Shows estimated 1RM history for a main lift (last 20 workouts in table format)
 - **Delete Confirmation Modals** - Confirm before deleting workout days or history entries
 
 ### Key Data Structures
@@ -186,13 +206,25 @@ The application uses a monolithic component architecture with all code embedded 
 }
 ```
 
+**Body Weight Entry:**
+```javascript
+{
+  id: number (auto-generated),
+  weight: number (kg),
+  date: ISO string,
+  unit: 'kg'
+}
+```
+
 ## Important Implementation Details
 
 ### IndexedDB Schema
-- Database: `WorkoutTrackerDB` (version 1)
+- Database: `WorkoutTrackerDB` (version 2)
 - Store 1: `workouts` - Workout templates (keyPath: `id`)
 - Store 2: `history` - Completed workouts (keyPath: `id` auto-increment)
+- Store 3: `bodyWeight` - Body weight tracking (keyPath: `id` auto-increment)
 - Indexes on `history`: `date`, `workoutId`
+- Indexes on `bodyWeight`: `date`
 
 ### Core Exercise Detection
 Core exercises (plank, hanging leg raises, ab rollout) are treated differently:
@@ -215,6 +247,38 @@ Weight inputs accept commas and convert to dots (line 249): `value.replace(',', 
 
 ### Skipped Exercise Handling
 Sets with `weight: 0` and `reps: 0` are filtered out in history view and statistics to handle skipped exercises gracefully.
+
+### 1RM Calculation & Strength Standards
+The app calculates estimated one-rep max (1RM) using the Epley formula and compares against Symmetric Strength standards:
+
+**Calculation Method:**
+- Formula: `1RM = weight × (1 + reps / 30)`
+- Only uses sets with ≤12 reps (strength training range)
+- Tracks best 1RM per exercise across all workout history
+- Excludes core exercises (no weight involved)
+
+**Main Lifts Tracked:**
+- Squat (includes "Back Squat", "Front Squat", etc.)
+- Bench Press
+- Deadlift (includes "Trap Bar Deadlift", "Romanian Deadlift", etc.)
+- Overhead Press (includes "OHP")
+
+**Strength Standards (Male, Bodyweight-Relative):**
+- Based on Symmetric Strength standards
+- 5 levels: Untrained → Novice → Intermediate → Advanced → Elite
+- Multipliers represent weight/bodyweight ratio:
+  - Squat: 0.6x / 1.0x / 1.5x / 2.0x / 2.5x
+  - Bench Press: 0.5x / 0.75x / 1.25x / 1.75x / 2.25x
+  - Deadlift: 0.7x / 1.25x / 1.75x / 2.25x / 2.75x
+  - Overhead Press: 0.35x / 0.5x / 0.85x / 1.15x / 1.5x
+- Shows percentage progress to next level
+
+**UI Features:**
+- Body Weight Tracker in Stats view (required for standards calculation)
+- Estimated 1RM section showing main lifts
+- Click any lift to view progression history (last 20 workouts)
+- Strength Standards section with visual progress bars
+- 5-segment progress bar shows current level position
 
 ### Inline SVG Icons
 The app uses inline SVG components instead of external icon libraries for reliability:
