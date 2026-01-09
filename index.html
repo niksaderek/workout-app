@@ -2307,13 +2307,6 @@ const WorkoutTracker = () => {
               </h2>
 
               <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-                <button
-                  onClick={exportProgram}
-                  className={`px-4 py-2 ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'} rounded-lg flex items-center gap-2 font-semibold transition-colors active:scale-95 touch-manipulation whitespace-nowrap`}
-                >
-                  <Upload size={18} />
-                  Export
-                </button>
                 {/* Mobile-friendly file upload using label */}
                 <label
                   htmlFor="workout-file-input"
@@ -2322,6 +2315,13 @@ const WorkoutTracker = () => {
                   <Download size={18} />
                   Import
                 </label>
+                <button
+                  onClick={exportProgram}
+                  className={`px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold transition-colors active:scale-95 touch-manipulation whitespace-nowrap`}
+                >
+                  <Upload size={18} />
+                  Export
+                </button>
                 <button
                   onClick={() => setShowAddDay(true)}
                   className={`px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold transition-colors whitespace-nowrap`}
