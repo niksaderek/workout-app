@@ -1590,7 +1590,11 @@ const WorkoutTracker = () => {
     let finalWorkouts;
 
     if (choice === 'replace') {
-      finalWorkouts = parsedWorkouts;
+      // Replace all - reassign clean sequential IDs starting from 1
+      finalWorkouts = parsedWorkouts.map((w, idx) => ({
+        ...w,
+        id: idx + 1
+      }));
     } else {
       // Add to existing - ensure unique IDs
       const maxId = Math.max(...workouts.map(w => w.id), 0);
