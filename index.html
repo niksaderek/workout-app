@@ -2152,7 +2152,7 @@ const WorkoutTracker = () => {
 
   if (loading) {
     return (
-      <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-br from-gray-100 via-white to-gray-100'} flex items-center justify-center`}>
+      <div className={`min-h-screen ${darkMode ? 'bg-gray-950' : 'bg-gray-100'} flex items-center justify-center`}>
         <div className="flex flex-col items-center gap-6">
           <Dumbbell size={120} className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} animate-pulse`} />
           <div className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Workout Pro</div>
@@ -2185,7 +2185,7 @@ const WorkoutTracker = () => {
   }
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950' : 'bg-gradient-to-br from-gray-100 via-white to-gray-100'} pb-24`}>
+    <div className={`min-h-screen ${darkMode ? 'bg-gray-950' : 'bg-gray-100'} pb-24`}>
       {/* Update Notification Banner */}
       {showUpdateNotification && (
         <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 shadow-lg">
