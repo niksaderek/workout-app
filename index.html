@@ -400,7 +400,7 @@
 
 // IndexedDB wrapper
 const DB_NAME = 'WorkoutTrackerDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 const initDB = () => {
   return new Promise((resolve, reject) => {
@@ -411,15 +411,20 @@ const initDB = () => {
     
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
-      
+
       if (!db.objectStoreNames.contains('workouts')) {
         db.createObjectStore('workouts', { keyPath: 'id' });
       }
-      
+
       if (!db.objectStoreNames.contains('history')) {
         const historyStore = db.createObjectStore('history', { keyPath: 'id', autoIncrement: true });
         historyStore.createIndex('date', 'date', { unique: false });
         historyStore.createIndex('workoutId', 'workoutId', { unique: false });
+      }
+
+      if (!db.objectStoreNames.contains('bodyWeight')) {
+        const bodyWeightStore = db.createObjectStore('bodyWeight', { keyPath: 'id', autoIncrement: true });
+        bodyWeightStore.createIndex('date', 'date', { unique: false });
       }
     };
   });
@@ -472,11 +477,52 @@ const dbOperations = {
     const tx = db.transaction('history', 'readonly');
     const store = tx.objectStore('history');
     const request = store.getAll();
-    
+
     return new Promise((resolve, reject) => {
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
+  },
+
+  async saveBodyWeight(weight) {
+    const db = await initDB();
+    const tx = db.transaction('bodyWeight', 'readwrite');
+    const store = tx.objectStore('bodyWeight');
+
+    const entry = {
+      weight: Number(weight),
+      date: new Date().toISOString(),
+      unit: 'kg'
+    };
+
+    await store.put(entry);
+
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+
+  async getBodyWeightHistory() {
+    const db = await initDB();
+    const tx = db.transaction('bodyWeight', 'readonly');
+    const store = tx.objectStore('bodyWeight');
+    const request = store.getAll();
+
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => {
+        const records = request.result;
+        // Sort by date descending (newest first)
+        records.sort((a, b) => new Date(b.date) - new Date(a.date));
+        resolve(records);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  },
+
+  async getLatestBodyWeight() {
+    const history = await this.getBodyWeightHistory();
+    return history.length > 0 ? history[0] : null;
   }
 };
 
@@ -892,52 +938,52 @@ const WorkoutTracker = () => {
   const [workouts, setWorkouts] = useState([
     {
       id: 1,
-      name: "DAY 1 – PUSH A (Teški Bench & Kvadriceps)",
+      name: "DAY 1 – PUSH A (Heavy Bench & Quads)",
       emoji: "🦵",
       exercises: [
-        { name: "Bench Press", sets: 3, reps: 5, notes: "Glavni lift. Zadnja serija AMRAP." },
-        { name: "Back Squat (Čučanj)", sets: 3, reps: 8, notes: "Fokus na dubinu i kontrolu." },
-        { name: "Lateral Raises", sets: 4, reps: "15–20", notes: "Mala težina, \"burn\" efekt." },
-        { name: "Triceps Pushdown", sets: 3, reps: 12, notes: "Fokus na puni lockout." },
-        { name: "Ab Wheel Rollout", sets: 3, reps: "8–10", notes: "Anti-extension core (čvrsta leđa)." }
+        { name: "Bench Press", sets: 3, reps: 5, notes: "Main lift. Last set AMRAP." },
+        { name: "Back Squat", sets: 3, reps: 8, notes: "Focus on depth and control." },
+        { name: "Lateral Raises", sets: 4, reps: "15–20", notes: "Light weight, burn effect." },
+        { name: "Triceps Pushdown", sets: 3, reps: 12, notes: "Focus on full lockout." },
+        { name: "Ab Wheel Rollout", sets: 3, reps: "8–10", notes: "Anti-extension core." }
       ]
     },
     {
       id: 2,
-      name: "DAY 2 – PULL A (Mrtvo dizanje & Širina leđa)",
+      name: "DAY 2 – PULL A (Deadlift & Lat Width)",
       emoji: "💪",
       exercises: [
-        { name: "Trap Bar Deadlift", sets: 3, reps: 5, notes: "Eksplozivno s poda." },
-        { name: "Zgibovi / Lat Pulldown", sets: 3, reps: "8–10", notes: "Široki hvat za V-taper." },
-        { name: "Face Pulls", sets: 3, reps: 15, notes: "Pauza 1 s u kontrakciji." },
-        { name: "Hammer Curls", sets: 3, reps: 12, notes: "Za debljinu bicepsa i podlaktice." },
-        { name: "Back Extension", sets: 3, reps: 12, notes: "Jačanje donjeg dijela leđa." },
-        { name: "Dead Bug", sets: 2, reps: "10/str", notes: "Core stabilnost bez pritiska na leđa." }
+        { name: "Trap Bar Deadlift", sets: 3, reps: 5, notes: "Explosive from the floor." },
+        { name: "Pull-ups / Lat Pulldown", sets: 3, reps: "8–10", notes: "Wide grip for V-taper." },
+        { name: "Face Pulls", sets: 3, reps: 15, notes: "1-second pause at contraction." },
+        { name: "Hammer Curls", sets: 3, reps: 12, notes: "Bicep and forearm thickness." },
+        { name: "Back Extension", sets: 3, reps: 12, notes: "Lower back strength." },
+        { name: "Dead Bug", sets: 2, reps: "10/side", notes: "Core stability." }
       ]
     },
     {
       id: 3,
-      name: "DAY 3 – PUSH B (Teški OHP & Gornja prsa)",
+      name: "DAY 3 – PUSH B (Heavy OHP & Upper Chest)",
       emoji: "⚡",
       exercises: [
-        { name: "Overhead Press (OHP)", sets: 3, reps: "5–6", notes: "Stisnuti gluteusi, bez varanja." },
-        { name: "Bugarski Iskorak", sets: 3, reps: 10, notes: "Po nozi. Ključ za atletski izgled." },
-        { name: "Incline DB Press", sets: 3, reps: "10–12", notes: "Fokus na gornji dio prsa." },
-        { name: "Dips (Propadači)", sets: 3, reps: "Do otkaza", notes: "Nagnut trup prema naprijed." },
-        { name: "Pallof Press", sets: 3, reps: "12/str", notes: "Anti-rotation core snaga." },
-        { name: "Side Plank", sets: 2, reps: "30–45 s", notes: "Stabilnost bočnog trbušnog zida." }
+        { name: "Overhead Press", sets: 3, reps: "5–6", notes: "Squeeze glutes, no cheating." },
+        { name: "Bulgarian Split Squat", sets: 3, reps: 10, notes: "Per leg. Key for athletic build." },
+        { name: "Incline DB Press", sets: 3, reps: "10–12", notes: "Focus on upper chest." },
+        { name: "Dips", sets: 3, reps: "To failure", notes: "Lean forward." },
+        { name: "Pallof Press", sets: 3, reps: "12/side", notes: "Anti-rotation core." },
+        { name: "Side Plank", sets: 2, reps: "30–45 s", notes: "Oblique stability." }
       ]
     },
     {
       id: 4,
-      name: "DAY 4 – PULL B (Zadnja loža & Debljina leđa)",
+      name: "DAY 4 – PULL B (Posterior Chain & Back Thickness)",
       emoji: "🎯",
       exercises: [
-        { name: "Rumunjsko Mrtvo (RDL)", sets: 3, reps: 10, notes: "Fokus na istezanje zadnje lože." },
-        { name: "Dumbbell Row", sets: 3, reps: 10, notes: "Lakat vući prema kuku." },
-        { name: "Farmer's Walk", sets: 3, reps: "40 m", notes: "Teške bučice (držanje i trbuh)." },
-        { name: "Hanging Leg Raises", sets: 3, reps: "12–15", notes: "Kontrolirano podizanje nogu." },
-        { name: "Back Extension Hold", sets: 2, reps: "30 s", notes: "Izdržljivost erektora leđa." }
+        { name: "Romanian Deadlift", sets: 3, reps: 10, notes: "Focus on hamstring stretch." },
+        { name: "Dumbbell Row", sets: 3, reps: 10, notes: "Pull elbow to hip." },
+        { name: "Farmer's Walk", sets: 3, reps: "40 m", notes: "Heavy dumbbells (grip and core)." },
+        { name: "Hanging Leg Raises", sets: 3, reps: "12–15", notes: "Controlled leg lift." },
+        { name: "Back Extension Hold", sets: 2, reps: "30 s", notes: "Erector spinae endurance." }
       ]
     }
   ]);
@@ -969,6 +1015,9 @@ const WorkoutTracker = () => {
   const [showProgressTimeline, setShowProgressTimeline] = useState(false); // collapsible Progress Timeline (default: hidden)
   const [expandedWorkouts, setExpandedWorkouts] = useState({}); // {workoutId: boolean} - track which workout previews are expanded
   const [statsPeriod, setStatsPeriod] = useState('week'); // 'week', 'month', 'all' - period selector for stats
+  const [bodyWeight, setBodyWeight] = useState(null); // Current body weight in kg
+  const [showBodyWeightInput, setShowBodyWeightInput] = useState(false); // Show/hide body weight input field
+  const [show1RMModal, setShow1RMModal] = useState(null); // {exerciseName: string, data: array} or null
   const fileInputRef = React.useRef(null);
   const restoreBackupInputRef = React.useRef(null);
   const dragExerciseRef = React.useRef(null);
@@ -1067,6 +1116,7 @@ const WorkoutTracker = () => {
       setLoading(true);
       const savedWorkouts = await dbOperations.getWorkouts();
       const savedHistory = await dbOperations.getHistory();
+      const latestBodyWeight = await dbOperations.getLatestBodyWeight();
 
       // Check if IndexedDB is empty but localStorage has backup
       const hasIndexedDBData = (savedWorkouts && savedWorkouts.length > 0) || (savedHistory && savedHistory.length > 0);
@@ -1111,6 +1161,11 @@ const WorkoutTracker = () => {
           localStorage.setItem('history_backup', JSON.stringify(savedHistory));
         }
       }
+
+      // Load body weight (no backup needed - stored only in IndexedDB)
+      if (latestBodyWeight) {
+        setBodyWeight(latestBodyWeight.weight);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -1141,6 +1196,17 @@ const WorkoutTracker = () => {
     }
   };
 
+  const handleSaveBodyWeight = async (weight) => {
+    try {
+      await dbOperations.saveBodyWeight(weight);
+      setBodyWeight(Number(weight));
+      setShowBodyWeightInput(false);
+      soundSystem.saveSuccess();
+    } catch (error) {
+      console.error('Error saving body weight:', error);
+    }
+  };
+
   const getLastWeight = (exerciseName) => {
     for (let i = completedWorkouts.length - 1; i >= 0; i--) {
       const workout = completedWorkouts[i];
@@ -1156,6 +1222,243 @@ const WorkoutTracker = () => {
   const calculateEstimated1RM = (weight, reps) => {
     // Epley formula: 1RM = weight × (1 + reps / 30)
     return weight * (1 + reps / 30);
+  };
+
+  // Calculate estimated 1RM for all exercises in history
+  const getAll1RMs = () => {
+    const exerciseMaxes = {}; // { exerciseName: best1RM }
+
+    completedWorkouts.forEach(workout => {
+      workout.exercises.forEach(exercise => {
+        const exerciseName = exercise.name;
+
+        // Skip core exercises (no weight)
+        const isCoreExercise = exerciseName.toLowerCase().includes('plank') ||
+                               exerciseName.toLowerCase().includes('hanging') ||
+                               exerciseName.toLowerCase().includes('rollout') ||
+                               exerciseName.toLowerCase().includes('dead bug') ||
+                               exerciseName.toLowerCase().includes('pallof');
+
+        if (isCoreExercise) return;
+
+        exercise.sets.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          const reps = parseFloat(set.reps) || 0;
+
+          // Only use sets with weight and 12 or fewer reps (strength range)
+          if (weight > 0 && reps > 0 && reps <= 12) {
+            const estimated1RM = calculateEstimated1RM(weight, reps);
+
+            // Track the best 1RM for this exercise
+            if (!exerciseMaxes[exerciseName] || estimated1RM > exerciseMaxes[exerciseName]) {
+              exerciseMaxes[exerciseName] = estimated1RM;
+            }
+          }
+        });
+      });
+    });
+
+    return exerciseMaxes;
+  };
+
+  // Get 1RMs for main compound lifts only
+  const getMainLifts1RMs = () => {
+    const all1RMs = getAll1RMs();
+    const mainLifts = {
+      'Bench Press': null,
+      'Squat': null,
+      'Deadlift': null,
+      'Overhead Press': null
+    };
+
+    // Fuzzy matching: map exercise names to standard lift categories
+    Object.keys(all1RMs).forEach(exerciseName => {
+      const lowerName = exerciseName.toLowerCase();
+
+      if (lowerName.includes('bench press') || lowerName.includes('bench')) {
+        if (!mainLifts['Bench Press'] || all1RMs[exerciseName] > mainLifts['Bench Press']) {
+          mainLifts['Bench Press'] = all1RMs[exerciseName];
+        }
+      } else if (lowerName.includes('squat') || lowerName.includes('čučanj')) {
+        if (!mainLifts['Squat'] || all1RMs[exerciseName] > mainLifts['Squat']) {
+          mainLifts['Squat'] = all1RMs[exerciseName];
+        }
+      } else if (lowerName.includes('deadlift') || lowerName.includes('mrtvo')) {
+        if (!mainLifts['Deadlift'] || all1RMs[exerciseName] > mainLifts['Deadlift']) {
+          mainLifts['Deadlift'] = all1RMs[exerciseName];
+        }
+      } else if (lowerName.includes('overhead press') || lowerName.includes('ohp') || lowerName.includes('press') && !lowerName.includes('bench')) {
+        if (!mainLifts['Overhead Press'] || all1RMs[exerciseName] > mainLifts['Overhead Press']) {
+          mainLifts['Overhead Press'] = all1RMs[exerciseName];
+        }
+      }
+    });
+
+    // Filter out null values
+    const result = {};
+    Object.keys(mainLifts).forEach(lift => {
+      if (mainLifts[lift] !== null) {
+        result[lift] = mainLifts[lift];
+      }
+    });
+
+    return result;
+  };
+
+  // Get 1RM progression history for a specific exercise
+  const get1RMProgression = (exerciseName) => {
+    const progression = [];
+
+    completedWorkouts.forEach(workout => {
+      const exercise = workout.exercises.find(ex => ex.name === exerciseName);
+
+      if (exercise) {
+        let best1RMForWorkout = 0;
+
+        exercise.sets.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          const reps = parseFloat(set.reps) || 0;
+
+          if (weight > 0 && reps > 0 && reps <= 12) {
+            const estimated1RM = calculateEstimated1RM(weight, reps);
+            if (estimated1RM > best1RMForWorkout) {
+              best1RMForWorkout = estimated1RM;
+            }
+          }
+        });
+
+        if (best1RMForWorkout > 0) {
+          progression.push({
+            date: workout.date,
+            estimated1RM: best1RMForWorkout
+          });
+        }
+      }
+    });
+
+    // Sort by date ascending and take last 20
+    progression.sort((a, b) => new Date(a.date) - new Date(b.date));
+    return progression.slice(-20);
+  };
+
+  // Get best actual set (weight × reps) for main lifts with 1RM
+  const getMainLiftsBestSets = () => {
+    const all1RMs = getAll1RMs();
+    const bestSets = {};
+
+    completedWorkouts.forEach(workout => {
+      workout.exercises.forEach(exercise => {
+        const exerciseName = exercise.name;
+        const lowerName = exerciseName.toLowerCase();
+
+        // Determine which main lift category this exercise belongs to
+        let category = null;
+        if (lowerName.includes('bench press') || lowerName.includes('bench')) {
+          category = 'Bench Press';
+        } else if (lowerName.includes('squat')) {
+          category = 'Squat';
+        } else if (lowerName.includes('deadlift') || lowerName.includes('mrtvo')) {
+          category = 'Deadlift';
+        } else if (lowerName.includes('overhead press') || lowerName.includes('ohp') || (lowerName.includes('press') && !lowerName.includes('bench'))) {
+          category = 'Overhead Press';
+        }
+
+        if (!category) return;
+
+        exercise.sets.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          const reps = parseFloat(set.reps) || 0;
+
+          if (weight > 0 && reps > 0 && reps <= 12) {
+            const estimated1RM = calculateEstimated1RM(weight, reps);
+
+            if (!bestSets[category] || estimated1RM > bestSets[category].estimated1RM) {
+              bestSets[category] = {
+                weight: weight,
+                reps: reps,
+                estimated1RM: estimated1RM,
+                exerciseName: exerciseName
+              };
+            }
+          }
+        });
+      });
+    });
+
+    return bestSets;
+  };
+
+  // Strength standards data (Symmetric Strength - Male)
+  // Multipliers are relative to bodyweight
+  const STRENGTH_STANDARDS = {
+    'Squat': {
+      levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+      multipliers: [0.6, 1.0, 1.5, 2.0, 2.5]
+    },
+    'Bench Press': {
+      levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+      multipliers: [0.5, 0.75, 1.25, 1.75, 2.25]
+    },
+    'Deadlift': {
+      levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+      multipliers: [0.7, 1.25, 1.75, 2.25, 2.75]
+    },
+    'Overhead Press': {
+      levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+      multipliers: [0.35, 0.5, 0.85, 1.15, 1.5]
+    }
+  };
+
+  // Calculate strength standard level for a given lift
+  const getStrengthStandard = (liftName, estimated1RM, bodyWeightKg) => {
+    if (!bodyWeightKg || bodyWeightKg <= 0 || !estimated1RM || estimated1RM <= 0) {
+      return null;
+    }
+
+    const standard = STRENGTH_STANDARDS[liftName];
+    if (!standard) {
+      return null;
+    }
+
+    const ratio = estimated1RM / bodyWeightKg;
+    const multipliers = standard.multipliers;
+    const levels = standard.levels;
+
+    // Find which level the ratio falls into
+    let currentLevelIndex = 0;
+    for (let i = 0; i < multipliers.length; i++) {
+      if (ratio >= multipliers[i]) {
+        currentLevelIndex = i;
+      } else {
+        break;
+      }
+    }
+
+    const currentLevel = levels[currentLevelIndex];
+    const nextLevelIndex = Math.min(currentLevelIndex + 1, levels.length - 1);
+    const nextLevel = levels[nextLevelIndex];
+
+    // Calculate percentage progress to next level
+    let percentageToNext = 0;
+    if (currentLevelIndex < levels.length - 1) {
+      const currentThreshold = multipliers[currentLevelIndex];
+      const nextThreshold = multipliers[nextLevelIndex];
+      const progress = ratio - currentThreshold;
+      const range = nextThreshold - currentThreshold;
+      percentageToNext = Math.min(100, Math.round((progress / range) * 100));
+    } else {
+      // Already at max level
+      percentageToNext = 100;
+    }
+
+    return {
+      level: currentLevel,
+      levelIndex: currentLevelIndex,
+      nextLevel: nextLevel,
+      percentageToNext: percentageToNext,
+      ratio: ratio.toFixed(2),
+      totalLevels: levels.length
+    };
   };
 
   const getSmartWeightSuggestion = (exerciseName) => {
@@ -1758,6 +2061,20 @@ const WorkoutTracker = () => {
       totalVolume: Math.round(totalVolume),
       totalReps: totalReps
     };
+  };
+
+  // Helper: Format relative date
+  const getRelativeDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'today';
+    if (diffDays === 1) return 'yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return date.toLocaleDateString('hr-HR');
   };
 
   const getDetailedStats = () => {
@@ -2463,6 +2780,87 @@ const WorkoutTracker = () => {
               </button>
             </div>
 
+            {/* Body Weight Tracker */}
+            <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'}`}>Body Weight</h3>
+                {bodyWeight && !showBodyWeightInput && (
+                  <button
+                    onClick={() => setShowBodyWeightInput(true)}
+                    className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                      darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
+                    }`}
+                  >
+                    Update
+                  </button>
+                )}
+              </div>
+
+              {bodyWeight && !showBodyWeightInput ? (
+                <div>
+                  <div className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-1`}>
+                    {bodyWeight} kg
+                  </div>
+                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Last updated {getRelativeDate(new Date().toISOString())}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  {!bodyWeight && (
+                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>
+                      Add your body weight to see strength standards and track progress
+                    </p>
+                  )}
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      step="0.1"
+                      placeholder="Enter weight (kg)"
+                      defaultValue={bodyWeight || ''}
+                      className={`flex-1 px-3 py-2 rounded-lg ${
+                        darkMode
+                          ? 'bg-gray-700 text-white placeholder-gray-400'
+                          : 'bg-gray-100 text-gray-900 placeholder-gray-500'
+                      }`}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const value = e.target.value;
+                          if (value && Number(value) > 0) {
+                            handleSaveBodyWeight(value);
+                          }
+                        }
+                      }}
+                      id="bodyWeightInput"
+                    />
+                    <button
+                      onClick={() => {
+                        const input = document.getElementById('bodyWeightInput');
+                        if (input && input.value && Number(input.value) > 0) {
+                          handleSaveBodyWeight(input.value);
+                        }
+                      }}
+                      className={`px-4 py-2 rounded-lg font-medium ${
+                        darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
+                      }`}
+                    >
+                      Save
+                    </button>
+                    {bodyWeight && (
+                      <button
+                        onClick={() => setShowBodyWeightInput(false)}
+                        className={`px-4 py-2 rounded-lg font-medium ${
+                          darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                        }`}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Performance Overview */}
             <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
               <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>Performance Overview</h3>
@@ -2562,34 +2960,157 @@ const WorkoutTracker = () => {
               })()}
             </div>
 
-            {/* Personal Records */}
-            <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
-              <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4 flex items-center gap-2`}>
-                <Award size={20} />
-                Personal Records (Main Lifts)
-              </h3>
-              
-              {Object.keys(detailedStats.exerciseMaxes).length === 0 ? (
-                <div className={`text-center py-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                  No records yet. Complete workouts to see your PRs!
+            {/* Personal Records (Main Lifts) */}
+            {(() => {
+              const bestSets = getMainLiftsBestSets();
+              const hasLifts = Object.keys(bestSets).length > 0;
+
+              return (
+                <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
+                  <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-2 flex items-center gap-2`}>
+                    <Award size={20} />
+                    Personal Records (Main Lifts)
+                  </h3>
+                  <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
+                    Your best lifts and estimated 1RM (Epley formula). Tap to view progression.
+                  </div>
+
+                  {!hasLifts ? (
+                    <div className={`text-center py-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      No records yet. Complete workouts to see your PRs!
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {Object.keys(bestSets).map(liftName => {
+                        const bestSet = bestSets[liftName];
+
+                        return (
+                          <button
+                            key={liftName}
+                            onClick={() => {
+                              const progression = get1RMProgression(bestSet.exerciseName);
+                              if (progression.length > 0) {
+                                setShow1RMModal({ exerciseName: liftName, data: progression });
+                              }
+                            }}
+                            className={`w-full flex flex-col p-3 ${darkMode ? 'bg-gray-900 hover:bg-gray-800' : 'bg-gray-50 hover:bg-gray-100'} rounded-lg transition-colors text-left`}
+                          >
+                            <div className="flex justify-between items-center mb-1">
+                              <div className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                {liftName}
+                              </div>
+                              <ChevronRight size={16} className={darkMode ? 'text-gray-500' : 'text-gray-400'} />
+                            </div>
+                            <div className="flex justify-between items-baseline">
+                              <div className={`text-lg font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                {bestSet.weight} kg × {bestSet.reps} reps
+                              </div>
+                              <div className={`text-sm ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                                ~{bestSet.estimated1RM.toFixed(1)} kg (1RM)
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {/* Display in specific order */}
-                  {['Mrtvo dizanje (Trap Bar)', 'Squat', 'Bench Press', 'Overhead Press (vojnički press)', 'Lat Pulldown (ili zgibovi)'].map(lift => {
-                    const weight = detailedStats.exerciseMaxes[lift];
-                    if (!weight) return null;
-                    
-                    return (
-                      <div key={lift} className={`flex justify-between items-center p-3 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg`}>
-                        <div className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>{lift}</div>
-                        <div className={`font-bold text-lg ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{weight} kg</div>
-                      </div>
-                    );
-                  })}
+              );
+            })()}
+
+            {/* Strength Standards */}
+            {(() => {
+              const mainLifts1RMs = getMainLifts1RMs();
+              const hasLifts = Object.keys(mainLifts1RMs).length > 0;
+              const hasBodyWeight = bodyWeight && bodyWeight > 0;
+
+              if (!hasBodyWeight || !hasLifts) return null;
+
+              return (
+                <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
+                  <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-2 flex items-center gap-2`}>
+                    <Target size={20} />
+                    Strength Standards
+                  </h3>
+                  <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
+                    Your strength level based on estimated 1RM relative to your {bodyWeight} kg bodyweight
+                  </div>
+
+                  <div className="space-y-5">
+                    {Object.keys(mainLifts1RMs).map(liftName => {
+                      const estimated1RM = mainLifts1RMs[liftName];
+                      const standard = getStrengthStandard(liftName, estimated1RM, bodyWeight);
+
+                      if (!standard) return null;
+
+                      return (
+                        <div key={liftName}>
+                          <div className="flex justify-between items-baseline mb-1">
+                            <div className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                              {liftName}
+                            </div>
+                            <div className={`text-sm font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                              {estimated1RM.toFixed(1)} kg (est. 1RM)
+                            </div>
+                          </div>
+
+                          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+                            <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{standard.level}</span> level
+                            {standard.levelIndex < standard.totalLevels - 1 && ` • ${standard.percentageToNext}% to ${standard.nextLevel}`}
+                            {' • '}{standard.ratio}x bodyweight
+                          </div>
+
+                          {/* Progress bar with level labels */}
+                          <div className={`h-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full overflow-hidden flex mb-1`}>
+                            {Array.from({ length: standard.totalLevels }).map((_, idx) => {
+                              const isCompleted = idx < standard.levelIndex;
+                              const isCurrent = idx === standard.levelIndex;
+                              const percentage = isCurrent ? standard.percentageToNext : 0;
+
+                              return (
+                                <div
+                                  key={idx}
+                                  className="flex-1 relative"
+                                  style={{
+                                    borderRight: idx < standard.totalLevels - 1 ? `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` : 'none'
+                                  }}
+                                >
+                                  {isCompleted && (
+                                    <div className={`h-full ${darkMode ? 'bg-gray-500' : 'bg-gray-400'}`}></div>
+                                  )}
+                                  {isCurrent && (
+                                    <div
+                                      className={`h-full ${darkMode ? 'bg-blue-600' : 'bg-blue-500'}`}
+                                      style={{ width: `${percentage}%` }}
+                                    ></div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Level labels */}
+                          <div className="flex justify-between text-[9px] mt-1">
+                            {['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'].map((levelName, idx) => (
+                              <div
+                                key={idx}
+                                className={`flex-1 text-center ${
+                                  idx === standard.levelIndex
+                                    ? darkMode ? 'text-blue-400 font-semibold' : 'text-blue-600 font-semibold'
+                                    : darkMode ? 'text-gray-500' : 'text-gray-400'
+                                }`}
+                              >
+                                {levelName}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              )}
-            </div>
+              );
+            })()}
 
             {/* Exercise Progress */}
             {(() => {
@@ -3388,6 +3909,71 @@ const WorkoutTracker = () => {
       )}
 
       {/* Exercise Progress Modal */}
+      {/* 1RM Progression Modal */}
+      {show1RMModal && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+          onClick={() => setShow1RMModal(null)}
+        >
+          <div
+            className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                {show1RMModal.exerciseName} - 1RM Progression
+              </h3>
+              <button
+                onClick={() => setShow1RMModal(null)}
+                className={`p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg transition-colors`}
+              >
+                <X size={20} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
+              </button>
+            </div>
+
+            {show1RMModal.data.length === 0 ? (
+              <div className={`text-center py-12 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                No 1RM data available
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2 mb-6">
+                  {show1RMModal.data.map((entry, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex justify-between items-center p-3 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg`}
+                    >
+                      <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {new Date(entry.date).toLocaleDateString('hr-HR')}
+                      </div>
+                      <div className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                        {entry.estimated1RM.toFixed(1)} kg
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-4`}>
+                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>
+                    Progress
+                  </div>
+                  <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                    {show1RMModal.data.length > 1
+                      ? `+${(show1RMModal.data[show1RMModal.data.length - 1].estimated1RM - show1RMModal.data[0].estimated1RM).toFixed(1)} kg`
+                      : '--'}
+                  </div>
+                  {show1RMModal.data.length > 1 && (
+                    <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
+                      from {show1RMModal.data.length} workouts
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {exerciseProgressModal && (() => {
         const progressData = getExerciseProgress(exerciseProgressModal.exerciseName);
         const isCoreExercise = exerciseProgressModal.exerciseName.toLowerCase().includes('core') ||
