@@ -3038,7 +3038,7 @@ const WorkoutTracker = () => {
 
         {activeView === 'edit' && editingWorkout && (
           <div className="space-y-4">
-            <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur border rounded-2xl p-5`}>
+            <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
               <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>Edit Workout</h2>
               <div className="space-y-3">
                 <input
@@ -3058,12 +3058,12 @@ const WorkoutTracker = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-3">
               {editingWorkout.exercises.map((ex, idx) => (
                 <div
-                  key={idx}
-                  className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur border rounded-2xl p-4 transition-all duration-200 ${
+                  key={`exercise-${idx}-${ex.name}`}
+                  className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 ${
                     draggedExerciseIndex === idx && isDraggingExercise ? 'opacity-30' : ''
                   } ${
                     dropTargetIndex === idx && draggedExerciseIndex !== idx ? 'ring-2 ring-blue-500' : ''
