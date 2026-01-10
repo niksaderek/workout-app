@@ -57,7 +57,8 @@ The application uses a monolithic component architecture with all code embedded 
 - `showUploadModal` - Controls markdown upload confirmation modal
 - `parsedWorkouts` - Temporarily stores parsed markdown workouts
 - `draggedExerciseIndex` - Current exercise being dragged (for reordering)
-- `timelineRange` - Selected time range for progress timeline
+- `timelineRange` - Selected time range for progress timeline ('2weeks', '4weeks', '3months', '6months', 'all')
+- `gender` - User gender for strength standards ('male' or 'female')
 - `fileInputRef` - React ref for hidden file input element
 - `substituteDropdown` - Controls exercise substitution dropdown visibility
 - `exerciseProgressModal` - Controls exercise progress chart modal
@@ -95,9 +96,12 @@ The application uses a monolithic component architecture with all code embedded 
    - Allows fixing mistakes in logged data without affecting templates
 
 5. **Progress Timeline**:
-   - `getTimelineData()` - Aggregates workout history by week/month
-   - Tracks volume progression, workout frequency, and main lift PRs
-   - Interactive charts with clickable data points
+   - `getTimelineData()` - Aggregates workout history by day (always daily grouping)
+   - Tracks volume progression, total reps per day, and main lift PRs
+   - Interactive charts with hover tooltips showing exact values
+   - Smart X-axis labeling that adapts to data count (shows all labels for ≤7 days, evenly spaced for larger ranges)
+   - Two charts: "Total Volume (kg)" and "Total Reps (per day)"
+   - Timeline reps include ALL exercises (weighted, bodyweight, core) while main stats only count weighted reps
 
 6. **Markdown Upload**:
    - `triggerFileUpload()` - Opens file picker for .md files
@@ -105,8 +109,10 @@ The application uses a monolithic component architecture with all code embedded 
    - `handleImportChoice()` - Handles user choice (replace all vs add to existing)
    - Supports multiple markdown formats automatically
 
-7. **Data Export**:
+7. **Data Export/Import**:
    - `exportToCSV()` - Export history to CSV with Croatian date formatting
+   - `exportBackupToFile()` - Export complete backup (workouts, history, body weight, gender) to JSON file
+   - `restoreBackupFromFile()` - Restore from backup JSON (version 1.1 includes body weight/gender, backward compatible with v1.0)
 
 8. **Exercise Autocomplete**:
    - `ExerciseInput` component - Dropdown with 60+ popular exercises
@@ -141,21 +147,23 @@ The application uses a monolithic component architecture with all code embedded 
    - Preserves all set data (weight/reps) when substituting
    - Handles custom exercises gracefully (no suggestions)
 
-12. **Body Weight Tracking**:
-   - `handleSaveBodyWeight()` - Saves body weight entry with timestamp to IndexedDB
-   - `dbOperations.saveBodyWeight()` - Stores weight in kg with date
-   - `dbOperations.getLatestBodyWeight()` - Retrieves most recent weight entry
-   - Used for calculating strength standards (bodyweight-relative metrics)
+12. **Body Weight & Gender Tracking**:
+   - `handleSaveBodyWeight()` - Saves body weight and gender entry with timestamp to IndexedDB
+   - `dbOperations.saveBodyWeight(weight, gender)` - Stores weight (kg), gender (male/female), and date
+   - `dbOperations.getLatestBodyWeight()` - Retrieves most recent weight entry with gender
+   - Gender selection UI: ♂ Male / ♀ Female toggle buttons
+   - Used for calculating gender-specific strength standards (bodyweight-relative metrics)
 
 13. **1RM Calculator & Strength Standards**:
    - `getAll1RMs()` - Calculates estimated 1RM for all exercises in history using Epley formula
    - `getMainLifts1RMs()` - Extracts 1RMs for main compound lifts (Squat, Bench, Deadlift, Overhead Press)
    - `get1RMProgression()` - Returns 1RM history for a specific exercise (last 20 workouts)
-   - `getStrengthStandard()` - Calculates strength level (Untrained/Novice/Intermediate/Advanced/Elite) based on Symmetric Strength standards
-   - `STRENGTH_STANDARDS` - Male bodyweight-relative strength standards data
+   - `getStrengthStandard(liftName, estimated1RM, bodyWeight, gender)` - Calculates strength level based on Symmetric Strength standards
+   - `STRENGTH_STANDARDS` - Gender-specific bodyweight-relative strength standards (male and female)
    - Only uses sets with ≤12 reps for accurate strength calculations
    - Excludes core exercises (plank, hanging leg raises, etc.) from 1RM calculations
    - Fuzzy exercise name matching (e.g., "Front Squat" maps to "Squat" category)
+   - Female standards adjusted for physiological differences (e.g., Bench: 0.3x/0.4x/0.65x/1.0x/1.3x vs Male: 0.5x/0.75x/1.25x/1.75x/2.25x)
 
 ### UI Views
 
@@ -211,8 +219,25 @@ The application uses a monolithic component architecture with all code embedded 
 {
   id: number (auto-generated),
   weight: number (kg),
+  gender: 'male' | 'female',
   date: ISO string,
   unit: 'kg'
+}
+```
+
+**Backup File Structure (v1.1):**
+```javascript
+{
+  workouts: [...], // Workout templates
+  history: [...],  // Completed workouts
+  bodyWeight: {    // Latest body weight entry
+    weight: number,
+    gender: 'male' | 'female',
+    date: ISO string,
+    unit: 'kg'
+  },
+  exportDate: ISO string,
+  version: '1.1'
 }
 ```
 
@@ -245,8 +270,15 @@ Core exercises (plank, hanging leg raises, ab rollout) are treated differently:
 ### Decimal Weight Support
 Weight inputs accept commas and convert to dots (line 249): `value.replace(',', '.')` for European number format.
 
+### Bodyweight Exercise Handling
+Bodyweight exercises (pull-ups, dips, chin-ups, push-ups) are tracked with `weight: 0` or empty string:
+- Still counted in history view and statistics (checks `reps > 0`)
+- Counted in total reps for timeline charts
+- Not counted in volume calculations (no weight × reps)
+- Detection: `name.toLowerCase().includes('pull-up'|'dip'|'chin-up'|'push-up')`
+
 ### Skipped Exercise Handling
-Sets with `weight: 0` and `reps: 0` are filtered out in history view and statistics to handle skipped exercises gracefully.
+Sets with `reps: 0` are filtered out in history view and statistics to handle skipped exercises gracefully.
 
 ### 1RM Calculation & Strength Standards
 The app calculates estimated one-rep max (1RM) using the Epley formula and compares against Symmetric Strength standards:
@@ -263,22 +295,57 @@ The app calculates estimated one-rep max (1RM) using the Epley formula and compa
 - Deadlift (includes "Trap Bar Deadlift", "Romanian Deadlift", etc.)
 - Overhead Press (includes "OHP")
 
-**Strength Standards (Male, Bodyweight-Relative):**
+**Strength Standards (Gender-Specific, Bodyweight-Relative):**
 - Based on Symmetric Strength standards
 - 5 levels: Untrained → Novice → Intermediate → Advanced → Elite
 - Multipliers represent weight/bodyweight ratio:
+
+**Male Standards:**
   - Squat: 0.6x / 1.0x / 1.5x / 2.0x / 2.5x
   - Bench Press: 0.5x / 0.75x / 1.25x / 1.75x / 2.25x
   - Deadlift: 0.7x / 1.25x / 1.75x / 2.25x / 2.75x
   - Overhead Press: 0.35x / 0.5x / 0.85x / 1.15x / 1.5x
+
+**Female Standards:**
+  - Squat: 0.4x / 0.65x / 1.0x / 1.5x / 1.9x
+  - Bench Press: 0.3x / 0.4x / 0.65x / 1.0x / 1.3x
+  - Deadlift: 0.5x / 0.8x / 1.25x / 1.75x / 2.15x
+  - Overhead Press: 0.2x / 0.3x / 0.5x / 0.75x / 1.0x
+
 - Shows percentage progress to next level
+- Automatically uses correct standards based on selected gender
 
 **UI Features:**
-- Body Weight Tracker in Stats view (required for standards calculation)
+- Body Weight & Gender Tracker in Stats view (required for standards calculation)
+- Gender selection: ♂ Male / ♀ Female toggle buttons
 - Estimated 1RM section showing main lifts
 - Click any lift to view progression history (last 20 workouts)
-- Strength Standards section with visual progress bars
+- Strength Standards section with visual progress bars (gender-specific)
 - 5-segment progress bar shows current level position
+
+### Progress Timeline Charts
+The Progress Timeline section shows daily workout data with interactive visualizations:
+
+**Features:**
+- **Always Daily Grouping**: All time ranges (2 weeks, 4 weeks, 3 months, 6 months, all time) show individual daily data points
+- **Two Charts**:
+  1. Total Volume (kg) - Sum of weight × reps for weighted exercises
+  2. Total Reps (per day) - Sum of ALL reps (weighted + bodyweight + core)
+- **Smart X-Axis Labels**: Automatically adjusts label density based on data count
+  - ≤7 days: Shows all labels
+  - 8-14 days: Every other label
+  - 15-30 days: ~5 labels evenly spaced
+  - 31-90 days: ~7 labels evenly spaced
+  - >90 days: ~10 labels evenly spaced
+- **Hover Tooltips**: Hover over any data point to see exact value and date
+- **Clickable Points**: Click any point to view detailed workout breakdown in modal
+- **Clarifying Note**: "Includes all reps (weighted, bodyweight, and core exercises). Stats above only count weighted reps."
+
+**Data Point Details:**
+- Each dot represents one workout day
+- Empty days (no workout) have no data point
+- Volume only counts weighted exercises
+- Reps count ALL exercises to show total training volume
 
 ### Inline SVG Icons
 The app uses inline SVG components instead of external icon libraries for reliability:
