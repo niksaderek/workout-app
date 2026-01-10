@@ -308,9 +308,12 @@ const WorkoutTracker = () => {
   };
 
   const updateExercise = (index, field, value) => {
-    const updated = { ...editingWorkout };
-    updated.exercises[index][field] = value;
-    setEditingWorkout(updated);
+    setEditingWorkout(prev => ({
+      ...prev,
+      exercises: prev.exercises.map((ex, idx) =>
+        idx === index ? { ...ex, [field]: value } : ex
+      )
+    }));
   };
 
   const addExercise = () => {
