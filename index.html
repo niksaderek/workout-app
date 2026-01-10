@@ -2119,12 +2119,21 @@ const WorkoutTracker = () => {
     setSubstituteDropdown(null); // Close dropdown after selection
   };
 
-  const exportBackupToFile = () => {
+  const exportBackupToFile = async () => {
+    // Get latest body weight data from IndexedDB
+    const latestBodyWeight = await dbOperations.getLatestBodyWeight();
+
     const backupData = {
       workouts: workouts,
       history: completedWorkouts,
+      bodyWeight: latestBodyWeight ? {
+        weight: latestBodyWeight.weight,
+        gender: latestBodyWeight.gender || 'male',
+        date: latestBodyWeight.date,
+        unit: latestBodyWeight.unit || 'kg'
+      } : null,
       exportDate: new Date().toISOString(),
-      version: '1.0'
+      version: '1.1'
     };
 
     const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
@@ -2160,6 +2169,13 @@ const WorkoutTracker = () => {
         }
         setCompletedWorkouts(backupData.history);
         localStorage.setItem('history_backup', JSON.stringify(backupData.history));
+
+        // Restore body weight and gender if present
+        if (backupData.bodyWeight) {
+          await dbOperations.saveBodyWeight(backupData.bodyWeight.weight, backupData.bodyWeight.gender || 'male');
+          setBodyWeight(backupData.bodyWeight.weight);
+          setGender(backupData.bodyWeight.gender || 'male');
+        }
 
         alert('Backup restored successfully!');
       } catch (error) {
