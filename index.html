@@ -489,13 +489,14 @@ const dbOperations = {
     });
   },
 
-  async saveBodyWeight(weight) {
+  async saveBodyWeight(weight, gender = 'male') {
     const db = await initDB();
     const tx = db.transaction('bodyWeight', 'readwrite');
     const store = tx.objectStore('bodyWeight');
 
     const entry = {
       weight: Number(weight),
+      gender: gender,
       date: new Date().toISOString(),
       unit: 'kg'
     };
@@ -1077,6 +1078,7 @@ const WorkoutTracker = () => {
   const [expandedWorkouts, setExpandedWorkouts] = useState({}); // {workoutId: boolean} - track which workout previews are expanded
   const [statsPeriod, setStatsPeriod] = useState('week'); // 'week', 'month', 'all' - period selector for stats
   const [bodyWeight, setBodyWeight] = useState(null); // Current body weight in kg
+  const [gender, setGender] = useState('male'); // 'male' or 'female'
   const [showBodyWeightInput, setShowBodyWeightInput] = useState(false); // Show/hide body weight input field
   const [show1RMModal, setShow1RMModal] = useState(null); // {exerciseName: string, data: array} or null
   const fileInputRef = React.useRef(null);
@@ -1223,9 +1225,12 @@ const WorkoutTracker = () => {
         }
       }
 
-      // Load body weight (no backup needed - stored only in IndexedDB)
+      // Load body weight and gender (no backup needed - stored only in IndexedDB)
       if (latestBodyWeight) {
         setBodyWeight(latestBodyWeight.weight);
+        if (latestBodyWeight.gender) {
+          setGender(latestBodyWeight.gender);
+        }
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -1259,7 +1264,7 @@ const WorkoutTracker = () => {
 
   const handleSaveBodyWeight = async (weight) => {
     try {
-      await dbOperations.saveBodyWeight(weight);
+      await dbOperations.saveBodyWeight(weight, gender);
       setBodyWeight(Number(weight));
       setShowBodyWeightInput(false);
       soundSystem.saveSuccess();
@@ -1449,34 +1454,55 @@ const WorkoutTracker = () => {
     return bestSets;
   };
 
-  // Strength standards data (Symmetric Strength - Male)
+  // Strength standards data (Symmetric Strength)
   // Multipliers are relative to bodyweight
   const STRENGTH_STANDARDS = {
-    'Squat': {
-      levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
-      multipliers: [0.6, 1.0, 1.5, 2.0, 2.5]
+    male: {
+      'Squat': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.6, 1.0, 1.5, 2.0, 2.5]
+      },
+      'Bench Press': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.5, 0.75, 1.25, 1.75, 2.25]
+      },
+      'Deadlift': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.7, 1.25, 1.75, 2.25, 2.75]
+      },
+      'Overhead Press': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.35, 0.5, 0.85, 1.15, 1.5]
+      }
     },
-    'Bench Press': {
-      levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
-      multipliers: [0.5, 0.75, 1.25, 1.75, 2.25]
-    },
-    'Deadlift': {
-      levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
-      multipliers: [0.7, 1.25, 1.75, 2.25, 2.75]
-    },
-    'Overhead Press': {
-      levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
-      multipliers: [0.35, 0.5, 0.85, 1.15, 1.5]
+    female: {
+      'Squat': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.4, 0.65, 1.0, 1.5, 1.9]
+      },
+      'Bench Press': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.3, 0.4, 0.65, 1.0, 1.3]
+      },
+      'Deadlift': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.5, 0.8, 1.25, 1.75, 2.15]
+      },
+      'Overhead Press': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.2, 0.3, 0.5, 0.75, 1.0]
+      }
     }
   };
 
   // Calculate strength standard level for a given lift
-  const getStrengthStandard = (liftName, estimated1RM, bodyWeightKg) => {
+  const getStrengthStandard = (liftName, estimated1RM, bodyWeightKg, userGender = 'male') => {
     if (!bodyWeightKg || bodyWeightKg <= 0 || !estimated1RM || estimated1RM <= 0) {
       return null;
     }
 
-    const standard = STRENGTH_STANDARDS[liftName];
+    const genderStandards = STRENGTH_STANDARDS[userGender] || STRENGTH_STANDARDS.male;
+    const standard = genderStandards[liftName];
     if (!standard) {
       return null;
     }
@@ -2890,37 +2916,69 @@ const WorkoutTracker = () => {
                     {bodyWeight} kg
                   </div>
                   <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Last updated {getRelativeDate(new Date().toISOString())}
+                    {gender === 'male' ? '♂ Male' : '♀ Female'} · Last updated {getRelativeDate(new Date().toISOString())}
                   </div>
                 </div>
               ) : (
                 <div>
                   {!bodyWeight && (
                     <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>
-                      Add your body weight to see strength standards and track progress
+                      Add your body weight and gender to see strength standards and track progress
                     </p>
                   )}
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      step="0.1"
-                      placeholder="Enter weight (kg)"
-                      defaultValue={bodyWeight || ''}
-                      className={`flex-1 px-3 py-2 rounded-lg ${
-                        darkMode
-                          ? 'bg-gray-700 text-white placeholder-gray-400'
-                          : 'bg-gray-100 text-gray-900 placeholder-gray-500'
-                      }`}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          const value = e.target.value;
-                          if (value && Number(value) > 0) {
-                            handleSaveBodyWeight(value);
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        step="0.1"
+                        placeholder="Enter weight (kg)"
+                        defaultValue={bodyWeight || ''}
+                        className={`flex-1 px-3 py-2 rounded-lg ${
+                          darkMode
+                            ? 'bg-gray-700 text-white placeholder-gray-400'
+                            : 'bg-gray-100 text-gray-900 placeholder-gray-500'
+                        }`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            const value = e.target.value;
+                            if (value && Number(value) > 0) {
+                              handleSaveBodyWeight(value);
+                            }
                           }
-                        }
-                      }}
-                      id="bodyWeightInput"
-                    />
+                        }}
+                        id="bodyWeightInput"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setGender('male')}
+                        className={`flex-1 px-3 py-2 rounded-lg font-medium transition-colors ${
+                          gender === 'male'
+                            ? darkMode
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-blue-500 text-white'
+                            : darkMode
+                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        ♂ Male
+                      </button>
+                      <button
+                        onClick={() => setGender('female')}
+                        className={`flex-1 px-3 py-2 rounded-lg font-medium transition-colors ${
+                          gender === 'female'
+                            ? darkMode
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-blue-500 text-white'
+                            : darkMode
+                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        ♀ Female
+                      </button>
+                    </div>
                     <button
                       onClick={() => {
                         const input = document.getElementById('bodyWeightInput');
@@ -2928,7 +2986,7 @@ const WorkoutTracker = () => {
                           handleSaveBodyWeight(input.value);
                         }
                       }}
-                      className={`px-4 py-2 rounded-lg font-medium ${
+                      className={`w-full px-4 py-2 rounded-lg font-medium ${
                         darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'
                       }`}
                     >
@@ -3127,7 +3185,7 @@ const WorkoutTracker = () => {
                   <div className="space-y-5">
                     {Object.keys(mainLifts1RMs).map(liftName => {
                       const estimated1RM = mainLifts1RMs[liftName];
-                      const standard = getStrengthStandard(liftName, estimated1RM, bodyWeight);
+                      const standard = getStrengthStandard(liftName, estimated1RM, bodyWeight, gender);
 
                       if (!standard) return null;
 
