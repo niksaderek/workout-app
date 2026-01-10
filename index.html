@@ -194,6 +194,7 @@
     const LineChart = ({data, metric, darkMode, onPointClick, selectedPoint}) => {
       if (!data || data.length === 0) return null;
 
+      const [hoveredPoint, setHoveredPoint] = React.useState(null);
       const width = 350;
       const height = 220;
       const padding = {top: 20, right: 20, bottom: 45, left: 50};
@@ -282,6 +283,7 @@
             const x = scaleX(i);
             const y = scaleY(values[i]);
             const isSelected = selectedPoint && selectedPoint.date === point.date;
+            const isHovered = hoveredPoint && hoveredPoint.date === point.date;
 
             return (
               <g key={i}>
@@ -294,8 +296,44 @@
                   strokeWidth="2"
                   style={{cursor: 'pointer'}}
                   onClick={() => onPointClick(point)}
+                  onMouseEnter={() => setHoveredPoint(point)}
+                  onMouseLeave={() => setHoveredPoint(null)}
                   className="transition-all"
                 />
+                {/* Tooltip on hover */}
+                {isHovered && (
+                  <g>
+                    <rect
+                      x={x - 35}
+                      y={y - 40}
+                      width="70"
+                      height="30"
+                      fill={darkMode ? '#1F2937' : '#FFFFFF'}
+                      stroke={darkMode ? '#374151' : '#E5E7EB'}
+                      strokeWidth="1"
+                      rx="4"
+                    />
+                    <text
+                      x={x}
+                      y={y - 28}
+                      textAnchor="middle"
+                      fontSize="11"
+                      fontWeight="bold"
+                      fill={darkMode ? '#60A5FA' : '#3B82F6'}
+                    >
+                      {metric === 'volume' ? `${values[i].toLocaleString()} kg` : `${values[i]} reps`}
+                    </text>
+                    <text
+                      x={x}
+                      y={y - 16}
+                      textAnchor="middle"
+                      fontSize="9"
+                      fill={darkMode ? '#9CA3AF' : '#6B7280'}
+                    >
+                      {formatDate(point.date)}
+                    </text>
+                  </g>
+                )}
                 {/* X-axis label - smart labeling based on data count */}
                 {(() => {
                   const dataCount = data.length;
@@ -3399,6 +3437,9 @@ const WorkoutTracker = () => {
                     <div>
                       <div className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
                         Total Reps (per day)
+                      </div>
+                      <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'} mb-2 italic`}>
+                        Includes all reps (weighted, bodyweight, and core exercises). Stats above only count weighted reps.
                       </div>
                       <div className="flex justify-center">
                         <LineChart
