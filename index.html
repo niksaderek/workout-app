@@ -204,7 +204,7 @@
       // Get values for the selected metric
       const values = data.map(d => {
         if (metric === 'volume') return d.volume;
-        if (metric === 'frequency') return d.frequency;
+        if (metric === 'reps') return d.reps;
         return 0;
       });
 
@@ -296,18 +296,43 @@
                   onClick={() => onPointClick(point)}
                   className="transition-all"
                 />
-                {/* X-axis label */}
-                {(i === 0 || i === data.length - 1 || i === Math.floor(data.length / 2)) && (
-                  <text
-                    x={x}
-                    y={height - padding.bottom + 20}
-                    textAnchor="middle"
-                    fontSize="11"
-                    fill={darkMode ? '#9CA3AF' : '#6B7280'}
-                  >
-                    {formatDate(point.date)}
-                  </text>
-                )}
+                {/* X-axis label - smart labeling based on data count */}
+                {(() => {
+                  const dataCount = data.length;
+                  let shouldShowLabel = false;
+
+                  if (dataCount <= 7) {
+                    // Show all labels for ≤7 days
+                    shouldShowLabel = true;
+                  } else if (dataCount <= 14) {
+                    // Show every other label for 8-14 days
+                    shouldShowLabel = i % 2 === 0 || i === dataCount - 1;
+                  } else if (dataCount <= 30) {
+                    // Show ~5 labels for 15-30 days
+                    const step = Math.floor(dataCount / 5);
+                    shouldShowLabel = i % step === 0 || i === dataCount - 1;
+                  } else if (dataCount <= 90) {
+                    // Show ~7 labels for 31-90 days
+                    const step = Math.floor(dataCount / 7);
+                    shouldShowLabel = i % step === 0 || i === dataCount - 1;
+                  } else {
+                    // Show ~10 labels for >90 days
+                    const step = Math.floor(dataCount / 10);
+                    shouldShowLabel = i % step === 0 || i === dataCount - 1;
+                  }
+
+                  return shouldShowLabel ? (
+                    <text
+                      x={x}
+                      y={height - padding.bottom + 20}
+                      textAnchor="middle"
+                      fontSize="11"
+                      fill={darkMode ? '#9CA3AF' : '#6B7280'}
+                    >
+                      {formatDate(point.date)}
+                    </text>
+                  ) : null;
+                })()}
               </g>
             );
           })}
@@ -2378,72 +2403,49 @@ const WorkoutTracker = () => {
 
     const now = new Date();
     let startDate;
-    let groupBy = 'day'; // 'day', 'week', or 'month'
 
-    // Determine date range based on timelineRange
+    // Determine date range based on timelineRange (always use daily grouping)
     switch (timelineRange) {
       case '2weeks':
         startDate = new Date(now);
         startDate.setDate(now.getDate() - 14);
-        groupBy = 'day';
         break;
       case '4weeks':
         startDate = new Date(now);
         startDate.setDate(now.getDate() - 28);
-        groupBy = 'week';
         break;
       case '3months':
         startDate = new Date(now);
         startDate.setMonth(now.getMonth() - 3);
-        groupBy = 'week';
         break;
       case '6months':
         startDate = new Date(now);
         startDate.setMonth(now.getMonth() - 6);
-        groupBy = 'month';
         break;
       case 'all':
         const sortedWorkouts = [...completedWorkouts].sort((a, b) => new Date(a.date) - new Date(b.date));
         startDate = new Date(sortedWorkouts[0].date);
-        // Determine groupBy based on data span
-        const daysDiff = (now - startDate) / (1000 * 60 * 60 * 24);
-        groupBy = daysDiff > 180 ? 'month' : 'week';
         break;
     }
 
-    // Group workouts by day, week, or month
+    // Group workouts by day (always daily)
     const grouped = {};
 
     completedWorkouts.forEach(workout => {
       const workoutDate = new Date(workout.date);
       if (workoutDate < startDate) return;
 
-      let key;
-      if (groupBy === 'day') {
-        // Get start of day
-        const dayStart = new Date(workoutDate);
-        dayStart.setHours(0, 0, 0, 0);
-        key = dayStart.toISOString().split('T')[0];
-      } else if (groupBy === 'week') {
-        // Get start of week (Monday)
-        const weekStart = new Date(workoutDate);
-        const day = weekStart.getDay();
-        const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
-        weekStart.setDate(diff);
-        weekStart.setHours(0, 0, 0, 0);
-        key = weekStart.toISOString().split('T')[0];
-      } else {
-        // Get start of month
-        const monthStart = new Date(workoutDate.getFullYear(), workoutDate.getMonth(), 1);
-        key = monthStart.toISOString().split('T')[0];
-      }
+      // Always group by day
+      const dayStart = new Date(workoutDate);
+      dayStart.setHours(0, 0, 0, 0);
+      const key = dayStart.toISOString().split('T')[0];
 
       if (!grouped[key]) {
         grouped[key] = {
           date: key,
           workouts: [],
           volume: 0,
-          frequency: 0,
+          reps: 0,
           mainLifts: {
             deadlift: [],
             squat: [],
@@ -2454,21 +2456,29 @@ const WorkoutTracker = () => {
       }
 
       grouped[key].workouts.push(workout);
-      grouped[key].frequency += 1;
 
-      // Calculate volume and track main lifts
+      // Calculate volume, reps, and track main lifts
       workout.exercises.forEach(exercise => {
         const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
                                exercise.name.toLowerCase().includes('plank') ||
                                exercise.name.toLowerCase().includes('hanging') ||
                                exercise.name.toLowerCase().includes('rollout');
 
+        const isBodyweightExercise = exercise.name.toLowerCase().includes('pull-up') ||
+                                     exercise.name.toLowerCase().includes('dip') ||
+                                     exercise.name.toLowerCase().includes('chin-up') ||
+                                     exercise.name.toLowerCase().includes('push-up');
+
         exercise.sets.forEach(set => {
           const weight = parseFloat(set.weight) || 0;
           const reps = parseFloat(set.reps) || 0;
 
-          if (weight === 0 && reps === 0) return; // Skip empty sets
+          if (reps === 0) return; // Skip empty sets
 
+          // Count reps for all exercises (core, bodyweight, weighted)
+          grouped[key].reps += reps;
+
+          // Count volume only for weighted exercises
           if (!isCoreExercise && weight > 0 && reps > 0) {
             grouped[key].volume += weight * reps;
           }
@@ -3385,15 +3395,15 @@ const WorkoutTracker = () => {
                       </div>
                     </div>
 
-                    {/* Frequency Chart */}
+                    {/* Total Reps Chart */}
                     <div>
                       <div className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
-                        Workout Frequency (sessions)
+                        Total Reps (per day)
                       </div>
                       <div className="flex justify-center">
                         <LineChart
                           data={timelineData}
-                          metric="frequency"
+                          metric="reps"
                           darkMode={darkMode}
                           onPointClick={setSelectedTimelinePoint}
                           selectedPoint={selectedTimelinePoint}
@@ -4280,11 +4290,11 @@ const WorkoutTracker = () => {
               </div>
 
               <div className={`${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-4`}>
-                <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Workouts</div>
+                <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`}>Total Reps</div>
                 <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                  {selectedTimelinePoint.frequency}
+                  {selectedTimelinePoint.reps}
                 </div>
-                <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>sessions</div>
+                <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>reps</div>
               </div>
             </div>
 
