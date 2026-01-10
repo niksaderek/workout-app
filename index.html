@@ -1067,7 +1067,7 @@ const WorkoutTracker = () => {
   const [dragStartPosition, setDragStartPosition] = useState({ x: 0, y: 0 });
   const [isDraggingExercise, setIsDraggingExercise] = useState(false);
   const [dropTargetIndex, setDropTargetIndex] = useState(null);
-  const [timelineRange, setTimelineRange] = useState('4weeks'); // '4weeks', '3months', '6months', 'all'
+  const [timelineRange, setTimelineRange] = useState('2weeks'); // '2weeks', '4weeks', '3months', '6months', 'all'
   const [selectedTimelinePoint, setSelectedTimelinePoint] = useState(null);
   const [showUpdateNotification, setShowUpdateNotification] = useState(false);
   const [substituteDropdown, setSubstituteDropdown] = useState(null); // exerciseIndex or null
@@ -2352,10 +2352,15 @@ const WorkoutTracker = () => {
 
     const now = new Date();
     let startDate;
-    let groupBy = 'week'; // 'week' or 'month'
+    let groupBy = 'day'; // 'day', 'week', or 'month'
 
     // Determine date range based on timelineRange
     switch (timelineRange) {
+      case '2weeks':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 14);
+        groupBy = 'day';
+        break;
       case '4weeks':
         startDate = new Date(now);
         startDate.setDate(now.getDate() - 28);
@@ -2380,7 +2385,7 @@ const WorkoutTracker = () => {
         break;
     }
 
-    // Group workouts by week or month
+    // Group workouts by day, week, or month
     const grouped = {};
 
     completedWorkouts.forEach(workout => {
@@ -2388,7 +2393,12 @@ const WorkoutTracker = () => {
       if (workoutDate < startDate) return;
 
       let key;
-      if (groupBy === 'week') {
+      if (groupBy === 'day') {
+        // Get start of day
+        const dayStart = new Date(workoutDate);
+        dayStart.setHours(0, 0, 0, 0);
+        key = dayStart.toISOString().split('T')[0];
+      } else if (groupBy === 'week') {
         // Get start of week (Monday)
         const weekStart = new Date(workoutDate);
         const day = weekStart.getDay();
@@ -3261,6 +3271,7 @@ const WorkoutTracker = () => {
                   {/* Time Range Selector */}
                   <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
                 {[
+                  { value: '2weeks', label: '2 Weeks' },
                   { value: '4weeks', label: '4 Weeks' },
                   { value: '3months', label: '3 Months' },
                   { value: '6months', label: '6 Months' },
