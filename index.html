@@ -3573,7 +3573,7 @@ const WorkoutTracker = () => {
                         <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Set</div>
                         <div className={`${darkMode ? 'text-white' : 'text-gray-900'} font-bold`}>{setIdx + 1}</div>
                       </div>
-                      
+
                       <input
                         type="text"
                         inputMode="decimal"
@@ -3586,9 +3586,9 @@ const WorkoutTracker = () => {
                                  exercise.name.toLowerCase().includes('hanging') ||
                                  exercise.name.toLowerCase().includes('rollout')}
                       />
-                      
+
                       <span className={`${darkMode ? 'text-gray-500' : 'text-gray-400'} font-bold`}>×</span>
-                      
+
                       <input
                         type="number"
                         placeholder="reps"
@@ -3596,6 +3596,22 @@ const WorkoutTracker = () => {
                         onChange={(e) => updateSet(exIdx, setIdx, 'reps', e.target.value)}
                         className={`w-20 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg text-center font-semibold focus:border-gray-500 focus:outline-none`}
                       />
+
+                      {/* Remove Set Button - only show if more than 1 set */}
+                      {exercise.sets.length > 1 && (
+                        <button
+                          onClick={() => {
+                            const updatedLog = { ...currentLog };
+                            updatedLog.exercises[exIdx].sets.splice(setIdx, 1);
+                            setCurrentLog(updatedLog);
+                            soundSystem.buttonPress();
+                          }}
+                          className={`p-2 ${darkMode ? 'bg-red-900/30 hover:bg-red-900/50 text-red-400' : 'bg-red-100 hover:bg-red-200 text-red-600'} rounded-lg transition-colors flex-shrink-0`}
+                          title="Remove set"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </div>
                   ))}
 
