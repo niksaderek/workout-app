@@ -1237,11 +1237,106 @@ const WorkoutTracker = () => {
     };
   }, [draggedExerciseIndex, dragStartPosition]);
 
+  // FUNC_ID: validateAndFixHistoryItem | Validates and repairs corrupted history entries
+  const validateAndFixHistoryItem = (item) => {
+    try {
+      // Ensure exercises exists and is an array
+      if (!item.exercises || !Array.isArray(item.exercises)) {
+        console.warn('Invalid history item - missing exercises array:', item);
+        return null;
+      }
+
+      // Fix each exercise
+      item.exercises = item.exercises.map(exercise => {
+        // If sets is a number (template structure), convert to history structure
+        if (typeof exercise.sets === 'number') {
+          const numSets = exercise.sets;
+          exercise.plannedSets = numSets;
+          exercise.plannedReps = exercise.reps || 10;
+          exercise.sets = Array(numSets).fill(null).map(() => ({
+            weight: '0',
+            reps: exercise.reps || 10
+          }));
+          console.log(`Migrated exercise "${exercise.name}" from template to history structure`);
+        }
+
+        // Ensure sets is an array
+        if (!Array.isArray(exercise.sets)) {
+          console.warn(`Exercise "${exercise.name}" has invalid sets, creating empty array`);
+          exercise.sets = [];
+        }
+
+        // Validate each set has weight and reps
+        exercise.sets = exercise.sets.map(set => ({
+          weight: set?.weight ?? '0',
+          reps: set?.reps ?? 0
+        }));
+
+        // Ensure plannedSets/plannedReps exist
+        exercise.plannedSets = exercise.plannedSets || exercise.sets.length || 3;
+        exercise.plannedReps = exercise.plannedReps || 10;
+
+        return exercise;
+      });
+
+      // Ensure required fields exist
+      return {
+        id: item.id || Date.now(),
+        workoutId: item.workoutId || 0,
+        workoutName: item.workoutName || 'Unknown',
+        workoutEmoji: item.workoutEmoji || '🔥',
+        date: item.date || new Date().toISOString(),
+        exercises: item.exercises,
+        difficulty: item.difficulty || null
+      };
+    } catch (error) {
+      console.error('Error validating history item:', error, item);
+      return null;
+    }
+  };
+
+  // FUNC_ID: cleanupCorruptedData | Validates and fixes corrupted history entries on startup
+  const cleanupCorruptedData = async () => {
+    try {
+      const history = await dbOperations.getHistory();
+      if (!history || history.length === 0) return;
+
+      console.log(`Checking ${history.length} history items for corruption...`);
+      const cleanedHistory = history
+        .map(validateAndFixHistoryItem)
+        .filter(item => item !== null);
+
+      const corruptedCount = history.length - cleanedHistory.length;
+      if (corruptedCount > 0 || cleanedHistory.length !== history.length) {
+        console.log(`Found ${corruptedCount} corrupted entries, cleaning up...`);
+
+        // Clear and restore cleaned data
+        const db = await initDB();
+        const tx = db.transaction('history', 'readwrite');
+        const store = tx.objectStore('history');
+        await store.clear();
+
+        for (const item of cleanedHistory) {
+          await dbOperations.saveHistory(item);
+        }
+
+        console.log(`Cleanup complete. ${cleanedHistory.length} valid entries restored.`);
+        return cleanedHistory;
+      }
+
+      console.log('No corrupted data found.');
+      return history;
+    } catch (error) {
+      console.error('Error cleaning up data:', error);
+      return null;
+    }
+  };
+
   const loadData = async () => {
     try {
       setLoading(true);
       const savedWorkouts = await dbOperations.getWorkouts();
-      const savedHistory = await dbOperations.getHistory();
+      let savedHistory = await dbOperations.getHistory();
       const latestBodyWeight = await dbOperations.getLatestBodyWeight();
 
       // Check if IndexedDB is empty but localStorage has backup
@@ -1286,6 +1381,13 @@ const WorkoutTracker = () => {
           // Update backup
           localStorage.setItem('history_backup', JSON.stringify(savedHistory));
         }
+      }
+
+      // Cleanup any corrupted data from history
+      const cleanedHistory = await cleanupCorruptedData();
+      if (cleanedHistory) {
+        setCompletedWorkouts(cleanedHistory);
+        localStorage.setItem('history_backup', JSON.stringify(cleanedHistory));
       }
 
       // Load body weight and gender (no backup needed - stored only in IndexedDB)
@@ -2163,12 +2265,26 @@ const WorkoutTracker = () => {
         setWorkouts(backupData.workouts);
         localStorage.setItem('workouts_backup', JSON.stringify(backupData.workouts));
 
-        // Restore history
-        for (const item of backupData.history) {
+        // Validate and fix history items before restoring
+        console.log(`Validating ${backupData.history.length} history items...`);
+        const validHistory = backupData.history
+          .map(validateAndFixHistoryItem)
+          .filter(item => item !== null); // Remove invalid items
+
+        console.log(`${validHistory.length} valid history items after validation`);
+
+        // Clear existing history first to prevent duplicates
+        const db = await initDB();
+        const tx = db.transaction('history', 'readwrite');
+        const store = tx.objectStore('history');
+        await store.clear();
+
+        // Restore validated history
+        for (const item of validHistory) {
           await dbOperations.saveHistory(item);
         }
-        setCompletedWorkouts(backupData.history);
-        localStorage.setItem('history_backup', JSON.stringify(backupData.history));
+        setCompletedWorkouts(validHistory);
+        localStorage.setItem('history_backup', JSON.stringify(validHistory));
 
         // Restore body weight and gender if present
         if (backupData.bodyWeight) {
@@ -2177,7 +2293,12 @@ const WorkoutTracker = () => {
           setGender(backupData.bodyWeight.gender || 'male');
         }
 
-        alert('Backup restored successfully!');
+        const invalidCount = backupData.history.length - validHistory.length;
+        if (invalidCount > 0) {
+          alert(`Backup restored! ${invalidCount} corrupted entries were fixed/skipped.`);
+        } else {
+          alert('Backup restored successfully!');
+        }
       } catch (error) {
         console.error('Error restoring backup:', error);
         alert('Failed to restore backup. Please check the file.');
