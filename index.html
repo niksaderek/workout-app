@@ -1007,6 +1007,15 @@ const parseCSVWorkout = (csvText) => {
     }
   });
 
+  // Auto-assign muscle groups to all exercises
+  workouts.forEach(workout => {
+    workout.exercises.forEach(exercise => {
+      if (!exercise.muscleGroup) {
+        exercise.muscleGroup = getMuscleGroup(exercise.name);
+      }
+    });
+  });
+
   return workouts;
 };
 
@@ -1066,11 +1075,11 @@ const WorkoutTracker = () => {
       name: "DAY 1 – PUSH A (Heavy Bench & Quads)",
       emoji: "🦵",
       exercises: [
-        { name: "Bench Press", sets: 3, reps: 5, notes: "Main lift. Last set AMRAP." },
-        { name: "Back Squat", sets: 3, reps: 8, notes: "Focus on depth and control." },
-        { name: "Lateral Raises", sets: 4, reps: "15–20", notes: "Light weight, burn effect." },
-        { name: "Triceps Pushdown", sets: 3, reps: 12, notes: "Focus on full lockout." },
-        { name: "Ab Wheel Rollout", sets: 3, reps: "8–10", notes: "Anti-extension core." }
+        { name: "Bench Press", sets: 3, reps: 5, notes: "Main lift. Last set AMRAP.", muscleGroup: "chest" },
+        { name: "Back Squat", sets: 3, reps: 8, notes: "Focus on depth and control.", muscleGroup: "legs" },
+        { name: "Lateral Raises", sets: 4, reps: "15–20", notes: "Light weight, burn effect.", muscleGroup: "shoulders" },
+        { name: "Triceps Pushdown", sets: 3, reps: 12, notes: "Focus on full lockout.", muscleGroup: "arms" },
+        { name: "Ab Wheel Rollout", sets: 3, reps: "8–10", notes: "Anti-extension core.", muscleGroup: "core" }
       ]
     },
     {
@@ -1078,12 +1087,12 @@ const WorkoutTracker = () => {
       name: "DAY 2 – PULL A (Deadlift & Lat Width)",
       emoji: "💪",
       exercises: [
-        { name: "Trap Bar Deadlift", sets: 3, reps: 5, notes: "Explosive from the floor." },
-        { name: "Pull-ups / Lat Pulldown", sets: 3, reps: "8–10", notes: "Wide grip for V-taper." },
-        { name: "Face Pulls", sets: 3, reps: 15, notes: "1-second pause at contraction." },
-        { name: "Hammer Curls", sets: 3, reps: 12, notes: "Bicep and forearm thickness." },
-        { name: "Back Extension", sets: 3, reps: 12, notes: "Lower back strength." },
-        { name: "Dead Bug", sets: 2, reps: "10/side", notes: "Core stability." }
+        { name: "Trap Bar Deadlift", sets: 3, reps: 5, notes: "Explosive from the floor.", muscleGroup: "back" },
+        { name: "Pull-ups / Lat Pulldown", sets: 3, reps: "8–10", notes: "Wide grip for V-taper.", muscleGroup: "back" },
+        { name: "Face Pulls", sets: 3, reps: 15, notes: "1-second pause at contraction.", muscleGroup: "shoulders" },
+        { name: "Hammer Curls", sets: 3, reps: 12, notes: "Bicep and forearm thickness.", muscleGroup: "arms" },
+        { name: "Back Extension", sets: 3, reps: 12, notes: "Lower back strength.", muscleGroup: "back" },
+        { name: "Dead Bug", sets: 2, reps: "10/side", notes: "Core stability.", muscleGroup: "core" }
       ]
     },
     {
@@ -1091,12 +1100,12 @@ const WorkoutTracker = () => {
       name: "DAY 3 – PUSH B (Heavy OHP & Upper Chest)",
       emoji: "⚡",
       exercises: [
-        { name: "Overhead Press", sets: 3, reps: "5–6", notes: "Squeeze glutes, no cheating." },
-        { name: "Bulgarian Split Squat", sets: 3, reps: 10, notes: "Per leg. Key for athletic build." },
-        { name: "Incline DB Press", sets: 3, reps: "10–12", notes: "Focus on upper chest." },
-        { name: "Dips", sets: 3, reps: "To failure", notes: "Lean forward." },
-        { name: "Pallof Press", sets: 3, reps: "12/side", notes: "Anti-rotation core." },
-        { name: "Side Plank", sets: 2, reps: "30–45 s", notes: "Oblique stability." }
+        { name: "Overhead Press", sets: 3, reps: "5–6", notes: "Squeeze glutes, no cheating.", muscleGroup: "shoulders" },
+        { name: "Bulgarian Split Squat", sets: 3, reps: 10, notes: "Per leg. Key for athletic build.", muscleGroup: "legs" },
+        { name: "Incline DB Press", sets: 3, reps: "10–12", notes: "Focus on upper chest.", muscleGroup: "chest" },
+        { name: "Dips", sets: 3, reps: "To failure", notes: "Lean forward.", muscleGroup: "chest" },
+        { name: "Pallof Press", sets: 3, reps: "12/side", notes: "Anti-rotation core.", muscleGroup: "core" },
+        { name: "Side Plank", sets: 2, reps: "30–45 s", notes: "Oblique stability.", muscleGroup: "core" }
       ]
     },
     {
@@ -1104,11 +1113,11 @@ const WorkoutTracker = () => {
       name: "DAY 4 – PULL B (Posterior Chain & Back Thickness)",
       emoji: "🎯",
       exercises: [
-        { name: "Romanian Deadlift", sets: 3, reps: 10, notes: "Focus on hamstring stretch." },
-        { name: "Dumbbell Row", sets: 3, reps: 10, notes: "Pull elbow to hip." },
-        { name: "Farmer's Walk", sets: 3, reps: "40 m", notes: "Heavy dumbbells (grip and core)." },
-        { name: "Hanging Leg Raises", sets: 3, reps: "12–15", notes: "Controlled leg lift." },
-        { name: "Back Extension Hold", sets: 2, reps: "30 s", notes: "Erector spinae endurance." }
+        { name: "Romanian Deadlift", sets: 3, reps: 10, notes: "Focus on hamstring stretch.", muscleGroup: "back" },
+        { name: "Dumbbell Row", sets: 3, reps: 10, notes: "Pull elbow to hip.", muscleGroup: "back" },
+        { name: "Farmer's Walk", sets: 3, reps: "40 m", notes: "Heavy dumbbells (grip and core).", muscleGroup: "other" },
+        { name: "Hanging Leg Raises", sets: 3, reps: "12–15", notes: "Controlled leg lift.", muscleGroup: "core" },
+        { name: "Back Extension Hold", sets: 2, reps: "30 s", notes: "Erector spinae endurance.", muscleGroup: "back" }
       ]
     }
   ]);
@@ -1501,6 +1510,37 @@ const WorkoutTracker = () => {
     return null; // Not a main lift
   };
 
+  // FUNC_ID: getMuscleGroup | Auto-detect muscle group for an exercise
+  // Returns muscle group (chest, back, shoulders, legs, arms, core, other) or null
+  const getMuscleGroup = (exerciseName) => {
+    const normalizedName = exerciseName.toLowerCase().trim();
+
+    // Check popularExercises for exact or fuzzy match
+    for (const [group, exercises] of Object.entries(popularExercises)) {
+      if (exercises.some(ex => ex.toLowerCase() === normalizedName)) {
+        return group;
+      }
+    }
+
+    // Fallback: keyword-based categorization for custom exercises
+    const keywords = {
+      chest: ['bench', 'press', 'fly', 'chest', 'pec'],
+      back: ['row', 'pull', 'lat', 'deadlift', 'mrtvo'],
+      shoulders: ['raise', 'shoulder', 'delt', 'overhead', 'military', 'arnold'],
+      legs: ['squat', 'lunge', 'leg', 'calf', 'čučanj'],
+      arms: ['curl', 'extension', 'tricep', 'bicep'],
+      core: ['plank', 'crunch', 'ab', 'core', 'pallof', 'rollout', 'bug']
+    };
+
+    for (const [group, words] of Object.entries(keywords)) {
+      if (words.some(word => normalizedName.includes(word))) {
+        return group;
+      }
+    }
+
+    return 'other'; // Default fallback
+  };
+
   // Calculate estimated 1RM for all exercises in history
   const getAll1RMs = () => {
     const exerciseMaxes = {}; // { exerciseName: best1RM }
@@ -1817,6 +1857,7 @@ const WorkoutTracker = () => {
           name: ex.name,
           plannedSets: ex.sets,
           plannedReps: ex.reps,
+          muscleGroup: ex.muscleGroup || getMuscleGroup(ex.name), // Auto-assign if missing
           difficulty: null, // User can optionally rate difficulty
           sets: Array(ex.sets).fill(null).map(() => ({
             weight: lastWeight,
@@ -1942,7 +1983,7 @@ const WorkoutTracker = () => {
 
   const addExercise = () => {
     const updated = { ...editingWorkout };
-    updated.exercises.push({ name: '', sets: 3, reps: 10, notes: '' });
+    updated.exercises.push({ name: '', sets: 3, reps: 10, notes: '', muscleGroup: 'other' });
     setEditingWorkout(updated);
   };
 
@@ -2558,6 +2599,31 @@ const WorkoutTracker = () => {
       }
     }
     
+    // Calculate muscle group stats (this week)
+    const muscleGroupStats = {};
+    thisWeekWorkouts.forEach(workout => {
+      workout.exercises.forEach(exercise => {
+        const muscleGroup = exercise.muscleGroup || getMuscleGroup(exercise.name);
+
+        if (!muscleGroupStats[muscleGroup]) {
+          muscleGroupStats[muscleGroup] = { volume: 0, reps: 0, sets: 0 };
+        }
+
+        exercise.sets.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          const rep = parseFloat(set.reps) || 0;
+
+          if (rep > 0) {
+            muscleGroupStats[muscleGroup].reps += rep;
+            muscleGroupStats[muscleGroup].sets += 1;
+            if (weight > 0) {
+              muscleGroupStats[muscleGroup].volume += weight * rep;
+            }
+          }
+        });
+      });
+    });
+
     return {
       thisWeek,
       lastWeek,
@@ -2571,7 +2637,8 @@ const WorkoutTracker = () => {
       allTimeVolume: Math.round(allTimeVolume),
       allTimeReps,
       allTimeCoreSets,
-      avgWorkoutsPerWeek
+      avgWorkoutsPerWeek,
+      muscleGroupStats
     };
   };
 
@@ -2798,7 +2865,8 @@ const WorkoutTracker = () => {
       allTimeVolume: 0,
       allTimeReps: 0,
       allTimeCoreSets: 0,
-      avgWorkoutsPerWeek: 0
+      avgWorkoutsPerWeek: 0,
+      muscleGroupStats: {}
     };
   }
 
@@ -3193,6 +3261,41 @@ const WorkoutTracker = () => {
                 </div>
               )}
             </div>
+
+            {/* Muscle Group Stats (This Week) */}
+            {Object.keys(detailedStats.muscleGroupStats || {}).length > 0 && (
+              <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
+                <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4 flex items-center gap-2`}>
+                  <Target size={20} />
+                  Muscle Group Breakdown (This Week)
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {Object.entries(detailedStats.muscleGroupStats)
+                    .sort((a, b) => b[1].volume - a[1].volume)
+                    .map(([group, stats]) => {
+                      return (
+                        <div
+                          key={group}
+                          className={`${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-xl p-3`}
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <Dumbbell size={16} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                            <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} capitalize`}>
+                              {group}
+                            </span>
+                          </div>
+                          <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                            {Math.round(stats.volume)} kg
+                          </div>
+                          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {stats.sets} sets · {stats.reps} reps
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
 
             {/* Performance Overview */}
             <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
@@ -3979,6 +4082,21 @@ const WorkoutTracker = () => {
                     >
                       <Trash2 size={20} className="text-white" />
                     </button>
+                  </div>
+                  <div className="flex gap-2 pl-7 mb-2">
+                    <select
+                      value={ex.muscleGroup || getMuscleGroup(ex.name)}
+                      onChange={(e) => updateExercise(idx, 'muscleGroup', e.target.value)}
+                      className={`flex-1 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg focus:border-gray-500 focus:outline-none text-sm`}
+                    >
+                      <option value="chest">Chest</option>
+                      <option value="back">Back</option>
+                      <option value="shoulders">Shoulders</option>
+                      <option value="legs">Legs</option>
+                      <option value="arms">Arms</option>
+                      <option value="core">Core</option>
+                      <option value="other">Other</option>
+                    </select>
                   </div>
                   <div className="flex gap-2 pl-7">
                     <input
