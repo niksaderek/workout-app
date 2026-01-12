@@ -1147,6 +1147,7 @@ const WorkoutTracker = () => {
   const [exerciseProgressModal, setExerciseProgressModal] = useState(null); // {exerciseName: string} or null
   const [showExerciseProgress, setShowExerciseProgress] = useState(false); // collapsible Exercise Progress section (default: hidden)
   const [showProgressTimeline, setShowProgressTimeline] = useState(false); // collapsible Progress Timeline (default: hidden)
+  const [showMuscleGroupBreakdown, setShowMuscleGroupBreakdown] = useState(false); // collapsible Muscle Group Breakdown (default: hidden)
   const [expandedWorkouts, setExpandedWorkouts] = useState({}); // {workoutId: boolean} - track which workout previews are expanded
   const [statsPeriod, setStatsPeriod] = useState('week'); // 'week', 'month', 'all' - period selector for stats
   const [bodyWeight, setBodyWeight] = useState(null); // Current body weight in kg
@@ -2599,30 +2600,38 @@ const WorkoutTracker = () => {
       }
     }
     
-    // Calculate muscle group stats (this week)
-    const muscleGroupStats = {};
-    thisWeekWorkouts.forEach(workout => {
-      workout.exercises.forEach(exercise => {
-        const muscleGroup = exercise.muscleGroup || getMuscleGroup(exercise.name);
+    // Helper function to calculate muscle group stats for any period
+    const calculateMuscleGroupStats = (workouts) => {
+      const stats = {};
+      workouts.forEach(workout => {
+        workout.exercises.forEach(exercise => {
+          const muscleGroup = exercise.muscleGroup || getMuscleGroup(exercise.name);
 
-        if (!muscleGroupStats[muscleGroup]) {
-          muscleGroupStats[muscleGroup] = { volume: 0, reps: 0, sets: 0 };
-        }
-
-        exercise.sets.forEach(set => {
-          const weight = parseFloat(set.weight) || 0;
-          const rep = parseFloat(set.reps) || 0;
-
-          if (rep > 0) {
-            muscleGroupStats[muscleGroup].reps += rep;
-            muscleGroupStats[muscleGroup].sets += 1;
-            if (weight > 0) {
-              muscleGroupStats[muscleGroup].volume += weight * rep;
-            }
+          if (!stats[muscleGroup]) {
+            stats[muscleGroup] = { volume: 0, reps: 0, sets: 0 };
           }
+
+          exercise.sets.forEach(set => {
+            const weight = parseFloat(set.weight) || 0;
+            const rep = parseFloat(set.reps) || 0;
+
+            if (rep > 0) {
+              stats[muscleGroup].reps += rep;
+              stats[muscleGroup].sets += 1;
+              if (weight > 0) {
+                stats[muscleGroup].volume += weight * rep;
+              }
+            }
+          });
         });
       });
-    });
+      return stats;
+    };
+
+    // Calculate muscle group stats for each period
+    const muscleGroupStatsWeek = calculateMuscleGroupStats(thisWeekWorkouts);
+    const muscleGroupStatsMonth = calculateMuscleGroupStats(thisMonthWorkouts);
+    const muscleGroupStatsAll = calculateMuscleGroupStats(completedWorkouts);
 
     return {
       thisWeek,
@@ -2638,7 +2647,9 @@ const WorkoutTracker = () => {
       allTimeReps,
       allTimeCoreSets,
       avgWorkoutsPerWeek,
-      muscleGroupStats
+      muscleGroupStatsWeek,
+      muscleGroupStatsMonth,
+      muscleGroupStatsAll
     };
   };
 
@@ -2866,7 +2877,9 @@ const WorkoutTracker = () => {
       allTimeReps: 0,
       allTimeCoreSets: 0,
       avgWorkoutsPerWeek: 0,
-      muscleGroupStats: {}
+      muscleGroupStatsWeek: {},
+      muscleGroupStatsMonth: {},
+      muscleGroupStatsAll: {}
     };
   }
 
@@ -3262,41 +3275,6 @@ const WorkoutTracker = () => {
               )}
             </div>
 
-            {/* Muscle Group Stats (This Week) */}
-            {Object.keys(detailedStats.muscleGroupStats || {}).length > 0 && (
-              <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
-                <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4 flex items-center gap-2`}>
-                  <Target size={20} />
-                  Muscle Group Breakdown (This Week)
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {Object.entries(detailedStats.muscleGroupStats)
-                    .sort((a, b) => b[1].volume - a[1].volume)
-                    .map(([group, stats]) => {
-                      return (
-                        <div
-                          key={group}
-                          className={`${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-xl p-3`}
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <Dumbbell size={16} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
-                            <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} capitalize`}>
-                              {group}
-                            </span>
-                          </div>
-                          <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                            {Math.round(stats.volume)} kg
-                          </div>
-                          <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {stats.sets} sets · {stats.reps} reps
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            )}
-
             {/* Performance Overview */}
             <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
               <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>Performance Overview</h3>
@@ -3453,6 +3431,76 @@ const WorkoutTracker = () => {
                 </div>
               );
             })()}
+
+            {/* Muscle Group Breakdown */}
+            <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
+              <button
+                onClick={() => setShowMuscleGroupBreakdown(!showMuscleGroupBreakdown)}
+                className="w-full flex items-center justify-between mb-4"
+              >
+                <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center gap-2`}>
+                  <Target size={20} />
+                  Muscle Group Breakdown
+                </h3>
+                {showMuscleGroupBreakdown ? (
+                  <ChevronUp size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                ) : (
+                  <ChevronDown size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                )}
+              </button>
+
+              {showMuscleGroupBreakdown && (() => {
+                // Get muscle group stats based on selected period
+                const muscleGroupData = statsPeriod === 'week'
+                  ? detailedStats.muscleGroupStatsWeek
+                  : statsPeriod === 'month'
+                  ? detailedStats.muscleGroupStatsMonth
+                  : detailedStats.muscleGroupStatsAll;
+
+                const periodLabel = statsPeriod === 'week' ? 'This Week' : statsPeriod === 'month' ? 'This Month' : 'All Time';
+
+                if (!muscleGroupData || Object.keys(muscleGroupData).length === 0) {
+                  return (
+                    <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      No muscle group data for {periodLabel.toLowerCase()}
+                    </div>
+                  );
+                }
+
+                return (
+                  <>
+                    <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
+                      Training volume distribution ({periodLabel})
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {Object.entries(muscleGroupData)
+                        .sort((a, b) => b[1].volume - a[1].volume)
+                        .map(([group, stats]) => {
+                          return (
+                            <div
+                              key={group}
+                              className={`${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-xl p-3`}
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <Dumbbell size={16} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                                <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} capitalize`}>
+                                  {group}
+                                </span>
+                              </div>
+                              <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                {Math.round(stats.volume)} kg
+                              </div>
+                              <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                {stats.sets} sets · {stats.reps} reps
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
 
             {/* Strength Standards */}
             {(() => {
