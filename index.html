@@ -1148,6 +1148,8 @@ const WorkoutTracker = () => {
   const [showExerciseProgress, setShowExerciseProgress] = useState(false); // collapsible Exercise Progress section (default: hidden)
   const [showProgressTimeline, setShowProgressTimeline] = useState(false); // collapsible Progress Timeline (default: hidden)
   const [showMuscleGroupBreakdown, setShowMuscleGroupBreakdown] = useState(false); // collapsible Muscle Group Breakdown (default: hidden)
+  const [showPersonalRecords, setShowPersonalRecords] = useState(false); // collapsible Personal Records (default: hidden)
+  const [showStrengthStandards, setShowStrengthStandards] = useState(false); // collapsible Strength Standards (default: hidden)
   const [expandedWorkouts, setExpandedWorkouts] = useState({}); // {workoutId: boolean} - track which workout previews are expanded
   const [statsPeriod, setStatsPeriod] = useState('week'); // 'week', 'month', 'all' - period selector for stats
   const [bodyWeight, setBodyWeight] = useState(null); // Current body weight in kg
@@ -3381,20 +3383,33 @@ const WorkoutTracker = () => {
 
               return (
                 <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
-                  <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-2 flex items-center gap-2`}>
-                    <Award size={20} />
-                    Personal Records (Main Lifts)
-                  </h3>
-                  <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
-                    Your best lifts and estimated 1RM (Epley formula). Tap to view progression.
-                  </div>
+                  <button
+                    onClick={() => setShowPersonalRecords(!showPersonalRecords)}
+                    className="w-full flex items-center justify-between mb-4"
+                  >
+                    <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center gap-2`}>
+                      <Award size={20} />
+                      Personal Records (Main Lifts)
+                    </h3>
+                    {showPersonalRecords ? (
+                      <ChevronUp size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                    ) : (
+                      <ChevronDown size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                    )}
+                  </button>
 
-                  {!hasLifts ? (
-                    <div className={`text-center py-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                      No records yet. Complete workouts to see your PRs!
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
+                  {showPersonalRecords && (
+                    <>
+                      <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
+                        Your best lifts and estimated 1RM (Epley formula). Tap to view progression.
+                      </div>
+
+                      {!hasLifts ? (
+                        <div className={`text-center py-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                          No records yet. Complete workouts to see your PRs!
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
                       {Object.keys(bestSets).map(liftName => {
                         const bestSet = bestSets[liftName];
 
@@ -3426,7 +3441,9 @@ const WorkoutTracker = () => {
                           </button>
                         );
                       })}
-                    </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               );
@@ -3512,15 +3529,28 @@ const WorkoutTracker = () => {
 
               return (
                 <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
-                  <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-2 flex items-center gap-2`}>
-                    <Target size={20} />
-                    Strength Standards
-                  </h3>
-                  <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
-                    Your strength level based on estimated 1RM relative to your {bodyWeight} kg bodyweight
-                  </div>
+                  <button
+                    onClick={() => setShowStrengthStandards(!showStrengthStandards)}
+                    className="w-full flex items-center justify-between mb-4"
+                  >
+                    <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center gap-2`}>
+                      <Target size={20} />
+                      Strength Standards
+                    </h3>
+                    {showStrengthStandards ? (
+                      <ChevronUp size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                    ) : (
+                      <ChevronDown size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                    )}
+                  </button>
 
-                  <div className="space-y-5">
+                  {showStrengthStandards && (
+                    <>
+                      <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
+                        Your strength level based on estimated 1RM relative to your {bodyWeight} kg bodyweight
+                      </div>
+
+                      <div className="space-y-5">
                     {Object.keys(mainLifts1RMs).map(liftName => {
                       const estimated1RM = mainLifts1RMs[liftName];
                       const standard = getStrengthStandard(liftName, estimated1RM, bodyWeight, gender);
@@ -3591,7 +3621,9 @@ const WorkoutTracker = () => {
                         </div>
                       );
                     })}
-                  </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               );
             })()}
