@@ -1455,6 +1455,52 @@ const WorkoutTracker = () => {
     return weight * (1 + reps / 30);
   };
 
+  // FUNC_ID: categorizeExercise | Maps exercise names to main lift categories
+  // Explicit exercise-to-category mapping for main compound lifts
+  // Prevents false positives (e.g., "Leg Press" → Overhead Press bug)
+  const EXERCISE_CATEGORIES = {
+    'Bench Press': [
+      'bench press', 'bench',
+      'incline bench', 'decline bench',
+      'dumbbell bench', 'db bench',
+      'close grip bench', 'close-grip bench',
+      'incline db press'
+    ],
+    'Squat': [
+      'squat', 'čučanj', 'cucanj',
+      'back squat', 'front squat',
+      'goblet squat', 'hack squat',
+      'bulgarian split squat'
+    ],
+    'Deadlift': [
+      'deadlift', 'mrtvo dizanje', 'mrtvo',
+      'trap bar deadlift', 'trap bar',
+      'romanian deadlift', 'rdl',
+      'sumo deadlift', 'stiff leg deadlift'
+    ],
+    'Overhead Press': [
+      'overhead press', 'ohp',
+      'military press', 'shoulder press',
+      'vojnički press', 'vojnicki',
+      'dumbbell shoulder press', 'db shoulder press',
+      'seated press', 'standing press',
+      'arnold press'
+    ]
+  };
+
+  // Categorize exercise name to main lift category (or null if not a main lift)
+  const categorizeExercise = (exerciseName) => {
+    const lowerName = exerciseName.toLowerCase().trim();
+
+    for (const [category, variations] of Object.entries(EXERCISE_CATEGORIES)) {
+      if (variations.some(variation => lowerName.includes(variation))) {
+        return category;
+      }
+    }
+
+    return null; // Not a main lift
+  };
+
   // Calculate estimated 1RM for all exercises in history
   const getAll1RMs = () => {
     const exerciseMaxes = {}; // { exerciseName: best1RM }
@@ -1502,25 +1548,14 @@ const WorkoutTracker = () => {
       'Overhead Press': null
     };
 
-    // Fuzzy matching: map exercise names to standard lift categories
+    // Use explicit categorization to map exercises to main lift categories
     Object.keys(all1RMs).forEach(exerciseName => {
-      const lowerName = exerciseName.toLowerCase();
+      const category = categorizeExercise(exerciseName);
 
-      if (lowerName.includes('bench press') || lowerName.includes('bench')) {
-        if (!mainLifts['Bench Press'] || all1RMs[exerciseName] > mainLifts['Bench Press']) {
-          mainLifts['Bench Press'] = all1RMs[exerciseName];
-        }
-      } else if (lowerName.includes('squat') || lowerName.includes('čučanj')) {
-        if (!mainLifts['Squat'] || all1RMs[exerciseName] > mainLifts['Squat']) {
-          mainLifts['Squat'] = all1RMs[exerciseName];
-        }
-      } else if (lowerName.includes('deadlift') || lowerName.includes('mrtvo')) {
-        if (!mainLifts['Deadlift'] || all1RMs[exerciseName] > mainLifts['Deadlift']) {
-          mainLifts['Deadlift'] = all1RMs[exerciseName];
-        }
-      } else if (lowerName.includes('overhead press') || lowerName.includes('ohp') || lowerName.includes('press') && !lowerName.includes('bench')) {
-        if (!mainLifts['Overhead Press'] || all1RMs[exerciseName] > mainLifts['Overhead Press']) {
-          mainLifts['Overhead Press'] = all1RMs[exerciseName];
+      if (category) {
+        // Track the best 1RM for this category
+        if (!mainLifts[category] || all1RMs[exerciseName] > mainLifts[category]) {
+          mainLifts[category] = all1RMs[exerciseName];
         }
       }
     });
@@ -1580,19 +1615,9 @@ const WorkoutTracker = () => {
     completedWorkouts.forEach(workout => {
       workout.exercises.forEach(exercise => {
         const exerciseName = exercise.name;
-        const lowerName = exerciseName.toLowerCase();
 
-        // Determine which main lift category this exercise belongs to
-        let category = null;
-        if (lowerName.includes('bench press') || lowerName.includes('bench')) {
-          category = 'Bench Press';
-        } else if (lowerName.includes('squat')) {
-          category = 'Squat';
-        } else if (lowerName.includes('deadlift') || lowerName.includes('mrtvo')) {
-          category = 'Deadlift';
-        } else if (lowerName.includes('overhead press') || lowerName.includes('ohp') || (lowerName.includes('press') && !lowerName.includes('bench'))) {
-          category = 'Overhead Press';
-        }
+        // Use explicit categorization
+        const category = categorizeExercise(exerciseName);
 
         if (!category) return;
 
@@ -2448,60 +2473,37 @@ const WorkoutTracker = () => {
       ? Math.round(((thisMonth.volume - lastMonth.volume) / lastMonth.volume) * 100)
       : 0;
     
-    // Personal records - only track main lifts
-    const mainLiftsForPRs = {
-      'Mrtvo dizanje (Trap Bar)': null,
-      'Squat': null,
-      'Bench Press': null,
-      'Overhead Press (vojnički press)': null,
-      'Lat Pulldown (ili zgibovi)': null
+    // Personal records - track max weight per category using explicit categorization
+    const categoryMaxes = {
+      'Bench Press': { weight: null, exerciseName: null },
+      'Squat': { weight: null, exerciseName: null },
+      'Deadlift': { weight: null, exerciseName: null },
+      'Overhead Press': { weight: null, exerciseName: null }
     };
-    
+
     completedWorkouts.forEach(workout => {
       workout.exercises.forEach(exercise => {
+        const category = categorizeExercise(exercise.name);
+
+        if (!category) return; // Skip non-main lifts
+
         exercise.sets.forEach(set => {
           const weight = parseFloat(set.weight) || 0;
           if (weight > 0) {
-            // Check for Deadlift
-            if (exercise.name.includes('Mrtvo dizanje')) {
-              if (!mainLiftsForPRs['Mrtvo dizanje (Trap Bar)'] || weight > mainLiftsForPRs['Mrtvo dizanje (Trap Bar)']) {
-                mainLiftsForPRs['Mrtvo dizanje (Trap Bar)'] = weight;
-              }
-            }
-            // Check for Squat (Front or Back)
-            else if (exercise.name.includes('Čučanj')) {
-              if (!mainLiftsForPRs['Squat'] || weight > mainLiftsForPRs['Squat']) {
-                mainLiftsForPRs['Squat'] = weight;
-              }
-            }
-            // Check for Bench Press (regular or Incline)
-            else if (exercise.name.includes('Bench Press')) {
-              if (!mainLiftsForPRs['Bench Press'] || weight > mainLiftsForPRs['Bench Press']) {
-                mainLiftsForPRs['Bench Press'] = weight;
-              }
-            }
-            // Check for Overhead Press
-            else if (exercise.name.includes('Overhead Press')) {
-              if (!mainLiftsForPRs['Overhead Press (vojnički press)'] || weight > mainLiftsForPRs['Overhead Press (vojnički press)']) {
-                mainLiftsForPRs['Overhead Press (vojnički press)'] = weight;
-              }
-            }
-            // Check for Lat Pulldown or Pull-ups
-            else if (exercise.name.includes('Lat Pulldown') || exercise.name.includes('Zgibovi')) {
-              if (!mainLiftsForPRs['Lat Pulldown (ili zgibovi)'] || weight > mainLiftsForPRs['Lat Pulldown (ili zgibovi)']) {
-                mainLiftsForPRs['Lat Pulldown (ili zgibovi)'] = weight;
-              }
+            if (!categoryMaxes[category].weight || weight > categoryMaxes[category].weight) {
+              categoryMaxes[category].weight = weight;
+              categoryMaxes[category].exerciseName = exercise.name;
             }
           }
         });
       });
     });
-    
-    // Filter out lifts with no data
+
+    // Convert to display format (use actual exercise name, not category)
     const exerciseMaxes = {};
-    Object.entries(mainLiftsForPRs).forEach(([lift, weight]) => {
-      if (weight !== null) {
-        exerciseMaxes[lift] = weight;
+    Object.entries(categoryMaxes).forEach(([category, data]) => {
+      if (data.weight !== null) {
+        exerciseMaxes[data.exerciseName] = data.weight;
       }
     });
     
