@@ -2906,6 +2906,7 @@ const WorkoutTracker = () => {
   }
 
   return (
+    <>
     <div className={`min-h-screen ${darkMode ? 'bg-gray-950' : 'bg-gray-100'} pb-24`}>
       {/* Update Notification Banner */}
       {showUpdateNotification && (
@@ -4791,8 +4792,10 @@ const WorkoutTracker = () => {
         </div>
       )}
 
-      {/* Bottom Navigation */}
-      <div className={`fixed bottom-0 left-0 right-0 ${darkMode ? 'bg-gray-900' : 'bg-white'} border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'} px-4 py-3 transform-gpu z-50`}>
+    </div>
+
+      {/* Bottom Navigation - Always visible, outside main scroll container */}
+      <div className={`fixed bottom-0 left-0 right-0 ${darkMode ? 'bg-gray-900' : 'bg-white'} border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'} px-4 py-3 transform-gpu z-[100]`}>
         <div className="max-w-6xl mx-auto flex justify-around">
           <button
             onClick={() => setActiveView('home')}
@@ -4831,7 +4834,7 @@ const WorkoutTracker = () => {
           </button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
