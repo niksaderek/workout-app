@@ -2611,22 +2611,25 @@ const WorkoutTracker = () => {
       });
     });
     
-    // Calculate average workouts per week
+    // Calculate average workouts per week (from first workout to today)
     let avgWorkoutsPerWeek = 0;
     if (completedWorkouts.length > 0) {
       // Sort workouts by date to find the earliest one
       const sortedWorkouts = [...completedWorkouts].sort((a, b) => new Date(a.date) - new Date(b.date));
       const firstWorkoutDate = new Date(sortedWorkouts[0].date);
-      const lastWorkoutDate = new Date(sortedWorkouts[sortedWorkouts.length - 1].date);
-      
-      const daysBetween = (lastWorkoutDate - firstWorkoutDate) / (1000 * 60 * 60 * 24);
-      const weeksBetween = daysBetween / 7;
-      
-      // If less than a week of data, use current week calculation
-      if (weeksBetween < 1) {
+      firstWorkoutDate.setHours(0, 0, 0, 0);
+
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+
+      const daysSinceFirst = (today - firstWorkoutDate) / (1000 * 60 * 60 * 24);
+      const weeksSinceFirst = daysSinceFirst / 7;
+
+      // If less than a week of data, show workouts this week
+      if (weeksSinceFirst < 1) {
         avgWorkoutsPerWeek = completedWorkouts.length;
       } else {
-        avgWorkoutsPerWeek = Math.round((completedWorkouts.length / weeksBetween) * 10) / 10;
+        avgWorkoutsPerWeek = Math.round((completedWorkouts.length / weeksSinceFirst) * 10) / 10;
       }
     }
     
