@@ -488,3 +488,53 @@ Uses Tailwind utility classes directly in JSX:
 - Theme colors: Gray-scale with green accents for success states
 - Mobile-first: Responsive grid layouts, fixed bottom navigation
 - Animations: Gradient backgrounds, hover effects, shadow transitions
+
+## Known Issues & Solutions
+
+### CSS `transform` Breaks `fixed` Positioning (CRITICAL)
+**Problem:** Any CSS `transform` property on a parent element (including `transform: translateZ(0)`, `transform-gpu` class, etc.) breaks `position: fixed` on all child elements. The fixed element becomes positioned relative to the transformed ancestor instead of the viewport.
+
+**Symptoms:** Fixed navigation bar scrolls with content instead of staying fixed at bottom/top.
+
+**Solution:**
+1. Never use `transform` on containers that have fixed-position children
+2. For fixed elements (like bottom navigation), use a dedicated CSS class with `!important`:
+```css
+.fixed-bottom-nav {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 9998 !important;
+}
+```
+3. Place fixed elements **outside** the main scrollable container using React Fragments (`<>...</>`)
+4. Remove `transform-gpu` class from fixed elements
+
+**In this project:** The `#root` element had `transform: translateZ(0)` for scroll optimization which broke the bottom navigation. This was removed and a `.fixed-bottom-nav` class was added.
+
+### Week Statistics Use Calendar Weeks (Monday-Sunday)
+**Implementation:** "This Week" stats calculate from Monday 00:00:00 of the current calendar week, not a rolling 7-day window.
+
+```javascript
+const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+const thisWeekStart = new Date(now);
+thisWeekStart.setDate(now.getDate() - daysFromMonday);
+thisWeekStart.setHours(0, 0, 0, 0); // Start of Monday
+```
+
+### Mobile Modal Positioning
+**Problem:** Modals using `flex items-center justify-center` may appear off-screen on mobile when user has scrolled down.
+
+**Solution:**
+1. Use `items-start sm:items-center` - aligns to top on mobile, center on desktop
+2. Add `overflow-y-auto` to the modal overlay
+3. Add a `useEffect` to scroll page to top when modal opens:
+```javascript
+useEffect(() => {
+  if (modalIsOpen) {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+}, [modalIsOpen]);
+```
