@@ -1249,6 +1249,13 @@ const WorkoutTracker = () => {
     };
   }, [draggedExerciseIndex, dragStartPosition]);
 
+  // Scroll to top when exercise progress modal opens (fixes mobile positioning)
+  useEffect(() => {
+    if (exerciseProgressModal) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [exerciseProgressModal]);
+
   // FUNC_ID: validateAndFixHistoryItem | Validates and repairs corrupted history entries
   const validateAndFixHistoryItem = (item) => {
     try {
@@ -2377,9 +2384,14 @@ const WorkoutTracker = () => {
   };
 
   const getWeekStats = () => {
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    const recentWorkouts = completedWorkouts.filter(w => new Date(w.date) >= weekAgo);
+    // Get start of current calendar week (Monday)
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday = 6 days from Monday
+    const thisWeekStart = new Date(now);
+    thisWeekStart.setDate(now.getDate() - daysFromMonday);
+    thisWeekStart.setHours(0, 0, 0, 0); // Start of Monday
+    const recentWorkouts = completedWorkouts.filter(w => new Date(w.date) >= thisWeekStart);
 
     let totalVolume = 0;
     let totalReps = 0;
@@ -2445,10 +2457,18 @@ const WorkoutTracker = () => {
 
   const getDetailedStats = () => {
     const now = new Date();
+
+    // Get start of current calendar week (Monday)
+    const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday = 6 days from Monday
     const thisWeekStart = new Date(now);
-    thisWeekStart.setDate(now.getDate() - 7);
-    const lastWeekStart = new Date(now);
-    lastWeekStart.setDate(now.getDate() - 14);
+    thisWeekStart.setDate(now.getDate() - daysFromMonday);
+    thisWeekStart.setHours(0, 0, 0, 0); // Start of Monday
+
+    // Get start of last calendar week (previous Monday)
+    const lastWeekStart = new Date(thisWeekStart);
+    lastWeekStart.setDate(thisWeekStart.getDate() - 7);
+
     const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     
@@ -4557,11 +4577,11 @@ const WorkoutTracker = () => {
 
         return (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start sm:items-center justify-center z-[9999] p-4 pt-16 sm:pt-4 overflow-y-auto"
             onClick={() => setExerciseProgressModal(null)}
           >
             <div
-              className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-y-auto`}
+              className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-2xl w-full shadow-2xl max-h-[85vh] overflow-y-auto my-auto`}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
@@ -4772,7 +4792,7 @@ const WorkoutTracker = () => {
       )}
 
       {/* Bottom Navigation */}
-      <div className={`fixed bottom-0 left-0 right-0 ${darkMode ? 'bg-gray-900' : 'bg-white'} border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'} px-4 py-3 transform-gpu`}>
+      <div className={`fixed bottom-0 left-0 right-0 ${darkMode ? 'bg-gray-900' : 'bg-white'} border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'} px-4 py-3 transform-gpu z-50`}>
         <div className="max-w-6xl mx-auto flex justify-around">
           <button
             onClick={() => setActiveView('home')}
