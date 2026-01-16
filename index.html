@@ -30,10 +30,18 @@
       backface-visibility: hidden;
     }
 
-    /* Smooth scrolling with hardware acceleration */
+    /* Smooth scrolling - removed transform to fix fixed positioning */
     #root {
       -webkit-overflow-scrolling: touch;
-      transform: translateZ(0);
+    }
+
+    /* Fixed bottom navigation - ensure it stays fixed on mobile */
+    .fixed-bottom-nav {
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 9998 !important;
     }
   </style>
 </head>
@@ -4795,7 +4803,7 @@ const WorkoutTracker = () => {
     </div>
 
       {/* Bottom Navigation - Always visible, outside main scroll container */}
-      <div className={`fixed bottom-0 left-0 right-0 ${darkMode ? 'bg-gray-900' : 'bg-white'} border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'} px-4 py-3 transform-gpu z-[100]`}>
+      <div className={`fixed-bottom-nav ${darkMode ? 'bg-gray-900' : 'bg-white'} border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'} px-4 py-3`}>
         <div className="max-w-6xl mx-auto flex justify-around">
           <button
             onClick={() => setActiveView('home')}
