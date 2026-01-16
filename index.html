@@ -4035,14 +4035,14 @@ const WorkoutTracker = () => {
             </h2>
             
             {completedWorkouts.length === 0 ? (
-              <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur border rounded-2xl p-12 text-center`}>
+              <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-12 text-center`}>
                 <div className="mb-4 flex justify-center"><BarChart3 size={64} className={darkMode ? 'text-gray-600' : 'text-gray-400'} /></div>
                 <div className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-lg`}>No workouts yet</div>
                 <div className={`${darkMode ? 'text-gray-500' : 'text-gray-500'} text-sm mt-2`}>Start your first workout to see it here!</div>
               </div>
             ) : (
               completedWorkouts.slice().reverse().map((workout) => (
-                <div key={workout.id} className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur border rounded-2xl p-5 shadow-lg`}>
+                <div key={workout.id} className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5 shadow-lg`}>
                   <div className="flex items-start gap-3 mb-4">
                     <WorkoutIcon emoji={workout.workoutEmoji} size={32} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
                     <div className="flex-1">
