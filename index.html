@@ -4586,11 +4586,11 @@ const WorkoutTracker = () => {
 
         return (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start sm:items-center justify-center z-[9999] p-4 pt-16 sm:pt-4 overflow-y-auto"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start sm:items-center justify-center z-[9999] px-3 sm:px-4 pt-16 sm:pt-4 pb-4 overflow-y-auto"
             onClick={() => setExerciseProgressModal(null)}
           >
             <div
-              className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-2xl w-full shadow-2xl max-h-[85vh] overflow-y-auto my-auto`}
+              className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 sm:p-6 w-full max-w-[calc(100vw-24px)] sm:max-w-2xl shadow-2xl max-h-[85vh] overflow-y-auto my-auto`}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
