@@ -1629,16 +1629,29 @@ const WorkoutTracker = () => {
     return result;
   };
 
-  // Get 1RM progression history for a specific exercise
+  // Get 1RM progression history for a specific exercise or category
+  // For main lifts (Bench Press, Squat, Deadlift, Overhead Press), groups all variations together
   const get1RMProgression = (exerciseName) => {
     const progression = [];
 
+    // Check if this is a main lift category
+    const isMainLift = ['Bench Press', 'Squat', 'Deadlift', 'Overhead Press'].includes(exerciseName);
+
     completedWorkouts.forEach(workout => {
-      const exercise = workout.exercises.find(ex => ex.name === exerciseName);
+      let best1RMForWorkout = 0;
 
-      if (exercise) {
-        let best1RMForWorkout = 0;
+      // Find matching exercises in this workout
+      const matchingExercises = workout.exercises.filter(ex => {
+        if (isMainLift) {
+          // For main lifts, match all variations via categorizeExercise
+          return categorizeExercise(ex.name) === exerciseName;
+        } else {
+          // For other exercises, use exact name match
+          return ex.name === exerciseName;
+        }
+      });
 
+      matchingExercises.forEach(exercise => {
         exercise.sets.forEach(set => {
           const weight = parseFloat(set.weight) || 0;
           const reps = parseFloat(set.reps) || 0;
@@ -1650,13 +1663,13 @@ const WorkoutTracker = () => {
             }
           }
         });
+      });
 
-        if (best1RMForWorkout > 0) {
-          progression.push({
-            date: workout.date,
-            estimated1RM: best1RMForWorkout
-          });
-        }
+      if (best1RMForWorkout > 0) {
+        progression.push({
+          date: workout.date,
+          estimated1RM: best1RMForWorkout
+        });
       }
     });
 
@@ -1740,6 +1753,34 @@ const WorkoutTracker = () => {
         levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
         multipliers: [0.2, 0.3, 0.5, 0.75, 1.0]
       }
+    }
+  };
+
+  // Weekly set benchmarks per muscle group (based on hypertrophy research)
+  // MEV = Minimum Effective Volume, MRV = Maximum Recoverable Volume
+  // Sets per week for optimal hypertrophy (intermediate lifters)
+  const WEEKLY_SET_BENCHMARKS = {
+    chest: { mev: 8, optimal: 12, mrv: 20, label: 'Chest' },
+    back: { mev: 10, optimal: 14, mrv: 25, label: 'Back' },
+    shoulders: { mev: 6, optimal: 12, mrv: 20, label: 'Shoulders' },
+    legs: { mev: 10, optimal: 16, mrv: 26, label: 'Legs' },
+    arms: { mev: 6, optimal: 10, mrv: 18, label: 'Arms' },
+    core: { mev: 0, optimal: 6, mrv: 12, label: 'Core' }
+  };
+
+  // Get benchmark status for a muscle group
+  const getBenchmarkStatus = (muscleGroup, weeklySets) => {
+    const benchmark = WEEKLY_SET_BENCHMARKS[muscleGroup];
+    if (!benchmark) return { status: 'unknown', label: 'N/A' };
+
+    if (weeklySets < benchmark.mev) {
+      return { status: 'low', label: 'Below MEV', color: 'red', percentage: Math.round((weeklySets / benchmark.mev) * 100) };
+    } else if (weeklySets >= benchmark.mev && weeklySets < benchmark.optimal) {
+      return { status: 'moderate', label: 'At MEV', color: 'yellow', percentage: Math.round(((weeklySets - benchmark.mev) / (benchmark.optimal - benchmark.mev)) * 100) };
+    } else if (weeklySets >= benchmark.optimal && weeklySets <= benchmark.mrv) {
+      return { status: 'optimal', label: 'Optimal', color: 'green', percentage: Math.round(((weeklySets - benchmark.optimal) / (benchmark.mrv - benchmark.optimal)) * 100) };
+    } else {
+      return { status: 'high', label: 'Above MRV', color: 'purple', percentage: 100 };
     }
   };
 
@@ -3507,8 +3548,10 @@ const WorkoutTracker = () => {
                   : detailedStats.muscleGroupStatsAll;
 
                 const periodLabel = statsPeriod === 'week' ? 'This Week' : statsPeriod === 'month' ? 'This Month' : 'All Time';
+                const showBenchmarks = statsPeriod === 'week'; // Only show benchmarks for weekly view
 
-                if (!muscleGroupData || Object.keys(muscleGroupData).length === 0) {
+                // For non-weekly views, show "no data" message if empty
+                if (!showBenchmarks && (!muscleGroupData || Object.keys(muscleGroupData).length === 0)) {
                   return (
                     <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                       No muscle group data for {periodLabel.toLowerCase()}
@@ -3516,36 +3559,151 @@ const WorkoutTracker = () => {
                   );
                 }
 
+                // For weekly view, show all muscle groups (even those with 0 sets)
+                const allMuscleGroups = showBenchmarks
+                  ? Object.keys(WEEKLY_SET_BENCHMARKS).map(group => {
+                      const existing = muscleGroupData ? muscleGroupData[group] : null;
+                      return [group, existing || { sets: 0, reps: 0, volume: 0 }];
+                    })
+                  : Object.entries(muscleGroupData);
+
                 return (
                   <>
                     <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
-                      Training volume distribution ({periodLabel})
+                      {showBenchmarks
+                        ? 'Weekly sets vs hypertrophy benchmarks (MEV = Minimum Effective Volume)'
+                        : `Training volume distribution (${periodLabel})`}
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      {Object.entries(muscleGroupData)
-                        .sort((a, b) => b[1].volume - a[1].volume)
+                    <div className="space-y-3">
+                      {allMuscleGroups
+                        .sort((a, b) => {
+                          // Sort by benchmark order for consistency
+                          const order = ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'other'];
+                          return order.indexOf(a[0]) - order.indexOf(b[0]);
+                        })
+                        .filter(([group]) => group !== 'other') // Hide 'other' category
                         .map(([group, stats]) => {
+                          const benchmark = WEEKLY_SET_BENCHMARKS[group];
+                          const benchmarkStatus = showBenchmarks && benchmark ? getBenchmarkStatus(group, stats.sets) : null;
+
+                          // Calculate bar width (percentage of MRV)
+                          const barPercentage = showBenchmarks && benchmark
+                            ? Math.min(100, (stats.sets / benchmark.mrv) * 100)
+                            : 0;
+
+                          // Determine bar color based on status
+                          const getBarColor = () => {
+                            if (!benchmarkStatus) return darkMode ? 'bg-blue-500' : 'bg-blue-600';
+                            switch (benchmarkStatus.status) {
+                              case 'low': return 'bg-red-500';
+                              case 'moderate': return 'bg-yellow-500';
+                              case 'optimal': return 'bg-green-500';
+                              case 'high': return 'bg-purple-500';
+                              default: return darkMode ? 'bg-blue-500' : 'bg-blue-600';
+                            }
+                          };
+
+                          const getStatusTextColor = () => {
+                            if (!benchmarkStatus) return darkMode ? 'text-gray-400' : 'text-gray-600';
+                            switch (benchmarkStatus.status) {
+                              case 'low': return 'text-red-500';
+                              case 'moderate': return 'text-yellow-500';
+                              case 'optimal': return 'text-green-500';
+                              case 'high': return 'text-purple-500';
+                              default: return darkMode ? 'text-gray-400' : 'text-gray-600';
+                            }
+                          };
+
                           return (
                             <div
                               key={group}
                               className={`${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-xl p-3`}
                             >
-                              <div className="flex items-center gap-2 mb-2">
-                                <Dumbbell size={16} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
-                                <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} capitalize`}>
-                                  {group}
-                                </span>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <Dumbbell size={16} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+                                  <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} capitalize`}>
+                                    {group}
+                                  </span>
+                                </div>
+                                {showBenchmarks && benchmarkStatus && (
+                                  <span className={`text-xs font-medium ${getStatusTextColor()}`}>
+                                    {benchmarkStatus.label}
+                                  </span>
+                                )}
                               </div>
-                              <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                                {Math.round(stats.volume)} kg
-                              </div>
-                              <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                {stats.sets} sets · {stats.reps} reps
-                              </div>
+
+                              {showBenchmarks && benchmark ? (
+                                <>
+                                  {/* Progress bar with benchmark markers */}
+                                  <div className="relative mb-2">
+                                    <div className={`h-3 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full overflow-hidden`}>
+                                      <div
+                                        className={`h-full ${getBarColor()} rounded-full transition-all duration-300`}
+                                        style={{ width: `${barPercentage}%` }}
+                                      />
+                                    </div>
+                                    {/* MEV marker */}
+                                    <div
+                                      className="absolute top-0 h-3 w-0.5 bg-yellow-400"
+                                      style={{ left: `${(benchmark.mev / benchmark.mrv) * 100}%` }}
+                                      title={`MEV: ${benchmark.mev} sets`}
+                                    />
+                                    {/* Optimal marker */}
+                                    <div
+                                      className="absolute top-0 h-3 w-0.5 bg-green-400"
+                                      style={{ left: `${(benchmark.optimal / benchmark.mrv) * 100}%` }}
+                                      title={`Optimal: ${benchmark.optimal} sets`}
+                                    />
+                                  </div>
+
+                                  <div className="flex justify-between items-baseline">
+                                    <div className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                      {stats.sets} <span className={`text-sm font-normal ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>sets</span>
+                                    </div>
+                                    <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                                      {benchmark.mev}-{benchmark.optimal}-{benchmark.mrv}
+                                    </div>
+                                  </div>
+                                  <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                                    {stats.reps} reps · {Math.round(stats.volume)} kg volume
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                    {Math.round(stats.volume)} kg
+                                  </div>
+                                  <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {stats.sets} sets · {stats.reps} reps
+                                  </div>
+                                </>
+                              )}
                             </div>
                           );
                         })}
                     </div>
+                    {showBenchmarks && (
+                      <div className={`mt-4 text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                        <div className="flex items-center gap-4 flex-wrap">
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 bg-yellow-400 rounded-full inline-block" /> MEV
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 bg-green-400 rounded-full inline-block" /> Optimal
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 bg-red-500 rounded-full inline-block" /> Low
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 bg-green-500 rounded-full inline-block" /> Good
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 bg-purple-500 rounded-full inline-block" /> High
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </>
                 );
               })()}
