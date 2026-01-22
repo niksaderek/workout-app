@@ -3815,7 +3815,7 @@ const WorkoutTracker = () => {
 
                           <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
                             <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{standard.level}</span> level
-                            {standard.levelIndex < standard.totalLevels - 1 && ` • ${standard.percentageToNext}% to ${standard.nextLevel}`}
+                            {standard.levelIndex < standard.totalLevels - 1 && ` • ${standard.percentageToNext}% through ${standard.level}`}
                             {' • '}{standard.ratio}x bodyweight
                           </div>
 
