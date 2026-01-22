@@ -1844,23 +1844,27 @@ const WorkoutTracker = () => {
     const nextLevel = levels[nextLevelIndex];
 
     // Calculate percentage progress to next level
-    let percentageToNext = 0;
+    let percentageThrough = 0;
+    let percentageRemaining = 100;
     if (currentLevelIndex < levels.length - 1) {
       const currentThreshold = multipliers[currentLevelIndex];
       const nextThreshold = multipliers[nextLevelIndex];
       const progress = ratio - currentThreshold;
       const range = nextThreshold - currentThreshold;
-      percentageToNext = Math.min(100, Math.round((progress / range) * 100));
+      percentageThrough = Math.min(100, Math.round((progress / range) * 100));
+      percentageRemaining = 100 - percentageThrough;
     } else {
       // Already at max level
-      percentageToNext = 100;
+      percentageThrough = 100;
+      percentageRemaining = 0;
     }
 
     return {
       level: currentLevel,
       levelIndex: currentLevelIndex,
       nextLevel: nextLevel,
-      percentageToNext: percentageToNext,
+      percentageToNext: percentageThrough, // Keep for progress bar (0-100% through current level)
+      percentageRemaining: percentageRemaining, // New: % remaining to reach next level
       ratio: ratio.toFixed(2),
       totalLevels: levels.length
     };
@@ -3815,7 +3819,7 @@ const WorkoutTracker = () => {
 
                           <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
                             <span className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{standard.level}</span> level
-                            {standard.levelIndex < standard.totalLevels - 1 && ` • ${standard.percentageToNext}% through ${standard.level}`}
+                            {standard.levelIndex < standard.totalLevels - 1 && ` • ${standard.percentageRemaining}% to ${standard.nextLevel}`}
                             {' • '}{standard.ratio}x bodyweight
                           </div>
 
