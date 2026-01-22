@@ -1679,6 +1679,7 @@ const WorkoutTracker = () => {
   };
 
   // Get best actual set (weight × reps) for main lifts with 1RM
+  // Returns both best 1RM set and heaviest weight set
   const getMainLiftsBestSets = () => {
     const all1RMs = getAll1RMs();
     const bestSets = {};
@@ -1699,13 +1700,41 @@ const WorkoutTracker = () => {
           if (weight > 0 && reps > 0 && reps <= 12) {
             const estimated1RM = calculateEstimated1RM(weight, reps);
 
-            if (!bestSets[category] || estimated1RM > bestSets[category].estimated1RM) {
+            if (!bestSets[category]) {
               bestSets[category] = {
-                weight: weight,
-                reps: reps,
-                estimated1RM: estimated1RM,
-                exerciseName: exerciseName
+                best1RM: {
+                  weight: weight,
+                  reps: reps,
+                  estimated1RM: estimated1RM,
+                  exerciseName: exerciseName
+                },
+                heaviest: {
+                  weight: weight,
+                  reps: reps,
+                  estimated1RM: estimated1RM,
+                  exerciseName: exerciseName
+                }
               };
+            } else {
+              // Update best 1RM if this set has higher estimated 1RM
+              if (estimated1RM > bestSets[category].best1RM.estimated1RM) {
+                bestSets[category].best1RM = {
+                  weight: weight,
+                  reps: reps,
+                  estimated1RM: estimated1RM,
+                  exerciseName: exerciseName
+                };
+              }
+
+              // Update heaviest if this set has higher weight
+              if (weight > bestSets[category].heaviest.weight) {
+                bestSets[category].heaviest = {
+                  weight: weight,
+                  reps: reps,
+                  estimated1RM: estimated1RM,
+                  exerciseName: exerciseName
+                };
+              }
             }
           }
         });
@@ -3484,33 +3513,59 @@ const WorkoutTracker = () => {
                       ) : (
                         <div className="space-y-2">
                       {Object.keys(bestSets).map(liftName => {
-                        const bestSet = bestSets[liftName];
+                        const liftData = bestSets[liftName];
+                        const showBothMetrics = liftData.best1RM.weight !== liftData.heaviest.weight ||
+                                                liftData.best1RM.reps !== liftData.heaviest.reps;
 
                         return (
                           <button
                             key={liftName}
                             onClick={() => {
-                              const progression = get1RMProgression(bestSet.exerciseName);
+                              const progression = get1RMProgression(liftData.best1RM.exerciseName);
                               if (progression.length > 0) {
                                 setShow1RMModal({ exerciseName: liftName, data: progression });
                               }
                             }}
                             className={`w-full flex flex-col p-3 ${darkMode ? 'bg-gray-900 hover:bg-gray-800' : 'bg-gray-50 hover:bg-gray-100'} rounded-lg transition-colors text-left`}
                           >
-                            <div className="flex justify-between items-center mb-1">
+                            <div className="flex justify-between items-center mb-2">
                               <div className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                                 {liftName}
                               </div>
                               <ChevronRight size={16} className={darkMode ? 'text-gray-500' : 'text-gray-400'} />
                             </div>
-                            <div className="flex justify-between items-baseline">
-                              <div className={`text-lg font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                {bestSet.weight} kg × {bestSet.reps} reps
+
+                            {/* Best 1RM */}
+                            <div className="flex justify-between items-baseline mb-1">
+                              <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-600'}`}>
+                                Best 1RM:
                               </div>
-                              <div className={`text-sm ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                                ~{bestSet.estimated1RM.toFixed(1)} kg (1RM)
+                              <div className="flex items-baseline gap-2">
+                                <div className={`text-base font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                  {liftData.best1RM.weight} kg × {liftData.best1RM.reps}
+                                </div>
+                                <div className={`text-sm ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                                  ~{liftData.best1RM.estimated1RM.toFixed(1)} kg
+                                </div>
                               </div>
                             </div>
+
+                            {/* Heaviest Weight (only show if different from best 1RM) */}
+                            {showBothMetrics && (
+                              <div className="flex justify-between items-baseline">
+                                <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-600'}`}>
+                                  Heaviest:
+                                </div>
+                                <div className="flex items-baseline gap-2">
+                                  <div className={`text-base font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    {liftData.heaviest.weight} kg × {liftData.heaviest.reps}
+                                  </div>
+                                  <div className={`text-sm ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
+                                    ~{liftData.heaviest.estimated1RM.toFixed(1)} kg
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </button>
                         );
                       })}
