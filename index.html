@@ -465,7 +465,7 @@
             placeholder={placeholder}
           />
           {showDropdown && filteredExercises.length > 0 && (
-            <div className={`absolute z-50 w-full mt-1 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} border rounded-lg shadow-lg max-h-60 overflow-y-auto`}>
+            <div className={`absolute z-[999] w-full mt-1 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} border rounded-lg shadow-lg max-h-60 overflow-y-auto`}>
               {filteredExercises.map((exercise, idx) => (
                 <button
                   key={idx}
@@ -4333,7 +4333,7 @@ const WorkoutTracker = () => {
               {editingWorkout.exercises.map((ex, idx) => (
                 <div
                   key={`exercise-${idx}`}
-                  className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 ${
+                  className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 overflow-visible ${
                     draggedExerciseIndex === idx && isDraggingExercise ? 'opacity-30' : ''
                   } ${
                     dropTargetIndex === idx && draggedExerciseIndex !== idx ? 'ring-2 ring-blue-500' : ''
