@@ -1,0 +1,10 @@
+{
+  "name": "workout-pro",
+  "version": "1.0.0",
+  "scripts": {
+    "build:css": "tailwindcss -i ./input.css -o ./styles.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+}
