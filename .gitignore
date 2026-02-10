@@ -1,2 +1,6 @@
 node_modules/
 .netlify/
+package-lock.json
+*.backup
+.mcp.json
+generate-*.js
