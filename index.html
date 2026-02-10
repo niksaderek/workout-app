@@ -2461,6 +2461,8 @@ const WorkoutTracker = () => {
   const substituteExercise = (exerciseIndex, newExerciseName) => {
     const updated = { ...currentLog };
     updated.exercises[exerciseIndex].name = newExerciseName;
+    // Auto-update muscle group based on new exercise
+    updated.exercises[exerciseIndex].muscleGroup = getMuscleGroup(newExerciseName);
     setCurrentLog(updated);
     setSubstituteDropdown(null); // Close dropdown after selection
   };
@@ -4043,38 +4045,94 @@ const WorkoutTracker = () => {
                   </button>
                 </div>
 
-                {/* Substitution Input - Full Exercise Search */}
-                {substituteDropdown === exIdx && (
-                  <div className={`absolute left-5 right-5 mt-1 ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-xl z-50 p-3`}>
-                    <div className={`text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
-                      Replace with:
-                    </div>
-                    <ExerciseInput
-                      value={substituteInputValue}
-                      onChange={(newValue) => {
-                        // Update input value as user types
-                        setSubstituteInputValue(newValue);
-                        // Check if this is a selection (valid exercise from list)
-                        if (allExercises.includes(newValue)) {
-                          // User selected from dropdown
-                          substituteExercise(exIdx, newValue);
+                {/* Substitution Modal - Two-Tier Suggestions */}
+                {substituteDropdown === exIdx && (() => {
+                  const sameMuscleGroupSuggestions = getMuscleGroupSuggestions(exercise.name);
+                  const isSearching = substituteInputValue.length > 0;
+
+                  return (
+                    <div className={`absolute left-5 right-5 mt-1 ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-xl z-50 p-3 max-h-96 overflow-y-auto`}>
+                      <div className={`text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+                        Replace with:
+                      </div>
+
+                      {/* Search Input */}
+                      <input
+                        type="text"
+                        value={substituteInputValue}
+                        onChange={(e) => setSubstituteInputValue(e.target.value)}
+                        placeholder="Search all exercises..."
+                        className={`w-full px-3 py-2 mb-3 ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg focus:border-gray-500 focus:outline-none`}
+                      />
+
+                      {/* Show same muscle group suggestions when not searching */}
+                      {!isSearching && sameMuscleGroupSuggestions.length > 0 && (
+                        <>
+                          <div className={`text-xs font-semibold ${darkMode ? 'text-gray-500' : 'text-gray-500'} mb-2`}>
+                            Same muscle group:
+                          </div>
+                          <div className="space-y-1 mb-3">
+                            {sameMuscleGroupSuggestions.map((suggestion, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => {
+                                  substituteExercise(exIdx, suggestion);
+                                  setSubstituteInputValue('');
+                                }}
+                                className={`w-full text-left px-3 py-2 ${darkMode ? 'bg-gray-800 hover:bg-gray-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'} rounded-lg transition-colors text-sm`}
+                              >
+                                {suggestion}
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+
+                      {/* Show filtered exercises when searching */}
+                      {isSearching && (() => {
+                        const filtered = allExercises
+                          .filter(ex => ex.toLowerCase().includes(substituteInputValue.toLowerCase()))
+                          .slice(0, 8);
+
+                        return filtered.length > 0 ? (
+                          <>
+                            <div className={`text-xs font-semibold ${darkMode ? 'text-gray-500' : 'text-gray-500'} mb-2`}>
+                              All exercises:
+                            </div>
+                            <div className="space-y-1 mb-3">
+                              {filtered.map((ex, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => {
+                                    substituteExercise(exIdx, ex);
+                                    setSubstituteInputValue('');
+                                  }}
+                                  className={`w-full text-left px-3 py-2 ${darkMode ? 'bg-gray-800 hover:bg-gray-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'} rounded-lg transition-colors text-sm`}
+                                >
+                                  {ex}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        ) : (
+                          <div className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'} text-center py-2 mb-3`}>
+                            No exercises found
+                          </div>
+                        );
+                      })()}
+
+                      <button
+                        onClick={() => {
+                          setSubstituteDropdown(null);
                           setSubstituteInputValue('');
-                        }
-                      }}
-                      darkMode={darkMode}
-                      placeholder="Search all exercises..."
-                    />
-                    <button
-                      onClick={() => {
-                        setSubstituteDropdown(null);
-                        setSubstituteInputValue('');
-                      }}
-                      className={`w-full mt-2 px-3 py-1.5 text-xs ${darkMode ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'} rounded transition-colors`}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
+                        }}
+                        className={`w-full px-3 py-1.5 text-xs ${darkMode ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'} rounded transition-colors`}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  );
+                })()}
 
                 <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Target: {exercise.plannedSets} × {exercise.plannedReps}</div>
 
