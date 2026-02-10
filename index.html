@@ -1204,6 +1204,7 @@ const WorkoutTracker = () => {
   const [showBodyWeightInput, setShowBodyWeightInput] = useState(false); // Show/hide body weight input field
   const [show1RMModal, setShow1RMModal] = useState(null); // {exerciseName: string, data: array} or null
   const [showResumePrompt, setShowResumePrompt] = useState(false); // Resume workout prompt
+  const [savedWorkoutData, setSavedWorkoutData] = useState(null); // Temporarily store saved workout data before user chooses to resume
   const [substituteInputValue, setSubstituteInputValue] = useState(''); // Temp state for exercise substitution input
   const fileInputRef = React.useRef(null);
   const restoreBackupInputRef = React.useRef(null);
@@ -1223,6 +1224,8 @@ const WorkoutTracker = () => {
     if (savedWorkout) {
       try {
         const parsedWorkout = JSON.parse(savedWorkout);
+        // Store saved workout data in state to prevent auto-save from clearing it
+        setSavedWorkoutData(parsedWorkout);
         // Show resume prompt
         setShowResumePrompt(true);
       } catch (error) {
@@ -1267,14 +1270,18 @@ const WorkoutTracker = () => {
   }, []);
 
   // Auto-save current workout to localStorage whenever it changes
+  // Only clear localStorage if we've explicitly set currentLog to null (not initial load)
+  const [hasInitialized, setHasInitialized] = React.useState(false);
+
   useEffect(() => {
     if (currentLog) {
       localStorage.setItem('currentWorkout', JSON.stringify(currentLog));
-    } else {
-      // Clear saved workout when no active workout
+      setHasInitialized(true);
+    } else if (hasInitialized) {
+      // Only clear saved workout if we've already initialized (prevents clearing on page load)
       localStorage.removeItem('currentWorkout');
     }
-  }, [currentLog]);
+  }, [currentLog, hasInitialized]);
 
   const handleUpdateApp = () => {
     setShowUpdateNotification(false);
@@ -2040,23 +2047,32 @@ const WorkoutTracker = () => {
   };
 
   const resumeSavedWorkout = () => {
-    const savedWorkout = localStorage.getItem('currentWorkout');
-    if (savedWorkout) {
-      try {
-        const parsedWorkout = JSON.parse(savedWorkout);
-        setCurrentLog(parsedWorkout);
-        setActiveView('logging');
-        setShowResumePrompt(false);
-      } catch (error) {
-        console.error('Error resuming workout:', error);
-        localStorage.removeItem('currentWorkout');
-        setShowResumePrompt(false);
+    if (savedWorkoutData) {
+      setCurrentLog(savedWorkoutData);
+      setActiveView('logging');
+      setShowResumePrompt(false);
+      setSavedWorkoutData(null); // Clear temp data
+    } else {
+      // Fallback: try reading from localStorage if savedWorkoutData is somehow null
+      const savedWorkout = localStorage.getItem('currentWorkout');
+      if (savedWorkout) {
+        try {
+          const parsedWorkout = JSON.parse(savedWorkout);
+          setCurrentLog(parsedWorkout);
+          setActiveView('logging');
+          setShowResumePrompt(false);
+        } catch (error) {
+          console.error('Error resuming workout:', error);
+          localStorage.removeItem('currentWorkout');
+          setShowResumePrompt(false);
+        }
       }
     }
   };
 
   const discardSavedWorkout = () => {
     localStorage.removeItem('currentWorkout');
+    setSavedWorkoutData(null);
     setShowResumePrompt(false);
   };
 
