@@ -9,3 +9,4 @@ temp-*.jsx
 .claude/
 Source/
 workout_*.md
+.playwright-cli/
