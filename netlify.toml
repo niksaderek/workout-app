@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  command = "echo 'No build needed - single HTML file'"
+  command = "npm install && npm run build:css"
 
 [[redirects]]
   from = "/*"

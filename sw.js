@@ -1,10 +1,10 @@
 // Service Worker for Workout Pro PWA
-const CACHE_NAME = 'workout-pro-v7';
+const CACHE_NAME = 'workout-pro-v8';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/styles.css',
   '/manifest.json',
-  'https://cdn.tailwindcss.com',
   'https://unpkg.com/react@18/umd/react.production.min.js',
   'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
   'https://unpkg.com/@babel/standalone@7.24.0/babel.min.js'
