@@ -4,3 +4,8 @@ package-lock.json
 *.backup
 .mcp.json
 generate-*.js
+build-*.js
+temp-*.jsx
+.claude/
+Source/
+workout_*.md
