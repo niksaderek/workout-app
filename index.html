@@ -1200,16 +1200,31 @@ const WorkoutTracker = () => {
   const [gender, setGender] = useState('male'); // 'male' or 'female'
   const [showBodyWeightInput, setShowBodyWeightInput] = useState(false); // Show/hide body weight input field
   const [show1RMModal, setShow1RMModal] = useState(null); // {exerciseName: string, data: array} or null
+  const [showResumePrompt, setShowResumePrompt] = useState(false); // Resume workout prompt
   const fileInputRef = React.useRef(null);
   const restoreBackupInputRef = React.useRef(null);
   const dragExerciseRef = React.useRef(null);
 
   useEffect(() => {
     loadData();
+
     // Load theme preference
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       setDarkMode(savedTheme === 'dark');
+    }
+
+    // Check for saved in-progress workout
+    const savedWorkout = localStorage.getItem('currentWorkout');
+    if (savedWorkout) {
+      try {
+        const parsedWorkout = JSON.parse(savedWorkout);
+        // Show resume prompt
+        setShowResumePrompt(true);
+      } catch (error) {
+        console.error('Error parsing saved workout:', error);
+        localStorage.removeItem('currentWorkout');
+      }
     }
 
     // Play app launch sound after short delay
@@ -1246,6 +1261,16 @@ const WorkoutTracker = () => {
       });
     }
   }, []);
+
+  // Auto-save current workout to localStorage whenever it changes
+  useEffect(() => {
+    if (currentLog) {
+      localStorage.setItem('currentWorkout', JSON.stringify(currentLog));
+    } else {
+      // Clear saved workout when no active workout
+      localStorage.removeItem('currentWorkout');
+    }
+  }, [currentLog]);
 
   const handleUpdateApp = () => {
     setShowUpdateNotification(false);
@@ -2010,10 +2035,40 @@ const WorkoutTracker = () => {
     setCurrentLog(updated);
   };
 
+  const resumeSavedWorkout = () => {
+    const savedWorkout = localStorage.getItem('currentWorkout');
+    if (savedWorkout) {
+      try {
+        const parsedWorkout = JSON.parse(savedWorkout);
+        setCurrentLog(parsedWorkout);
+        setActiveView('logging');
+        setShowResumePrompt(false);
+      } catch (error) {
+        console.error('Error resuming workout:', error);
+        localStorage.removeItem('currentWorkout');
+        setShowResumePrompt(false);
+      }
+    }
+  };
+
+  const discardSavedWorkout = () => {
+    localStorage.removeItem('currentWorkout');
+    setShowResumePrompt(false);
+  };
+
+  const cancelWorkout = () => {
+    if (confirm('Are you sure you want to cancel this workout? All progress will be lost.')) {
+      setCurrentLog(null);
+      localStorage.removeItem('currentWorkout');
+      setActiveView('home');
+    }
+  };
+
   const finishWorkout = async () => {
     soundSystem.workoutComplete(); // Play sound
     await saveHistory(currentLog);
     setCurrentLog(null);
+    localStorage.removeItem('currentWorkout');
     setActiveView('home');
   };
 
@@ -4136,10 +4191,7 @@ const WorkoutTracker = () => {
             {/* Action Buttons */}
             <div className="flex gap-3 sticky bottom-4">
               <button
-                onClick={() => {
-                  setCurrentLog(null);
-                  setActiveView('home');
-                }}
+                onClick={cancelWorkout}
                 className={`px-6 py-4 ${darkMode ? 'bg-gray-800 hover:bg-gray-700 border-gray-700' : 'bg-white hover:bg-gray-50 border-gray-300'} border text-${darkMode ? 'white' : 'gray-900'} rounded-xl font-semibold transition-all`}
               >
                 Cancel
@@ -4590,6 +4642,35 @@ const WorkoutTracker = () => {
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Resume Workout Prompt Modal */}
+      {showResumePrompt && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
+          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-md w-full shadow-2xl`}>
+            <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-2`}>
+              Resume Workout?
+            </h3>
+            <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-6`}>
+              You have an unfinished workout. Would you like to continue where you left off?
+            </p>
+
+            <div className="space-y-3">
+              <button
+                onClick={resumeSavedWorkout}
+                className={`w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors touch-manipulation`}
+              >
+                Resume Workout
+              </button>
+              <button
+                onClick={discardSavedWorkout}
+                className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-xl font-semibold transition-colors touch-manipulation`}
+              >
+                Start Fresh
+              </button>
+            </div>
           </div>
         </div>
       )}
