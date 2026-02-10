@@ -1201,6 +1201,7 @@ const WorkoutTracker = () => {
   const [showBodyWeightInput, setShowBodyWeightInput] = useState(false); // Show/hide body weight input field
   const [show1RMModal, setShow1RMModal] = useState(null); // {exerciseName: string, data: array} or null
   const [showResumePrompt, setShowResumePrompt] = useState(false); // Resume workout prompt
+  const [substituteInputValue, setSubstituteInputValue] = useState(''); // Temp state for exercise substitution input
   const fileInputRef = React.useRef(null);
   const restoreBackupInputRef = React.useRef(null);
   const dragExerciseRef = React.useRef(null);
@@ -4031,7 +4032,10 @@ const WorkoutTracker = () => {
                     placeholder="Exercise name"
                   />
                   <button
-                    onClick={() => setSubstituteDropdown(substituteDropdown === exIdx ? null : exIdx)}
+                    onClick={() => {
+                      setSubstituteDropdown(substituteDropdown === exIdx ? null : exIdx);
+                      setSubstituteInputValue(''); // Reset input when opening
+                    }}
                     className={`p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg transition-colors flex-shrink-0`}
                     title="Swap exercise"
                   >
@@ -4046,15 +4050,25 @@ const WorkoutTracker = () => {
                       Replace with:
                     </div>
                     <ExerciseInput
-                      value=""
-                      onChange={(newExerciseName) => {
-                        substituteExercise(exIdx, newExerciseName);
+                      value={substituteInputValue}
+                      onChange={(newValue) => {
+                        // Update input value as user types
+                        setSubstituteInputValue(newValue);
+                        // Check if this is a selection (valid exercise from list)
+                        if (allExercises.includes(newValue)) {
+                          // User selected from dropdown
+                          substituteExercise(exIdx, newValue);
+                          setSubstituteInputValue('');
+                        }
                       }}
                       darkMode={darkMode}
                       placeholder="Search all exercises..."
                     />
                     <button
-                      onClick={() => setSubstituteDropdown(null)}
+                      onClick={() => {
+                        setSubstituteDropdown(null);
+                        setSubstituteInputValue('');
+                      }}
                       className={`w-full mt-2 px-3 py-1.5 text-xs ${darkMode ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'} rounded transition-colors`}
                     >
                       Cancel
