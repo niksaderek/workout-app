@@ -13,6 +13,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Workout Pro">
+
+  <!-- Preload critical resources for faster loading -->
+  <link rel="preload" href="https://unpkg.com/react@18/umd/react.production.min.js" as="script">
+  <link rel="preload" href="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" as="script">
+  <link rel="preload" href="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js" as="script">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -43,10 +49,42 @@
       right: 0 !important;
       z-index: 9998 !important;
     }
+
+    /* Loading skeleton styles */
+    .loading-skeleton {
+      background: #111827;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #9CA3AF;
+    }
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #374151;
+      border-top-color: #6B7280;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      margin-top: 16px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Loading skeleton - removed by React when app mounts -->
+    <div class="loading-skeleton">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading Workout Pro...</div>
+    </div>
+  </div>
   <script src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
   <script type="text/babel">
     const { useState, useEffect } = React;

@@ -1,5 +1,5 @@
 // Service Worker for Workout Pro PWA
-const CACHE_NAME = 'workout-pro-v6';
+const CACHE_NAME = 'workout-pro-v7';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -7,8 +7,7 @@ const urlsToCache = [
   'https://cdn.tailwindcss.com',
   'https://unpkg.com/react@18/umd/react.production.min.js',
   'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
-  'https://unpkg.com/@babel/standalone/babel.min.js',
-  'https://unpkg.com/lucide-react@0.294.0/dist/umd/lucide-react.js'
+  'https://unpkg.com/@babel/standalone@7.24.0/babel.min.js'
 ];
 
 // Install event - cache resources
