@@ -1684,7 +1684,7 @@ const WorkoutTracker = () => {
   };
 
   // FUNC_ID: formatPlannedTarget | "{reps} {label}" but suppress the label when
-  // plannedReps already carries its own unit/words (legacy free-text templates).
+  // plannedReps already carries its own unit/words (free-text templates).
   const formatPlannedTarget = (plannedReps, unitLabel) => {
     const raw = (plannedReps == null ? '' : String(plannedReps)).trim();
     // Append the label ONLY when plannedReps is a bare number or numeric range
