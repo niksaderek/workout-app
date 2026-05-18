@@ -1703,11 +1703,7 @@ const WorkoutTracker = () => {
         const exerciseName = exercise.name;
 
         // Skip core exercises (no weight)
-        const isCoreExercise = exerciseName.toLowerCase().includes('plank') ||
-                               exerciseName.toLowerCase().includes('hanging') ||
-                               exerciseName.toLowerCase().includes('rollout') ||
-                               exerciseName.toLowerCase().includes('dead bug') ||
-                               exerciseName.toLowerCase().includes('pallof');
+        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit({ name: exerciseName })].countsAsVolume;
 
         if (isCoreExercise) return;
 
@@ -2170,11 +2166,8 @@ const WorkoutTracker = () => {
       workoutEmoji: workout.emoji,
       date: new Date().toISOString(),
       exercises: workout.exercises.map(ex => {
-        const isCoreExercise = ex.name.toLowerCase().includes('core') ||
-                               ex.name.toLowerCase().includes('plank') ||
-                               ex.name.toLowerCase().includes('hanging') ||
-                               ex.name.toLowerCase().includes('rollout');
-        const lastWeight = isCoreExercise ? '0' : getLastWeight(ex.name);
+        const prefillUnit = getExerciseUnit(ex);
+        const lastWeight = prefillUnit === 'reps' ? getLastWeight(ex.name) : '';
         return {
           name: ex.name,
           plannedSets: ex.sets,
@@ -2754,10 +2747,7 @@ const WorkoutTracker = () => {
 
     recentWorkouts.forEach(workout => {
       workout.exercises.forEach(exercise => {
-        const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
-                               exercise.name.toLowerCase().includes('plank') ||
-                               exercise.name.toLowerCase().includes('hanging') ||
-                               exercise.name.toLowerCase().includes('rollout');
+        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsReps;
 
         const isBodyweightExercise = exercise.name.toLowerCase().includes('pull-up') ||
                                      exercise.name.toLowerCase().includes('dip') ||
@@ -2834,10 +2824,7 @@ const WorkoutTracker = () => {
 
       workouts.forEach(workout => {
         workout.exercises.forEach(exercise => {
-          const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
-                                 exercise.name.toLowerCase().includes('plank') ||
-                                 exercise.name.toLowerCase().includes('hanging') ||
-                                 exercise.name.toLowerCase().includes('rollout');
+          const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsReps;
 
           const isBodyweightExercise = exercise.name.toLowerCase().includes('pull-up') ||
                                        exercise.name.toLowerCase().includes('dip') ||
@@ -2936,10 +2923,7 @@ const WorkoutTracker = () => {
     let allTimeCoreSets = 0;
     completedWorkouts.forEach(workout => {
       workout.exercises.forEach(exercise => {
-        const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
-                               exercise.name.toLowerCase().includes('plank') ||
-                               exercise.name.toLowerCase().includes('hanging') ||
-                               exercise.name.toLowerCase().includes('rollout');
+        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsVolume;
 
         exercise.sets.forEach(set => {
           const weight = parseFloat(set.weight) || 0;
@@ -3093,10 +3077,7 @@ const WorkoutTracker = () => {
 
       // Calculate volume, reps, and track main lifts
       workout.exercises.forEach(exercise => {
-        const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
-                               exercise.name.toLowerCase().includes('plank') ||
-                               exercise.name.toLowerCase().includes('hanging') ||
-                               exercise.name.toLowerCase().includes('rollout');
+        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsVolume;
 
         const isBodyweightExercise = exercise.name.toLowerCase().includes('pull-up') ||
                                      exercise.name.toLowerCase().includes('dip') ||
@@ -4322,10 +4303,7 @@ const WorkoutTracker = () => {
 
                 {/* Smart Weight Suggestion */}
                 {(() => {
-                  const isCoreExercise = exercise.name.toLowerCase().includes('core') ||
-                                        exercise.name.toLowerCase().includes('plank') ||
-                                        exercise.name.toLowerCase().includes('hanging') ||
-                                        exercise.name.toLowerCase().includes('rollout');
+                  const isCoreExercise = getExerciseUnit(exercise) !== 'reps';
                   if (isCoreExercise) return null;
 
                   const suggestion = getSmartWeightSuggestion(exercise.name, exercise.plannedReps);
@@ -4525,10 +4503,7 @@ const WorkoutTracker = () => {
                       const completedSets = ex.sets.filter(set => {
                         const weight = parseFloat(set.weight) || 0;
                         const reps = parseFloat(set.reps) || 0;
-                        const isCoreExercise = ex.name.toLowerCase().includes('core') ||
-                                              ex.name.toLowerCase().includes('plank') ||
-                                              ex.name.toLowerCase().includes('hanging') ||
-                                              ex.name.toLowerCase().includes('rollout');
+                        const isCoreExercise = getExerciseUnit(ex) !== 'reps';
 
                         const isBodyweightExercise = ex.name.toLowerCase().includes('pull-up') ||
                                                      ex.name.toLowerCase().includes('dip') ||
