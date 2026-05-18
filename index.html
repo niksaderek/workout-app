@@ -4306,7 +4306,7 @@ const WorkoutTracker = () => {
                   );
                 })()}
 
-                <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Target: {exercise.plannedSets} × {exercise.plannedReps}</div>
+                <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Target: {exercise.plannedSets} × {exercise.plannedReps} {UNIT_CONFIG[getExerciseUnit(exercise)].label}</div>
 
                 {/* Smart Weight Suggestion */}
                 {(() => {
@@ -4353,17 +4353,14 @@ const WorkoutTracker = () => {
                         value={set.weight}
                         onChange={(e) => updateSet(exIdx, setIdx, 'weight', e.target.value)}
                         className={`w-20 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg text-center font-semibold focus:border-gray-500 focus:outline-none`}
-                        disabled={exercise.name.toLowerCase().includes('core') ||
-                                 exercise.name.toLowerCase().includes('plank') ||
-                                 exercise.name.toLowerCase().includes('hanging') ||
-                                 exercise.name.toLowerCase().includes('rollout')}
+                        disabled={!UNIT_CONFIG[getExerciseUnit(exercise)].hasWeight}
                       />
 
                       <span className={`${darkMode ? 'text-gray-500' : 'text-gray-400'} font-bold`}>×</span>
 
                       <input
                         type="number"
-                        placeholder="reps"
+                        placeholder={UNIT_CONFIG[getExerciseUnit(exercise)].placeholder}
                         value={set.reps}
                         onChange={(e) => updateSet(exIdx, setIdx, 'reps', e.target.value)}
                         className={`w-20 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg text-center font-semibold focus:border-gray-500 focus:outline-none`}
