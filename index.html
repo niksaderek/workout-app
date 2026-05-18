@@ -2075,6 +2075,22 @@ const WorkoutTracker = () => {
     // 1. No usable history -> no suggestion (unchanged behavior)
     if (history.length === 0) return null;
 
+    // Non-rep units (seconds/meters): weight/1RM/plateau math is meaningless.
+    // Give a simple progression nudge based on the last logged value.
+    const unit = getExerciseUnit({ name: exerciseName });
+    if (unit !== 'reps') {
+      const last = history[history.length - 1];
+      const lastVal = last.topSetRepsHit; // raw seconds or meters of best set
+      if (!lastVal) return null;
+      const cfg = UNIT_CONFIG[unit];
+      const diff = last.difficulty;
+      if (diff === 'easy') {
+        const bump = 5; // +5 sec or +5 m
+        return { weight: '', reps: String(lastVal + bump), reason: `felt easy — try ${lastVal + bump} ${cfg.label}`, type: 'progress' };
+      }
+      return { weight: '', reps: String(lastVal), reason: `last time ${lastVal} ${cfg.label} — match or beat it`, type: 'info' };
+    }
+
     const latest = history[history.length - 1];
     const lastWeight = latest.bestWeight;
     const difficulty = latest.difficulty;
