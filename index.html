@@ -4649,6 +4649,18 @@ const WorkoutTracker = () => {
                       <option value="other">Other</option>
                     </select>
                   </div>
+                  <div className="flex gap-2 pl-7 mb-2">
+                    <select
+                      value={ex.unit || 'auto'}
+                      onChange={(e) => updateExercise(idx, 'unit', e.target.value === 'auto' ? undefined : e.target.value)}
+                      className={`flex-1 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg focus:border-gray-500 focus:outline-none text-sm`}
+                    >
+                      <option value="auto">Unit: Auto (detected: {UNIT_CONFIG[getExerciseUnit(ex)].label})</option>
+                      <option value="reps">Unit: Reps</option>
+                      <option value="seconds">Unit: Seconds</option>
+                      <option value="meters">Unit: Meters</option>
+                    </select>
+                  </div>
                   <div className="flex gap-2 pl-7">
                     <input
                       type="number"
