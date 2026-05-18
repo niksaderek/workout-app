@@ -152,7 +152,12 @@
         'Incline DB Press',
         'Chest Fly',
         'Cable Fly',
+        'Machine Chest Press',
         'Push-ups',
+        'Diamond Push-ups',
+        'Wide Push-ups',
+        'Incline Push-ups',
+        'Knee Push-ups',
         'Dips (Chest Focus)'
       ],
       back: [
@@ -160,10 +165,16 @@
         'Trap Bar Deadlift',
         'Romanian Deadlift (RDL)',
         'Barbell Row',
+        'Pendlay Row',
         'Dumbbell Row',
         'T-Bar Row',
+        'Chest-Supported Row',
+        'Inverted Row',
         'Pull-ups',
+        'Chin-ups',
         'Lat Pulldown',
+        'Single-Arm Lat Pulldown',
+        'Straight-Arm Pulldown',
         'Cable Row',
         'Face Pulls',
         'Shrugs'
@@ -172,33 +183,52 @@
         'Overhead Press (OHP)',
         'Military Press',
         'Dumbbell Shoulder Press',
+        'Machine Shoulder Press',
         'Lateral Raises',
+        'Cable Lateral Raise',
         'Front Raises',
         'Rear Delt Fly',
+        'Reverse Pec Deck',
         'Arnold Press',
-        'Upright Row'
+        'Upright Row',
+        'Pike Push-ups'
       ],
       legs: [
         'Back Squat',
         'Front Squat',
+        'Goblet Squat',
+        'Bodyweight Squat',
         'Leg Press',
+        'Hack Squat',
         'Bulgarian Split Squat',
         'Lunges',
+        'Step-ups',
+        'Pistol Squat',
+        'Wall Sit',
+        'Jump Squats',
+        'Romanian Deadlift',
+        'Hip Thrust',
+        'Glute Bridge',
         'Leg Extension',
         'Leg Curl',
-        'Calf Raises',
-        'Hack Squat'
+        'Seated Leg Curl',
+        'Calf Raises'
       ],
       arms: [
         'Barbell Curl',
+        'EZ-Bar Curl',
         'Dumbbell Curl',
         'Hammer Curls',
         'Preacher Curl',
+        'Concentration Curl',
         'Cable Curl',
         'Triceps Pushdown',
+        'Rope Pushdown',
         'Overhead Triceps Extension',
         'Skull Crushers',
+        'Tricep Kickback',
         'Close-Grip Bench Press',
+        'Bench Dips',
         'Dips (Triceps Focus)'
       ],
       core: [
@@ -206,7 +236,15 @@
         'Side Plank',
         'Ab Wheel Rollout',
         'Hanging Leg Raises',
+        'Leg Raises',
         'Cable Crunch',
+        'Crunches',
+        'Reverse Crunches',
+        'Sit-ups',
+        'Decline Sit-ups',
+        'V-ups',
+        'Toe Touches',
+        'Flutter Kicks',
         'Russian Twist',
         'Dead Bug',
         'Pallof Press',
@@ -220,6 +258,8 @@
         'Battle Ropes',
         'Box Jumps',
         'Burpees',
+        'Jumping Jacks',
+        'Plain Dips',
         'Kettlebell Swings'
       ]
     };
@@ -1609,11 +1649,11 @@ const WorkoutTracker = () => {
     // Fallback: keyword-based categorization for custom exercises
     const keywords = {
       chest: ['bench', 'press', 'fly', 'chest', 'pec'],
-      back: ['row', 'pull', 'lat', 'deadlift', 'mrtvo'],
+      back: ['row', 'pull', 'lat', 'deadlift', 'mrtvo', 'chin'],
       shoulders: ['raise', 'shoulder', 'delt', 'overhead', 'military', 'arnold'],
-      legs: ['squat', 'lunge', 'leg', 'calf', 'čučanj'],
+      legs: ['squat', 'lunge', 'leg', 'calf', 'čučanj', 'hip thrust', 'glute', 'wall sit', 'pistol', 'step-up'],
       arms: ['curl', 'extension', 'tricep', 'bicep'],
-      core: ['plank', 'crunch', 'ab', 'core', 'pallof', 'rollout', 'bug']
+      core: ['plank', 'crunch', 'ab', 'core', 'pallof', 'rollout', 'bug', 'sit-up', 'leg raise', 'v-up', 'flutter']
     };
 
     for (const [group, words] of Object.entries(keywords)) {
@@ -1936,65 +1976,160 @@ const WorkoutTracker = () => {
     };
   };
 
-  const getSmartWeightSuggestion = (exerciseName) => {
-    // Find last workout with this exercise
-    for (let i = completedWorkouts.length - 1; i >= 0; i--) {
+  // FUNC_ID: getExerciseHistory | Summarize the last up-to-5 workouts containing an exercise
+  // Returns oldest->newest array of { date, bestWeight, bestReps, bestE1RM, difficulty, topSetRepsHit }
+  // Only sets with reps <= 12 count toward bestE1RM (strength range, mirrors get1RMProgression);
+  // bestWeight falls back to the heaviest set when every set is high-rep.
+  const getExerciseHistory = (exerciseName, maxWorkouts = 5) => {
+    const history = [];
+
+    for (let i = completedWorkouts.length - 1; i >= 0 && history.length < maxWorkouts; i--) {
       const workout = completedWorkouts[i];
       const exercise = workout.exercises.find(ex => ex.name === exerciseName);
+      if (!exercise || !exercise.sets || exercise.sets.length === 0) continue;
 
-      if (exercise && exercise.sets.length > 0) {
-        // Find best set (highest estimated 1RM)
-        let bestSet = null;
-        let bestEstimated1RM = 0;
+      let bestE1RM = 0;
+      let bestWeight = 0;
+      let bestReps = 0;
+      let topSetRepsHit = 0;
+      let hasValidSet = false;
 
-        exercise.sets.forEach(set => {
-          const weight = parseFloat(set.weight) || 0;
-          const reps = parseFloat(set.reps) || 0;
+      exercise.sets.forEach(set => {
+        const weight = parseFloat(set.weight) || 0;
+        const reps = parseFloat(set.reps) || 0;
+        if (reps <= 0) return;
 
-          if (weight > 0 && reps > 0) {
-            const estimated1RM = calculateEstimated1RM(weight, reps);
-            if (estimated1RM > bestEstimated1RM) {
-              bestEstimated1RM = estimated1RM;
-              bestSet = set;
-            }
-          }
-        });
+        hasValidSet = true;
+        if (reps > topSetRepsHit) topSetRepsHit = reps;
 
-        if (bestSet) {
-          const lastWeight = parseFloat(bestSet.weight);
-          const difficulty = exercise.difficulty;
-
-          // Smart progression based on difficulty
-          if (difficulty === 'easy') {
-            // Easy → +2.5 kg
-            return {
-              weight: (lastWeight + 2.5).toFixed(1),
-              reason: 'felt easy last time (+2.5 kg)'
-            };
-          } else if (difficulty === 'medium') {
-            // Medium → Keep same
-            return {
-              weight: lastWeight.toFixed(1),
-              reason: 'good weight (same as last time)'
-            };
-          } else if (difficulty === 'hard') {
-            // Hard → Keep same
-            return {
-              weight: lastWeight.toFixed(1),
-              reason: 'felt hard last time (repeat weight)'
-            };
-          } else {
-            // No difficulty rating → return last weight
-            return {
-              weight: lastWeight.toFixed(1),
-              reason: 'based on last workout'
-            };
-          }
+        // Track heaviest set regardless of rep count (fallback for high-rep work)
+        if (weight > bestWeight) {
+          bestWeight = weight;
+          bestReps = reps;
         }
+
+        // e1RM only meaningful in the strength range
+        if (weight > 0 && reps <= 12) {
+          const e1RM = calculateEstimated1RM(weight, reps);
+          if (e1RM > bestE1RM) bestE1RM = e1RM;
+        }
+      });
+
+      if (!hasValidSet) continue;
+
+      history.push({
+        date: workout.date,
+        bestWeight,
+        bestReps,
+        bestE1RM,
+        difficulty: exercise.difficulty || null,
+        topSetRepsHit
+      });
+    }
+
+    return history.reverse(); // oldest -> newest
+  };
+
+  // Round to nearest 0.5 kg (matches the .toFixed(1) display granularity)
+  const roundToHalf = (n) => (Math.round(n * 2) / 2);
+  // Round to nearest 2.5 kg (plate-friendly deload target)
+  const roundToPlate = (n) => (Math.round(n / 2.5) * 2.5);
+  // Parse the first integer out of planned reps like "8", "8-10", "8 to 12"
+  const parsePlannedReps = (plannedReps) => {
+    if (plannedReps == null) return null;
+    const m = String(plannedReps).match(/\d+/);
+    return m ? parseInt(m[0], 10) : null;
+  };
+
+  // FUNC_ID: getSmartWeightSuggestion | Proactive, multi-workout coaching recommendation
+  // Returns { weight, reps?, reason, type } or null. type in:
+  //   progress | hold | deload | swap | rep-up | info  (drives color/icon in the logging UI)
+  const getSmartWeightSuggestion = (exerciseName, plannedReps = null) => {
+    const history = getExerciseHistory(exerciseName, 5);
+
+    // 1. No usable history -> no suggestion (unchanged behavior)
+    if (history.length === 0) return null;
+
+    const latest = history[history.length - 1];
+    const lastWeight = latest.bestWeight;
+    const difficulty = latest.difficulty;
+    const plannedRepTarget = parsePlannedReps(plannedReps);
+
+    // Difficulty-only fallback (used for the single-history case and as the default tail)
+    const difficultyFallback = () => {
+      if (difficulty === 'easy') {
+        return { weight: roundToHalf(lastWeight + 2.5).toFixed(1), reason: 'felt easy last time (+2.5 kg)', type: 'progress' };
+      } else if (difficulty === 'medium') {
+        return { weight: lastWeight.toFixed(1), reason: 'good weight (same as last time)', type: 'hold' };
+      } else if (difficulty === 'hard') {
+        return { weight: lastWeight.toFixed(1), reason: 'felt hard last time (repeat weight)', type: 'hold' };
+      }
+      return { weight: lastWeight.toFixed(1), reason: 'based on last workout', type: 'info' };
+    };
+
+    // 2. Only one prior workout -> not enough trend data, use difficulty logic
+    if (history.length === 1) return difficultyFallback();
+
+    // Trend window: compare the most recent workout against the best of the
+    // window up to (but not including) the last 3, using e1RM where available.
+    const window = history.slice(-3);
+    const useE1RM = window.every(w => w.bestE1RM > 0);
+    const metric = (w) => (useE1RM ? w.bestE1RM : w.bestWeight);
+    const earlierBest = Math.max(...history.slice(0, -1).map(metric));
+    const currentMetric = metric(latest);
+    // Flat/declining = current not exceeding earlier best by >1%
+    const isPlateau = history.length >= 3 && currentMetric <= earlierBest * 1.01;
+    const allHard = window.length >= 3 && window.every(w => w.difficulty === 'hard');
+
+    // 3. Deload: stalled AND consistently grinding (3x hard, no progress)
+    if (isPlateau && allHard) {
+      const target = roundToPlate(lastWeight * 0.9);
+      return {
+        weight: target.toFixed(1),
+        reason: 'Stalled & fatigued 3x — deload week: drop ~10%, then rebuild',
+        type: 'deload'
+      };
+    }
+
+    // 4. Plateau -> suggest swapping to a same-muscle alternative
+    if (isPlateau) {
+      const alts = getMuscleGroupSuggestions(exerciseName);
+      const alt = alts.find(a => a.toLowerCase() !== exerciseName.toLowerCase());
+      if (alt) {
+        return {
+          weight: lastWeight.toFixed(1),
+          reason: `No progress in 3 workouts — try ${alt} for a few weeks`,
+          type: 'swap'
+        };
+      }
+      // 5. Plateau but no alternative available (custom exercise)
+      return {
+        weight: lastWeight.toFixed(1),
+        reason: 'Plateau — same weight, push for +1 rep or take a lighter week',
+        type: 'hold'
+      };
+    }
+
+    // 6. Rep-range progression: hit the planned reps on the top set last time
+    if (plannedRepTarget && latest.topSetRepsHit >= plannedRepTarget) {
+      if (difficulty === 'easy' || !difficulty) {
+        return {
+          weight: roundToHalf(lastWeight + 2.5).toFixed(1),
+          reason: 'Hit your target reps easily — add 2.5 kg',
+          type: 'progress'
+        };
+      }
+      if (difficulty === 'medium') {
+        return {
+          weight: lastWeight.toFixed(1),
+          reason: 'Solid — try +1 rep this time before adding weight',
+          type: 'rep-up'
+        };
       }
     }
 
-    return null;
+    // 7. Default: difficulty-based progression
+    return difficultyFallback();
   };
 
   const startWorkout = (workout) => {
@@ -4163,11 +4298,22 @@ const WorkoutTracker = () => {
                                         exercise.name.toLowerCase().includes('rollout');
                   if (isCoreExercise) return null;
 
-                  const suggestion = getSmartWeightSuggestion(exercise.name);
+                  const suggestion = getSmartWeightSuggestion(exercise.name, exercise.plannedReps);
                   if (!suggestion) return null;
 
+                  // Color the suggestion line by recommendation type
+                  const typeColors = {
+                    progress: darkMode ? 'text-green-400' : 'text-green-600',
+                    hold: darkMode ? 'text-blue-400' : 'text-blue-600',
+                    info: darkMode ? 'text-blue-400' : 'text-blue-600',
+                    'rep-up': darkMode ? 'text-blue-400' : 'text-blue-600',
+                    deload: darkMode ? 'text-amber-400' : 'text-amber-600',
+                    swap: darkMode ? 'text-purple-400' : 'text-purple-600'
+                  };
+                  const colorClass = typeColors[suggestion.type] || typeColors.info;
+
                   return (
-                    <div className={`text-xs ${darkMode ? 'text-blue-400' : 'text-blue-600'} mb-4 flex items-center gap-1`}>
+                    <div className={`text-xs ${colorClass} mb-4 flex items-center gap-1`}>
                       <Zap size={14} />
                       <span>Suggestion: <strong>{suggestion.weight} kg</strong> — {suggestion.reason}</span>
                     </div>
