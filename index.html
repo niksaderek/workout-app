@@ -1665,6 +1665,24 @@ const WorkoutTracker = () => {
     return 'other'; // Default fallback
   };
 
+  // ABOUTME: Resolves how an exercise is measured (reps/seconds/meters) and
+  // ABOUTME: per-unit display + stats rules. Override wins; else auto-detect by name.
+  // FUNC_ID: getExerciseUnit | Returns 'reps' | 'seconds' | 'meters'
+  const getExerciseUnit = (exercise) => {
+    const u = exercise && exercise.unit;
+    if (u === 'reps' || u === 'seconds' || u === 'meters') return u; // explicit override wins
+    const n = ((exercise && exercise.name) || '').toLowerCase();
+    if (/\b(farmer|carry|walk|sled|yoke)\b/.test(n)) return 'meters';
+    if (/\b(plank|hold|wall sit|dead hang|hang)\b/.test(n)) return 'seconds';
+    return 'reps';
+  };
+
+  const UNIT_CONFIG = {
+    reps:    { label: 'reps', placeholder: 'reps', hasWeight: true, countsAsReps: true,  countsAsVolume: true  },
+    seconds: { label: 'sec',  placeholder: 'sec',  hasWeight: true, countsAsReps: false, countsAsVolume: false },
+    meters:  { label: 'm',    placeholder: 'm',    hasWeight: true, countsAsReps: false, countsAsVolume: false }
+  };
+
   // Calculate estimated 1RM for all exercises in history
   const getAll1RMs = () => {
     const exerciseMaxes = {}; // { exerciseName: best1RM }
