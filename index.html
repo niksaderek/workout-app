@@ -1683,6 +1683,17 @@ const WorkoutTracker = () => {
     meters:  { label: 'm',    placeholder: 'm',    hasWeight: true, countsAsReps: false, countsAsVolume: false }
   };
 
+  // FUNC_ID: formatPlannedTarget | "{reps} {label}" but suppress the label when
+  // plannedReps already carries its own unit/words (legacy free-text templates).
+  const formatPlannedTarget = (plannedReps, unitLabel) => {
+    const raw = (plannedReps == null ? '' : String(plannedReps)).trim();
+    // Append the label ONLY when plannedReps is a bare number or numeric range
+    // (e.g. "10", "8-10", "8–12", "10 - 12"). Anything else (already has a unit
+    // like "40 m" / "30–45 s", or words like "To failure") is shown as-is.
+    const isBareNumeric = /^\d+(\s*[-–—]\s*\d+)?$/.test(raw);
+    return isBareNumeric && unitLabel ? `${raw} ${unitLabel}` : raw;
+  };
+
   // Calculate estimated 1RM for all exercises in history
   const getAll1RMs = () => {
     const exerciseMaxes = {}; // { exerciseName: best1RM }
@@ -4306,7 +4317,7 @@ const WorkoutTracker = () => {
                   );
                 })()}
 
-                <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Target: {exercise.plannedSets} × {exercise.plannedReps} {UNIT_CONFIG[getExerciseUnit(exercise)].label}</div>
+                <div className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>Target: {exercise.plannedSets} × {formatPlannedTarget(exercise.plannedReps, UNIT_CONFIG[getExerciseUnit(exercise)].label)}</div>
 
                 {/* Smart Weight Suggestion */}
                 {(() => {
