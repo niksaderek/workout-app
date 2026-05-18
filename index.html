@@ -2180,6 +2180,7 @@ const WorkoutTracker = () => {
           plannedSets: ex.sets,
           plannedReps: ex.reps,
           muscleGroup: ex.muscleGroup || getMuscleGroup(ex.name), // Auto-assign if missing
+          unit: ex.unit, // explicit override only; undefined => history reader auto-detects
           difficulty: null, // User can optionally rate difficulty
           sets: Array(ex.sets).fill(null).map(() => ({
             weight: lastWeight,
