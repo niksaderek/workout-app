@@ -16,8 +16,10 @@ type-detection logic.
 
 User decisions captured during brainstorming:
 1. **Unit assignment:** auto-detect by name **+ manual override**.
-2. **Weight relevance:** depends on exercise — planks/holds = seconds, no
-   weight; Farmer's Walk/sled = meters **with** weight.
+2. **Weight relevance:** all units keep an optional weight field. Plain
+   planks are logged with no weight; weighted planks and loaded carries
+   can record the load. (Revised 2026-05-18 from the original
+   "seconds = no weight" decision — weighted plank is now in scope.)
 3. **Stats impact:** track separately — seconds/meters excluded from
    reps/volume/1RM/strength stats (same treatment core gets today).
 4. **Existing data:** auto-detect, **no migration** — saved records are
@@ -38,8 +40,6 @@ User decisions captured during brainstorming:
 
 ## Non-Goals (YAGNI)
 
-- No "seconds + weight" combination (weighted plank is an edge case; use an
-  override and accept no weight field — explicitly out of scope).
 - No one-time data migration.
 - No new dedicated stat views (plank-time chart, total-distance card).
 - No CSV schema change (the `Reps` column keeps its name; value is still
@@ -65,7 +65,7 @@ const getExerciseUnit = (exercise) => {
 
 const UNIT_CONFIG = {
   reps:    { label: 'reps', placeholder: 'reps', hasWeight: true,  countsAsReps: true,  countsAsVolume: true  },
-  seconds: { label: 'sec',  placeholder: 'sec',  hasWeight: false, countsAsReps: false, countsAsVolume: false },
+  seconds: { label: 'sec',  placeholder: 'sec',  hasWeight: true,  countsAsReps: false, countsAsVolume: false },
   meters:  { label: 'm',    placeholder: 'm',    hasWeight: true,  countsAsReps: false, countsAsVolume: false },
 };
 ```
@@ -94,8 +94,9 @@ const UNIT_CONFIG = {
 - Compute `const unit = getExerciseUnit(exercise); const cfg = UNIT_CONFIG[unit];`
 - Weight input `disabled={!cfg.hasWeight}` — replaces the inline
   `includes('plank')...` string check; keeps the existing dimmed style.
-- The `×` separator renders only when `cfg.hasWeight` (no "× 60" for a
-  bare plank).
+- All units keep the weight field (`cfg.hasWeight` is `true` for all
+  three). The field stays optional — left blank for a bodyweight plank,
+  filled for a weighted plank or loaded carry.
 - Second input: `placeholder={cfg.placeholder}`, still bound to
   `set.reps`, `inputMode="numeric"`.
 - "Target:" line → `{plannedSets} × {plannedReps} {cfg.label}`
@@ -133,8 +134,10 @@ is already correct for seconds/meters.
 
 ## Edge Cases
 
-- **Weighted plank:** auto = seconds, no weight. No seconds+weight combo by
-  design (override available but still no weight field). Explicit non-goal.
+- **Weighted plank:** auto = seconds, weight field present but optional.
+  Leave weight blank for bodyweight, fill it for a weighted plank. The
+  weight does NOT feed volume/1RM (seconds `countsAsVolume: false`), it is
+  recorded for the user's own reference only.
 - **Ambiguous custom names** (e.g. "Walking Lunges" contains "walk"):
   word-boundaried, tight regex minimizes misfires; manual override is the
   escape hatch.
