@@ -2,6 +2,7 @@ node_modules/
 .netlify/
 package-lock.json
 *.backup
+workout-backup-*.json
 .mcp.json
 generate-*.js
 build-*.js
