@@ -8,14 +8,16 @@ A modern, feature-rich Progressive Web App (PWA) for tracking workouts with offl
 ## ✨ Features
 
 - 📊 **Detailed Statistics** - Track volume, reps, personal records, and progress over time
-- 💪 **Personal Records** - Monitor your strength gains on main compound lifts
+- 💪 **Personal Records** - Monitor strength gains on main compound lifts (competition-style variants only — Leg Press, RDL, Dumbbell variants are excluded from main-lift totals to keep Strength Standards accurate)
+- 🧠 **Proactive Recommendations** - Multi-workout coaching: plateau detection, deload cues, exercise-swap suggestions, "+1 rep last time, push for one more" prompts, and bodyweight-aware progress (same lift at lower bodyweight is flagged as a strength gain)
+- 📏 **Per-Exercise Units** - Reps, seconds, or meters per exercise (auto-detected by name; override per template). Time/distance work is counted separately from weighted volume
+- ⚖️ **Body Weight & Strength Standards** - Gender-specific Symmetric Strength bands (Untrained → Elite) computed from estimated 1RM relative to current bodyweight
 - 📱 **Progressive Web App** - Install on Android/iOS as a native app
 - 💾 **Offline Support** - Works completely offline with IndexedDB storage
 - 🌓 **Dark/Light Mode** - Comfortable viewing in any lighting condition
 - 📈 **Progress Tracking** - Weekly and monthly analytics with trend comparisons
-- 📥 **CSV Export** - Export your workout data for external analysis
-- ⚡ **Progressive Overload** - Automatically pre-fills weights from previous workouts
-- 🎯 **Core Exercise Tracking** - Separate tracking for core/bodyweight exercises
+- 📥 **CSV Export & JSON Backup** - Export history to CSV; full backup/restore via JSON (workouts, history, bodyweight, gender)
+- ⚡ **Progressive Overload** - Pre-fills weights from previous workouts and adjusts suggestions by your difficulty rating
 - 🔒 **Privacy First** - All data stays on your device, no backend required
 
 ## 🚀 Quick Start
