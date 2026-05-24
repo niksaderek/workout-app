@@ -1628,10 +1628,16 @@ const WorkoutTracker = () => {
   };
 
   // Categorize exercise name to main lift category (or null if not a main lift)
-  // Case-insensitive EXACT match — variants like Leg Press, RDL, Dumbbell Bench,
-  // Bulgarian Split Squat, Hack Squat, Push Press are deliberately excluded.
+  // Case-insensitive EXACT match (after stripping a trailing parenthetical) —
+  // variants like Leg Press, RDL, Dumbbell Bench, Bulgarian Split Squat, Hack Squat,
+  // Push Press are deliberately excluded.
+  // Trailing "(...)" stripped so names like "Overhead Press (OHP)", "Bench Press (Comp)",
+  // "Squat (Pause)" still match their base lift.
   const categorizeExercise = (exerciseName) => {
-    const lowerName = String(exerciseName || '').toLowerCase().trim();
+    const lowerName = String(exerciseName || '')
+      .toLowerCase()
+      .replace(/\s*\([^)]*\)\s*$/, '') // strip trailing parenthetical
+      .trim();
 
     for (const [category, variations] of Object.entries(EXERCISE_CATEGORIES)) {
       if (variations.some(variation => variation === lowerName)) {
