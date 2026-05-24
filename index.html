@@ -2576,6 +2576,12 @@ const WorkoutTracker = () => {
     setActiveView('history');
   };
 
+  const updateHistoryExerciseName = (exIdx, newName) => {
+    const updated = { ...editingHistory };
+    updated.exercises[exIdx] = { ...updated.exercises[exIdx], name: newName };
+    setEditingHistory(updated);
+  };
+
   const updateHistorySet = (exIdx, setIdx, field, value) => {
     const updated = { ...editingHistory };
     updated.exercises[exIdx].sets[setIdx][field] = value;
@@ -4822,7 +4828,14 @@ const WorkoutTracker = () => {
               {/* Exercises */}
               {editingHistory.exercises.map((exercise, exIdx) => (
                 <div key={exIdx} className={`${darkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-xl p-4 mb-4`}>
-                  <h3 className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-3`}>{exercise.name}</h3>
+                  <div className="mb-3">
+                    <ExerciseInput
+                      value={exercise.name}
+                      onChange={(v) => updateHistoryExerciseName(exIdx, v)}
+                      darkMode={darkMode}
+                      placeholder="Exercise name"
+                    />
+                  </div>
 
                   <div className="space-y-3">
                     {exercise.sets.map((set, setIdx) => (
