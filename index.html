@@ -1240,6 +1240,7 @@ const WorkoutTracker = () => {
   const [expandedWorkouts, setExpandedWorkouts] = useState({}); // {workoutId: boolean} - track which workout previews are expanded
   const [statsPeriod, setStatsPeriod] = useState('week'); // 'week', 'month', 'all' - period selector for stats
   const [bodyWeight, setBodyWeight] = useState(null); // Current body weight in kg
+  const [bodyWeightHistory, setBodyWeightHistory] = useState([]); // All BW entries (ascending by date) for nearest-date lookup
   const [gender, setGender] = useState('male'); // 'male' or 'female'
   const [showBodyWeightInput, setShowBodyWeightInput] = useState(false); // Show/hide body weight input field
   const [show1RMModal, setShow1RMModal] = useState(null); // {exerciseName: string, data: array} or null
@@ -1471,6 +1472,9 @@ const WorkoutTracker = () => {
       const savedWorkouts = await dbOperations.getWorkouts();
       let savedHistory = await dbOperations.getHistory();
       const latestBodyWeight = await dbOperations.getLatestBodyWeight();
+      const allBodyWeights = await dbOperations.getBodyWeightHistory();
+      // Sort ascending (oldest -> newest) for getBodyWeightAt nearest-date lookup
+      setBodyWeightHistory([...allBodyWeights].sort((a, b) => new Date(a.date) - new Date(b.date)));
 
       // Check if IndexedDB is empty but localStorage has backup
       const hasIndexedDBData = (savedWorkouts && savedWorkouts.length > 0) || (savedHistory && savedHistory.length > 0);
@@ -1565,6 +1569,8 @@ const WorkoutTracker = () => {
       await dbOperations.saveBodyWeight(weight, gender);
       setBodyWeight(Number(weight));
       setShowBodyWeightInput(false);
+      const allBodyWeights = await dbOperations.getBodyWeightHistory();
+      setBodyWeightHistory([...allBodyWeights].sort((a, b) => new Date(a.date) - new Date(b.date)));
       soundSystem.saveSuccess();
     } catch (error) {
       console.error('Error saving body weight:', error);
@@ -1591,42 +1597,44 @@ const WorkoutTracker = () => {
   // FUNC_ID: categorizeExercise | Maps exercise names to main lift categories
   // Explicit exercise-to-category mapping for main compound lifts
   // Prevents false positives (e.g., "Leg Press" → Overhead Press bug)
+  // Strict whitelist of competition-style barbell variants per main lift.
+  // Symmetric Strength standards are calibrated on these; assistance/machine/unilateral
+  // variants use different leverage/range/assistance and would distort the standard.
+  // Match rule: case-insensitive EXACT name match against this list (no substring).
+  // Exercises not listed still appear in getAll1RMs / Exercise Progress; they just
+  // don't roll up into Squat/Bench/Deadlift/OHP totals or Strength Standards.
   const EXERCISE_CATEGORIES = {
     'Bench Press': [
-      'bench press', 'bench',
-      'incline bench', 'decline bench',
-      'dumbbell bench', 'db bench',
-      'close grip bench', 'close-grip bench',
-      'incline db press'
+      'bench press', 'barbell bench press', 'flat bench press',
+      'competition bench press', 'pause bench press'
     ],
     'Squat': [
-      'squat', 'čučanj', 'cucanj',
-      'back squat', 'front squat',
-      'goblet squat', 'hack squat',
-      'bulgarian split squat'
+      'squat', 'back squat', 'front squat',
+      'box squat', 'pause squat',
+      'high bar squat', 'low bar squat',
+      'čučanj', 'cucanj'
     ],
     'Deadlift': [
-      'deadlift', 'mrtvo dizanje', 'mrtvo',
-      'trap bar deadlift', 'trap bar',
-      'romanian deadlift', 'rdl',
-      'sumo deadlift', 'stiff leg deadlift'
+      'deadlift', 'conventional deadlift',
+      'sumo deadlift', 'trap bar deadlift', 'hex bar deadlift',
+      'mrtvo dizanje', 'mrtvo'
     ],
     'Overhead Press': [
       'overhead press', 'ohp',
-      'military press', 'shoulder press',
-      'vojnički press', 'vojnicki',
-      'dumbbell shoulder press', 'db shoulder press',
-      'seated press', 'standing press',
-      'arnold press'
+      'standing overhead press', 'strict press',
+      'military press', 'barbell shoulder press',
+      'vojnički press', 'vojnicki'
     ]
   };
 
   // Categorize exercise name to main lift category (or null if not a main lift)
+  // Case-insensitive EXACT match — variants like Leg Press, RDL, Dumbbell Bench,
+  // Bulgarian Split Squat, Hack Squat, Push Press are deliberately excluded.
   const categorizeExercise = (exerciseName) => {
-    const lowerName = exerciseName.toLowerCase().trim();
+    const lowerName = String(exerciseName || '').toLowerCase().trim();
 
     for (const [category, variations] of Object.entries(EXERCISE_CATEGORIES)) {
-      if (variations.some(variation => lowerName.includes(variation))) {
+      if (variations.some(variation => variation === lowerName)) {
         return category;
       }
     }
@@ -2001,10 +2009,36 @@ const WorkoutTracker = () => {
     };
   };
 
+  // Top-level helper (mirrors the inline checks scattered across stats/UI sites).
+  // Kept separate from getExerciseUnit by deliberate design (see PROJECT_LEARNINGS 2026-05-18).
+  const isBodyweightExercise = (name) => {
+    const n = String(name || '').toLowerCase();
+    return n.includes('pull-up') || n.includes('push-up') || n.includes('chin-up') || n.includes('dip');
+  };
+
+  // FUNC_ID: getBodyWeightAt | Nearest-date BW lookup for any historical timestamp
+  // Returns the entry whose date is closest to dateISO (any direction), or null when store empty.
+  // bodyWeightHistory is kept sorted ascending by date in app state.
+  const getBodyWeightAt = (dateISO) => {
+    if (!bodyWeightHistory || bodyWeightHistory.length === 0) return null;
+    const target = new Date(dateISO).getTime();
+    let best = bodyWeightHistory[0];
+    let bestDelta = Math.abs(new Date(best.date).getTime() - target);
+    for (let i = 1; i < bodyWeightHistory.length; i++) {
+      const delta = Math.abs(new Date(bodyWeightHistory[i].date).getTime() - target);
+      if (delta < bestDelta) {
+        best = bodyWeightHistory[i];
+        bestDelta = delta;
+      }
+    }
+    return best;
+  };
+
   // FUNC_ID: getExerciseHistory | Summarize the last up-to-5 workouts containing an exercise
-  // Returns oldest->newest array of { date, bestWeight, bestReps, bestE1RM, difficulty, topSetRepsHit }
+  // Returns oldest->newest array of { date, bestWeight, bestReps, bestE1RM, difficulty, topSetRepsHit, bodyWeight, isBodyweight }
   // Only sets with reps <= 12 count toward bestE1RM (strength range, mirrors get1RMProgression);
   // bestWeight falls back to the heaviest set when every set is high-rep.
+  // bodyWeight is the nearest-date BW snapshot for the workout, or null when no BW data exists.
   const getExerciseHistory = (exerciseName, maxWorkouts = 5) => {
     const history = [];
 
@@ -2042,13 +2076,16 @@ const WorkoutTracker = () => {
 
       if (!hasValidSet) continue;
 
+      const bwEntry = getBodyWeightAt(workout.date);
       history.push({
         date: workout.date,
         bestWeight,
         bestReps,
         bestE1RM,
         difficulty: exercise.difficulty || null,
-        topSetRepsHit
+        topSetRepsHit,
+        bodyWeight: bwEntry ? bwEntry.weight : null,
+        isBodyweight: isBodyweightExercise(exerciseName)
       });
     }
 
@@ -2122,7 +2159,44 @@ const WorkoutTracker = () => {
     const isPlateau = history.length >= 3 && currentMetric <= earlierBest * 1.01;
     const allHard = window.length >= 3 && window.every(w => w.difficulty === 'hard');
 
-    // 3. Deload: stalled AND consistently grinding (3x hard, no progress)
+    // 3. BW-relative override: raw metric plateaued but relative strength improved.
+    //    Weighted: bestE1RM/bodyWeight grew >1% (lifter got lighter, same lift).
+    //    Bodyweight exercise: reps held/grew AND bodyWeight dropped >1% (same work, lighter loader).
+    if (isPlateau) {
+      const earlierBestEntry = history.slice(0, -1).reduce(
+        (best, w) => (metric(w) > metric(best) ? w : best),
+        history[0]
+      );
+      const latestBW = latest.bodyWeight;
+      const earlierBW = earlierBestEntry.bodyWeight;
+      if (latestBW && earlierBW) {
+        if (latest.isBodyweight) {
+          // Same reps at lower BW = strength gain
+          if (latest.topSetRepsHit >= earlierBestEntry.topSetRepsHit && latestBW < earlierBW * 0.99) {
+            const dKg = (earlierBW - latestBW).toFixed(1);
+            return {
+              weight: '',
+              reps: String(latest.topSetRepsHit),
+              reason: `Same reps at ${dKg} kg lighter bodyweight — that's a strength gain`,
+              type: 'progress'
+            };
+          }
+        } else if (latest.bestE1RM > 0 && earlierBestEntry.bestE1RM > 0) {
+          const latestRel = latest.bestE1RM / latestBW;
+          const earlierRel = earlierBestEntry.bestE1RM / earlierBW;
+          if (latestRel > earlierRel * 1.01) {
+            const dKg = (earlierBW - latestBW).toFixed(1);
+            return {
+              weight: lastWeight.toFixed(1),
+              reason: `Same lift, you're ${dKg} kg lighter — relative strength up, keep going`,
+              type: 'progress'
+            };
+          }
+        }
+      }
+    }
+
+    // 4. Deload: stalled AND consistently grinding (3x hard, no progress)
     if (isPlateau && allHard) {
       const target = roundToPlate(lastWeight * 0.9);
       return {
@@ -2151,7 +2225,26 @@ const WorkoutTracker = () => {
       };
     }
 
-    // 6. Rep-range progression: hit the planned reps on the top set last time
+    // 6. Rep-up below target: added a rep at same-or-heavier load but didn't hit the planned target yet.
+    //    Praise + keep climbing.
+    if (plannedRepTarget && history.length >= 2) {
+      const prev = history[history.length - 2];
+      if (
+        prev && prev.bestWeight > 0 && prev.topSetRepsHit > 0 &&
+        latest.bestWeight >= prev.bestWeight &&
+        latest.topSetRepsHit > prev.topSetRepsHit &&
+        latest.topSetRepsHit < plannedRepTarget
+      ) {
+        const dReps = latest.topSetRepsHit - prev.topSetRepsHit;
+        return {
+          weight: lastWeight.toFixed(1),
+          reason: `+${dReps} rep last time — push for one more to hit ${plannedRepTarget}`,
+          type: 'rep-up'
+        };
+      }
+    }
+
+    // 7. Rep-range progression: hit the planned reps on the top set last time
     if (plannedRepTarget && latest.topSetRepsHit >= plannedRepTarget) {
       if (difficulty === 'easy' || !difficulty) {
         return {
