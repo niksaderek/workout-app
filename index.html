@@ -2082,7 +2082,15 @@ const WorkoutTracker = () => {
 
       if (!hasValidSet) continue;
 
-      const bwEntry = getBodyWeightAt(workout.date);
+      // Prefer the snapshot baked into the workout at finish time; fall back
+      // to nearest-date lookup for older sessions that predate the snapshot.
+      let bwForWorkout = null;
+      if (typeof workout.bodyWeightSnapshot === 'number') {
+        bwForWorkout = workout.bodyWeightSnapshot;
+      } else {
+        const bwEntry = getBodyWeightAt(workout.date);
+        bwForWorkout = bwEntry ? bwEntry.weight : null;
+      }
       history.push({
         date: workout.date,
         bestWeight,
@@ -2090,7 +2098,7 @@ const WorkoutTracker = () => {
         bestE1RM,
         difficulty: exercise.difficulty || null,
         topSetRepsHit,
-        bodyWeight: bwEntry ? bwEntry.weight : null,
+        bodyWeight: bwForWorkout,
         isBodyweight: isBodyweightExercise(exerciseName)
       });
     }
@@ -2359,7 +2367,12 @@ const WorkoutTracker = () => {
 
   const finishWorkout = async () => {
     soundSystem.workoutComplete(); // Play sound
-    await saveHistory(currentLog);
+    // Snapshot the user's current bodyweight into the log so future BW-relative
+    // recommendations have an accurate per-workout reference (the global BW store
+    // is only weighed in occasionally; nearest-date lookup over a sparse store
+    // would otherwise snap every old workout to the same recent value).
+    const completed = bodyWeight ? { ...currentLog, bodyWeightSnapshot: bodyWeight } : currentLog;
+    await saveHistory(completed);
     setCurrentLog(null);
     localStorage.removeItem('currentWorkout');
     setActiveView('home');
