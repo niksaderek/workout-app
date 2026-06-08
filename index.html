@@ -2288,6 +2288,7 @@ const WorkoutTracker = () => {
       workoutName: workout.name,
       workoutEmoji: workout.emoji,
       date: new Date().toISOString(),
+      energyLevel: null,
       exercises: workout.exercises.map(ex => {
         const prefillUnit = getExerciseUnit(ex);
         const lastWeight = prefillUnit === 'reps' ? getLastWeight(ex.name) : '';
@@ -2319,6 +2320,13 @@ const WorkoutTracker = () => {
 
     updated.exercises[exerciseIndex].sets[setIndex][field] = value;
     setCurrentLog(updated);
+  };
+
+  const updateEnergyLevel = (level) => {
+    setCurrentLog(prev => ({
+      ...prev,
+      energyLevel: prev.energyLevel === level ? null : level
+    }));
   };
 
   const updateExerciseName = (exerciseIndex, newName) => {
@@ -4318,6 +4326,37 @@ const WorkoutTracker = () => {
                     })}
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Energy Level Picker */}
+            <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 shadow-sm`}>
+              <div className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-3`}>
+                ⚡ Energy level
+              </div>
+              <div className="flex gap-2">
+                {[
+                  { value: 'low', emoji: '🔴', label: 'Low' },
+                  { value: 'medium', emoji: '🟡', label: 'Medium' },
+                  { value: 'high', emoji: '🟢', label: 'High' }
+                ].map(option => (
+                  <button
+                    key={option.value}
+                    onClick={() => updateEnergyLevel(option.value)}
+                    className={`flex-1 flex flex-col items-center py-2 px-1 rounded-lg text-sm font-medium transition-all ${
+                      currentLog.energyLevel === option.value
+                        ? darkMode
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-blue-500 text-white'
+                        : darkMode
+                          ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                    }`}
+                  >
+                    <span className="text-base leading-tight">{option.emoji}</span>
+                    <span className="text-xs leading-tight mt-0.5">{option.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
