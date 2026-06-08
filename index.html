@@ -3243,6 +3243,7 @@ const WorkoutTracker = () => {
           workouts: [],
           volume: 0,
           reps: 0,
+          energyLevel: null,
           mainLifts: {
             deadlift: [],
             squat: [],
@@ -3253,6 +3254,10 @@ const WorkoutTracker = () => {
       }
 
       grouped[key].workouts.push(workout);
+      // Use the energy level of the first rated workout that day
+      if (!grouped[key].energyLevel && workout.energyLevel) {
+        grouped[key].energyLevel = workout.energyLevel;
+      }
 
       // Calculate volume, reps, and track main lifts
       workout.exercises.forEach(exercise => {
