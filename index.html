@@ -389,6 +389,17 @@
                   onMouseLeave={() => setHoveredPoint(null)}
                   className="transition-all"
                 />
+                {/* Energy emoji above point (volume chart only) */}
+                {metric === 'volume' && point.energyLevel && (
+                  <text
+                    x={x}
+                    y={y - 12}
+                    textAnchor="middle"
+                    fontSize="10"
+                  >
+                    {point.energyLevel === 'low' ? '🔴' : point.energyLevel === 'medium' ? '🟡' : '🟢'}
+                  </text>
+                )}
                 {/* Tooltip on hover */}
                 {isHovered && (
                   <g>
@@ -396,7 +407,7 @@
                       x={x - 35}
                       y={y - 40}
                       width="70"
-                      height="30"
+                      height={metric === 'volume' && point.energyLevel ? 42 : 30}
                       fill={darkMode ? '#1F2937' : '#FFFFFF'}
                       stroke={darkMode ? '#374151' : '#E5E7EB'}
                       strokeWidth="1"
@@ -421,6 +432,17 @@
                     >
                       {formatDate(point.date)}
                     </text>
+                    {metric === 'volume' && point.energyLevel && (
+                      <text
+                        x={x}
+                        y={y - 4}
+                        textAnchor="middle"
+                        fontSize="9"
+                        fill={darkMode ? '#9CA3AF' : '#6B7280'}
+                      >
+                        {`Energy: ${point.energyLevel === 'low' ? '🔴 Low' : point.energyLevel === 'medium' ? '🟡 Med' : '🟢 High'}`}
+                      </text>
+                    )}
                   </g>
                 )}
                 {/* X-axis label - smart labeling based on data count */}
