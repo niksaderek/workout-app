@@ -3277,15 +3277,17 @@ const WorkoutTracker = () => {
             grouped[key].volume += weight * reps;
           }
 
-          // Track main lifts
+          // Track main lifts — use explicit categorization (same whitelist as 1RM/Strength Standards)
+          // to prevent false positives like Bulgarian Split Squat → squat, Leg Press → squat, etc.
           if (weight > 0) {
-            if (exercise.name.toLowerCase().includes('deadlift') || exercise.name.toLowerCase().includes('mrtvo')) {
+            const timelineCategory = categorizeExercise(exercise.name);
+            if (timelineCategory === 'Deadlift') {
               grouped[key].mainLifts.deadlift.push(weight);
-            } else if (exercise.name.toLowerCase().includes('squat') || exercise.name.toLowerCase().includes('čučanj')) {
+            } else if (timelineCategory === 'Squat') {
               grouped[key].mainLifts.squat.push(weight);
-            } else if (exercise.name.toLowerCase().includes('bench press')) {
+            } else if (timelineCategory === 'Bench Press') {
               grouped[key].mainLifts.bench.push(weight);
-            } else if (exercise.name.toLowerCase().includes('overhead press') || exercise.name.toLowerCase().includes('ohp')) {
+            } else if (timelineCategory === 'Overhead Press') {
               grouped[key].mainLifts.ohp.push(weight);
             }
           }
