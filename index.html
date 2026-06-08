@@ -3910,6 +3910,47 @@ const WorkoutTracker = () => {
               })()}
             </div>
 
+            {/* Energy vs Volume */}
+            {(() => {
+                  const stats = getEnergyVolumeStats();
+                  if (!stats) return null;
+                  return (
+                    <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5 shadow-sm`}>
+                      <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
+                        ⚡ Energy vs Volume
+                      </h3>
+                      <div className="space-y-3">
+                        {stats.rows.map(row => (
+                          <div key={row.level} className="flex items-center gap-3">
+                            <div className="w-20 text-sm flex items-center gap-1">
+                              <span>{row.emoji}</span>
+                              <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{row.label}</span>
+                            </div>
+                            <div className={`flex-1 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-4 overflow-hidden`}>
+                              <div
+                                className={`h-full rounded-full transition-all ${
+                                  row.level === 'high' ? 'bg-green-500' :
+                                  row.level === 'medium' ? 'bg-yellow-500' : 'bg-red-500'
+                                }`}
+                                style={{ width: `${Math.round((row.mean / stats.maxMean) * 100)}%` }}
+                              />
+                            </div>
+                            <div className={`w-12 text-right text-sm font-medium ${
+                              row.delta === null || row.delta === 0 ? (darkMode ? 'text-gray-400' : 'text-gray-500') :
+                              row.delta > 0 ? 'text-green-500' : 'text-red-500'
+                            }`}>
+                              {row.delta === null || row.delta === 0 ? 'avg' : `${row.delta > 0 ? '+' : ''}${row.delta}%`}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'} mt-3`}>
+                        Based on {stats.total} rated workouts · vs your average volume
+                      </div>
+                    </div>
+                  );
+                })()}
+
             {/* Personal Records (Main Lifts) */}
             {(() => {
               const bestSets = getMainLiftsBestSets();
@@ -4195,47 +4236,6 @@ const WorkoutTracker = () => {
                 );
               })()}
             </div>
-
-            {/* Energy vs Volume */}
-            {(() => {
-                  const stats = getEnergyVolumeStats();
-                  if (!stats) return null;
-                  return (
-                    <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5 shadow-sm`}>
-                      <h3 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>
-                        ⚡ Energy vs Volume
-                      </h3>
-                      <div className="space-y-3">
-                        {stats.rows.map(row => (
-                          <div key={row.level} className="flex items-center gap-3">
-                            <div className="w-20 text-sm flex items-center gap-1">
-                              <span>{row.emoji}</span>
-                              <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{row.label}</span>
-                            </div>
-                            <div className={`flex-1 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-4 overflow-hidden`}>
-                              <div
-                                className={`h-full rounded-full transition-all ${
-                                  row.level === 'high' ? 'bg-green-500' :
-                                  row.level === 'medium' ? 'bg-yellow-500' : 'bg-red-500'
-                                }`}
-                                style={{ width: `${Math.round((row.mean / stats.maxMean) * 100)}%` }}
-                              />
-                            </div>
-                            <div className={`w-12 text-right text-sm font-medium ${
-                              row.delta === null || row.delta === 0 ? (darkMode ? 'text-gray-400' : 'text-gray-500') :
-                              row.delta > 0 ? 'text-green-500' : 'text-red-500'
-                            }`}>
-                              {row.delta === null || row.delta === 0 ? 'avg' : `${row.delta > 0 ? '+' : ''}${row.delta}%`}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'} mt-3`}>
-                        Based on {stats.total} rated workouts · vs your average volume
-                      </div>
-                    </div>
-                  );
-                })()}
 
             {/* Strength Standards */}
             {(() => {
