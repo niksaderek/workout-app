@@ -2127,7 +2127,8 @@ const WorkoutTracker = () => {
     if (history.length === 0) return null;
 
     // Non-rep units (seconds/meters): weight/1RM/plateau math is meaningless.
-    // Give a simple progression nudge based on the last logged value.
+    // Compare across sessions using topSetRepsHit (raw seconds/meters), then fall back
+    // to difficulty for a simple progression nudge.
     const unit = getExerciseUnit({ name: exerciseName });
     if (unit !== 'reps') {
       const last = history[history.length - 1];
@@ -2135,6 +2136,15 @@ const WorkoutTracker = () => {
       if (!lastVal) return null;
       const cfg = UNIT_CONFIG[unit];
       const diff = last.difficulty;
+      if (history.length >= 2) {
+        const prevBest = Math.max(...history.slice(0, -1).map(w => w.topSetRepsHit || 0));
+        if (lastVal > prevBest) {
+          return { weight: '', reps: String(lastVal), reason: `${cfg.label} up — great progress, keep going`, type: 'progress' };
+        }
+        if (lastVal < prevBest) {
+          return { weight: '', reps: String(prevBest), reason: `${prevBest} ${cfg.label} was your best — aim to match it`, type: 'hold' };
+        }
+      }
       if (diff === 'easy') {
         const bump = 5; // +5 sec or +5 m
         return { weight: '', reps: String(lastVal + bump), reason: `felt easy — try ${lastVal + bump} ${cfg.label}`, type: 'progress' };
@@ -2146,6 +2156,33 @@ const WorkoutTracker = () => {
     const lastWeight = latest.bestWeight;
     const difficulty = latest.difficulty;
     const plannedRepTarget = parsePlannedReps(plannedReps);
+
+    // Zero-weight exercises (push-ups, sit-ups, crunches, pull-ups without added weight):
+    // e1RM and weight are always 0, so use topSetRepsHit as the progression metric instead.
+    const isZeroWeight = history.every(w => w.bestWeight === 0);
+    if (isZeroWeight) {
+      const latestReps = latest.topSetRepsHit;
+      const diff = latest.difficulty;
+      if (history.length === 1) {
+        return { weight: '', reps: String(latestReps), reason: 'based on last workout', type: 'info' };
+      }
+      const prevBest = Math.max(...history.slice(0, -1).map(w => w.topSetRepsHit || 0));
+      if (latestReps > prevBest) {
+        const dReps = latestReps - prevBest;
+        return { weight: '', reps: String(latestReps), reason: `+${dReps} rep${dReps > 1 ? 's' : ''} — reps up, keep going`, type: 'progress' };
+      }
+      if (latestReps < prevBest) {
+        return { weight: '', reps: String(prevBest), reason: `${prevBest} reps was your best — aim to match it`, type: 'hold' };
+      }
+      // Same reps as previous best
+      if (diff === 'easy') {
+        return { weight: '', reps: String(latestReps + 1), reason: `felt easy — push for ${latestReps + 1} reps`, type: 'progress' };
+      }
+      if (diff === 'hard') {
+        return { weight: '', reps: String(latestReps), reason: `felt hard — hold at ${latestReps} reps`, type: 'hold' };
+      }
+      return { weight: '', reps: String(latestReps), reason: `match or beat ${latestReps} reps`, type: 'info' };
+    }
 
     // Difficulty-only fallback (used for the single-history case and as the default tail)
     const difficultyFallback = () => {
