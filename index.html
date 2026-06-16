@@ -2657,7 +2657,7 @@ const WorkoutTracker = () => {
       w.id === editingHistory.id ? editingHistory : w
     );
     setCompletedWorkouts(updatedHistory);
-    await dbOperations.saveHistory(updatedHistory);
+    await dbOperations.saveHistory(editingHistory);
     setEditingHistory(null);
     setActiveView('history');
   };
