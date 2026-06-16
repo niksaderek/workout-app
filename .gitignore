@@ -13,3 +13,4 @@ workout_*.md
 .playwright-cli/
 PROJECT_LEARNINGS.md
 CLAUDE.md
+.superpowers/
