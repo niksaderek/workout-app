@@ -4837,15 +4837,13 @@ const WorkoutTracker = () => {
                       const completedSets = ex.sets.filter(set => {
                         const weight = parseFloat(set.weight) || 0;
                         const reps = parseFloat(set.reps) || 0;
-                        const isCoreExercise = getExerciseUnit(ex) !== 'reps';
-
-                        const isBodyweightExercise = ex.name.toLowerCase().includes('pull-up') ||
-                                                     ex.name.toLowerCase().includes('dip') ||
-                                                     ex.name.toLowerCase().includes('chin-up') ||
-                                                     ex.name.toLowerCase().includes('push-up');
+                        const isCoreExercise = ex.name.toLowerCase().includes('core') ||
+                                              ex.name.toLowerCase().includes('plank') ||
+                                              ex.name.toLowerCase().includes('hanging') ||
+                                              ex.name.toLowerCase().includes('rollout');
 
                         // For core exercises and bodyweight exercises, only check reps
-                        if (isCoreExercise || isBodyweightExercise) return reps > 0;
+                        if (isCoreExercise || isBodyweightExercise(ex.name)) return reps > 0;
                         // For weighted exercises, check both weight and reps
                         return weight > 0 && reps > 0;
                       });
