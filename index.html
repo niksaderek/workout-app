@@ -1745,7 +1745,7 @@ const WorkoutTracker = () => {
         const exerciseName = exercise.name;
 
         // Skip core exercises (no weight)
-        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit({ name: exerciseName })].countsAsVolume;
+        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit({ name: exerciseName })].countsAsVolume || getMuscleGroup(exerciseName) === 'core';
 
         if (isCoreExercise) return;
 
@@ -2954,7 +2954,7 @@ const WorkoutTracker = () => {
 
     recentWorkouts.forEach(workout => {
       workout.exercises.forEach(exercise => {
-        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsReps;
+        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsReps || getMuscleGroup(exercise.name) === 'core';
 
         const isBodyweightExercise = exercise.name.toLowerCase().includes('pull-up') ||
                                      exercise.name.toLowerCase().includes('dip') ||
@@ -3031,7 +3031,7 @@ const WorkoutTracker = () => {
 
       workouts.forEach(workout => {
         workout.exercises.forEach(exercise => {
-          const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsReps;
+          const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsReps || getMuscleGroup(exercise.name) === 'core';
 
           const isBodyweightExercise = exercise.name.toLowerCase().includes('pull-up') ||
                                        exercise.name.toLowerCase().includes('dip') ||
@@ -3130,7 +3130,7 @@ const WorkoutTracker = () => {
     let allTimeCoreSets = 0;
     completedWorkouts.forEach(workout => {
       workout.exercises.forEach(exercise => {
-        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsVolume;
+        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsVolume || getMuscleGroup(exercise.name) === 'core';
 
         exercise.sets.forEach(set => {
           const weight = parseFloat(set.weight) || 0;
@@ -3325,7 +3325,7 @@ const WorkoutTracker = () => {
 
       // Calculate volume, reps, and track main lifts
       workout.exercises.forEach(exercise => {
-        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsVolume;
+        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsVolume || getMuscleGroup(exercise.name) === 'core';
 
         const isBodyweightExercise = exercise.name.toLowerCase().includes('pull-up') ||
                                      exercise.name.toLowerCase().includes('dip') ||
