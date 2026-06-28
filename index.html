@@ -2662,6 +2662,10 @@ const WorkoutTracker = () => {
     setActiveView('history');
   };
 
+  const updateHistoryEnergyLevel = (level) => {
+    setEditingHistory(prev => ({ ...prev, energyLevel: level }));
+  };
+
   const updateHistoryExerciseName = (exIdx, newName) => {
     const updated = { ...editingHistory };
     updated.exercises[exIdx] = { ...updated.exercises[exIdx], name: newName };
@@ -5032,6 +5036,33 @@ const WorkoutTracker = () => {
                 </div>
               </div>
 
+              {/* Energy Level */}
+              <div className={`${darkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-xl p-4 mb-4`}>
+                <div className={`text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-3`}>Energy level</div>
+                <div className="flex gap-2">
+                  {[
+                    { value: 'low',    Icon: FaceMeh,   label: 'Low' },
+                    { value: 'medium', Icon: FaceSmile, label: 'Medium' },
+                    { value: 'high',   Icon: FaceLaugh, label: 'High' }
+                  ].map(({ value, Icon, label }) => (
+                    <button
+                      key={value}
+                      onClick={() => updateHistoryEnergyLevel(editingHistory.energyLevel === value ? null : value)}
+                      className={`flex-1 flex flex-col items-center gap-1 py-2 rounded-xl border-2 transition-all text-sm font-semibold
+                        ${editingHistory.energyLevel === value
+                          ? value === 'low'    ? 'border-red-500 bg-red-500/20 text-red-400'
+                          : value === 'medium' ? 'border-amber-500 bg-amber-500/20 text-amber-400'
+                          :                     'border-green-500 bg-green-500/20 text-green-400'
+                          : darkMode ? 'border-gray-700 text-gray-500 hover:border-gray-500' : 'border-gray-200 text-gray-400 hover:border-gray-400'
+                        }`}
+                    >
+                      <Icon size={20} />
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Exercises */}
               {editingHistory.exercises.map((exercise, exIdx) => (
                 <div key={exIdx} className={`${darkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-xl p-4 mb-4`}>
@@ -5477,6 +5508,18 @@ const WorkoutTracker = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Resume workout banner — shown when a workout is in progress but user navigated away */}
+      {currentLog && activeView !== 'logging' && (
+        <div
+          onClick={() => setActiveView('logging')}
+          className="fixed-bottom-nav-banner flex items-center justify-between px-4 py-2 bg-green-600 hover:bg-green-700 cursor-pointer transition-colors"
+          style={{ bottom: '72px', left: 0, right: 0, position: 'fixed', zIndex: 9997 }}
+        >
+          <span className="text-white text-sm font-semibold">⏱ Workout in progress — tap to return</span>
+          <span className="text-green-200 text-xs">Resume →</span>
         </div>
       )}
 
