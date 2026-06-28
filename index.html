@@ -2085,6 +2085,8 @@ const WorkoutTracker = () => {
       let bestWeight = 0;
       let bestReps = 0;
       let topSetRepsHit = 0;
+      let totalVolume = 0;
+      let totalReps = 0;
       let hasValidSet = false;
 
       exercise.sets.forEach(set => {
@@ -2094,6 +2096,8 @@ const WorkoutTracker = () => {
 
         hasValidSet = true;
         if (reps > topSetRepsHit) topSetRepsHit = reps;
+        totalReps += reps;
+        if (weight > 0) totalVolume += weight * reps;
 
         // Track heaviest set regardless of rep count (fallback for high-rep work)
         if (weight > bestWeight) {
@@ -2124,6 +2128,8 @@ const WorkoutTracker = () => {
         bestWeight,
         bestReps,
         bestE1RM,
+        totalVolume,
+        totalReps,
         difficulty: exercise.difficulty || null,
         topSetRepsHit,
         bodyWeight: bwForWorkout,
@@ -2236,6 +2242,34 @@ const WorkoutTracker = () => {
     const currentMetric = metric(latest);
     // Flat/declining = current not exceeding earlier best by >1%
     const isPlateau = history.length >= 3 && currentMetric <= earlierBest * 1.01;
+
+    // Volume/rep-progress override: even if e1RM/weight didn't move, more total
+    // volume or reps vs the earliest session in the window means real progress.
+    // Compare against the WORST prior session (not just prev) so holding a volume
+    // gain isn't misread as a plateau.
+    if (isPlateau && history.length >= 2) {
+      const priorSessions = history.slice(0, -1);
+      const earliestVolume = Math.min(...priorSessions.map(w => w.totalVolume || 0));
+      const earliestReps   = Math.min(...priorSessions.map(w => w.totalReps   || 0));
+      const volumeUp = latest.totalVolume > earliestVolume * 1.01;
+      const repsUp   = !volumeUp && latest.totalReps > earliestReps;
+      if (volumeUp) {
+        const delta = Math.round(latest.totalVolume - earliestVolume);
+        return {
+          weight: lastWeight.toFixed(1),
+          reason: `+${delta} kg total volume vs your baseline — solid progress, push for more weight`,
+          type: 'progress'
+        };
+      }
+      if (repsUp) {
+        const delta = latest.totalReps - earliestReps;
+        return {
+          weight: lastWeight.toFixed(1),
+          reason: `+${delta} total rep${delta > 1 ? 's' : ''} vs your baseline — keep climbing`,
+          type: 'rep-up'
+        };
+      }
+    }
     const allHard = window.length >= 3 && window.every(w => w.difficulty === 'hard');
 
     // 3. BW-relative override: raw metric plateaued but relative strength improved.
@@ -4629,9 +4663,6 @@ const WorkoutTracker = () => {
 
                 {/* Smart Weight Suggestion */}
                 {(() => {
-                  const isCoreExercise = getExerciseUnit(exercise) !== 'reps';
-                  if (isCoreExercise) return null;
-
                   const suggestion = getSmartWeightSuggestion(exercise.name, exercise.plannedReps);
                   if (!suggestion) return null;
 
@@ -4646,10 +4677,17 @@ const WorkoutTracker = () => {
                   };
                   const colorClass = typeColors[suggestion.type] || typeColors.info;
 
+                  const unit = getExerciseUnit(exercise);
+                  const suggestionText = unit !== 'reps'
+                    ? `${suggestion.reps} ${UNIT_CONFIG[unit].label} — ${suggestion.reason}`
+                    : suggestion.weight
+                      ? `${suggestion.weight} kg — ${suggestion.reason}`
+                      : suggestion.reason;
+
                   return (
                     <div className={`text-xs ${colorClass} mb-4 flex items-center gap-1`}>
                       <Zap size={14} />
-                      <span>Suggestion: <strong>{suggestion.weight} kg</strong> — {suggestion.reason}</span>
+                      <span>Suggestion: {suggestionText}</span>
                     </div>
                   );
                 })()}
