@@ -148,6 +148,8 @@
 
     const FaceLaugh = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M7 13s1 3 5 3 5-3 5-3"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>;
 
+    const Clock = ({size = 24, className = ""}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+
     // Popular exercises database - organized by category
     const popularExercises = {
       chest: [
@@ -1274,6 +1276,7 @@ const WorkoutTracker = () => {
   const [show1RMModal, setShow1RMModal] = useState(null); // {exerciseName: string, data: array} or null
   const [showResumePrompt, setShowResumePrompt] = useState(false); // Resume workout prompt
   const [savedWorkoutData, setSavedWorkoutData] = useState(null); // Temporarily store saved workout data before user chooses to resume
+  const [elapsedSeconds, setElapsedSeconds] = useState(0); // Live workout timer
   const [substituteInputValue, setSubstituteInputValue] = useState(''); // Temp state for exercise substitution input
   const fileInputRef = React.useRef(null);
   const restoreBackupInputRef = React.useRef(null);
@@ -1351,6 +1354,16 @@ const WorkoutTracker = () => {
       localStorage.removeItem('currentWorkout');
     }
   }, [currentLog, hasInitialized]);
+
+  // Live workout timer — ticks every second while a workout is active
+  useEffect(() => {
+    if (!currentLog) { setElapsedSeconds(0); return; }
+    const start = new Date(currentLog.date).getTime();
+    const tick = () => setElapsedSeconds(Math.floor((Date.now() - start) / 1000));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [currentLog?.date]);
 
   const handleUpdateApp = () => {
     setShowUpdateNotification(false);
@@ -2140,6 +2153,14 @@ const WorkoutTracker = () => {
     return history.reverse(); // oldest -> newest
   };
 
+  const formatDuration = (startISO, endISO) => {
+    const secs = Math.floor((new Date(endISO) - new Date(startISO)) / 1000);
+    if (secs < 60) return `${secs}s`;
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  };
+
   // Round to nearest 0.5 kg (matches the .toFixed(1) display granularity)
   const roundToHalf = (n) => (Math.round(n * 2) / 2);
   // Round to nearest 2.5 kg (plate-friendly deload target)
@@ -2478,7 +2499,7 @@ const WorkoutTracker = () => {
     // recommendations have an accurate per-workout reference (the global BW store
     // is only weighed in occasionally; nearest-date lookup over a sparse store
     // would otherwise snap every old workout to the same recent value).
-    const completed = bodyWeight ? { ...currentLog, bodyWeightSnapshot: bodyWeight } : currentLog;
+    const completed = { ...(bodyWeight ? { ...currentLog, bodyWeightSnapshot: bodyWeight } : currentLog), finishedAt: new Date().toISOString() };
     await saveHistory(completed);
     setCurrentLog(null);
     localStorage.removeItem('currentWorkout');
@@ -4504,13 +4525,16 @@ const WorkoutTracker = () => {
                 <WorkoutIcon emoji={currentLog.workoutEmoji} className={darkMode ? 'text-gray-300' : 'text-gray-700'} />
                 <div>
                   <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{currentLog.workoutName}</h2>
-                  <div className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
-                    {new Date(currentLog.date).toLocaleString('hr-HR', { 
-                      day: 'numeric', 
+                  <div className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm flex items-center gap-3`}>
+                    <span>{new Date(currentLog.date).toLocaleString('hr-HR', {
+                      day: 'numeric',
                       month: 'long',
                       hour: '2-digit',
                       minute: '2-digit'
-                    })}
+                    })}</span>
+                    <span className={`font-mono font-semibold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                      {String(Math.floor(elapsedSeconds / 3600)).padStart(2,'0')}:{String(Math.floor((elapsedSeconds % 3600) / 60)).padStart(2,'0')}:{String(elapsedSeconds % 60).padStart(2,'0')}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -4841,18 +4865,25 @@ const WorkoutTracker = () => {
                           minute: '2-digit'
                         })}
                       </p>
-                      {workout.energyLevel && (() => {
-                        const cfg = {
-                          low:    { Icon: FaceMeh,   label: 'Low energy',    bg: darkMode ? 'bg-red-950'   : 'bg-red-100',   text: darkMode ? 'text-red-400'   : 'text-red-700'   },
-                          medium: { Icon: FaceSmile, label: 'Medium energy', bg: darkMode ? 'bg-amber-950' : 'bg-amber-100', text: darkMode ? 'text-amber-400' : 'text-amber-700' },
-                          high:   { Icon: FaceLaugh, label: 'High energy',   bg: darkMode ? 'bg-green-950' : 'bg-green-100', text: darkMode ? 'text-green-400' : 'text-green-700' }
-                        }[workout.energyLevel];
-                        return (
-                          <span className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.text}`}>
-                            <cfg.Icon size={12} /> {cfg.label}
+                      <div className="flex flex-wrap items-center gap-2 mt-1">
+                        {workout.finishedAt && (
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                            <Clock size={11} /> {formatDuration(workout.date, workout.finishedAt)}
                           </span>
-                        );
-                      })()}
+                        )}
+                        {workout.energyLevel && (() => {
+                          const cfg = {
+                            low:    { Icon: FaceMeh,   label: 'Low energy',    bg: darkMode ? 'bg-red-950'   : 'bg-red-100',   text: darkMode ? 'text-red-400'   : 'text-red-700'   },
+                            medium: { Icon: FaceSmile, label: 'Medium energy', bg: darkMode ? 'bg-amber-950' : 'bg-amber-100', text: darkMode ? 'text-amber-400' : 'text-amber-700' },
+                            high:   { Icon: FaceLaugh, label: 'High energy',   bg: darkMode ? 'bg-green-950' : 'bg-green-100', text: darkMode ? 'text-green-400' : 'text-green-700' }
+                          }[workout.energyLevel];
+                          return (
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.text}`}>
+                              <cfg.Icon size={12} /> {cfg.label}
+                            </span>
+                          );
+                        })()}
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <button
