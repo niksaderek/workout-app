@@ -3521,6 +3521,11 @@ const WorkoutTracker = () => {
             <div className="flex items-center gap-3">
               <Dumbbell className={darkMode ? 'text-gray-400' : 'text-gray-600'} size={28} />
               <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Workout Pro</h1>
+              {activeView === 'logging' && currentLog && (
+                <span className="font-mono text-lg font-bold" style={{ color: darkMode ? '#4ade80' : '#16a34a' }}>
+                  {String(Math.floor(elapsedSeconds / 3600)).padStart(2,'0')}:{String(Math.floor((elapsedSeconds % 3600) / 60)).padStart(2,'0')}:{String(elapsedSeconds % 60).padStart(2,'0')}
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -4532,7 +4537,7 @@ const WorkoutTracker = () => {
                       hour: '2-digit',
                       minute: '2-digit'
                     })}</span>
-                    <span className={`font-mono font-semibold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                    <span className="font-mono font-semibold" style={{ color: darkMode ? '#4ade80' : '#16a34a' }}>
                       {String(Math.floor(elapsedSeconds / 3600)).padStart(2,'0')}:{String(Math.floor((elapsedSeconds % 3600) / 60)).padStart(2,'0')}:{String(elapsedSeconds % 60).padStart(2,'0')}
                     </span>
                   </div>
