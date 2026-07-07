@@ -3518,8 +3518,8 @@ const WorkoutTracker = () => {
       <div className={`sticky ${showUpdateNotification ? 'top-[52px]' : 'top-0'} z-10 ${darkMode ? 'bg-gray-900/95' : 'bg-white/95'} ${darkMode ? 'border-gray-800' : 'border-gray-200'} border-b transform-gpu transition-all duration-300`}>
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Dumbbell className={darkMode ? 'text-gray-400' : 'text-gray-600'} size={28} />
+            <div className="flex items-baseline gap-3">
+              <Dumbbell className={darkMode ? 'text-gray-400' : 'text-gray-600'} size={28} style={{ alignSelf: 'center' }} />
               <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Workout Pro</h1>
               {activeView === 'logging' && currentLog && (
                 <span className="font-mono text-lg font-bold" style={{ color: darkMode ? '#4ade80' : '#16a34a' }}>
