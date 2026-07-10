@@ -1273,6 +1273,7 @@ const WorkoutTracker = () => {
   const [bodyWeightHistory, setBodyWeightHistory] = useState([]); // All BW entries (ascending by date) for nearest-date lookup
   const [gender, setGender] = useState('male'); // 'male' or 'female'
   const [showBodyWeightInput, setShowBodyWeightInput] = useState(false); // Show/hide body weight input field
+  const [showAllBWHistory, setShowAllBWHistory] = useState(false); // Expand full BW history list
   const [show1RMModal, setShow1RMModal] = useState(null); // {exerciseName: string, data: array} or null
   const [showResumePrompt, setShowResumePrompt] = useState(false); // Resume workout prompt
   const [savedWorkoutData, setSavedWorkoutData] = useState(null); // Temporarily store saved workout data before user chooses to resume
@@ -2911,8 +2912,8 @@ const WorkoutTracker = () => {
   };
 
   const exportBackupToFile = async () => {
-    // Get latest body weight data from IndexedDB
-    const latestBodyWeight = await dbOperations.getLatestBodyWeight();
+    const allBWHistory = await dbOperations.getBodyWeightHistory();
+    const latestBodyWeight = allBWHistory.length > 0 ? allBWHistory[0] : null;
 
     const backupData = {
       workouts: workouts,
@@ -2923,8 +2924,9 @@ const WorkoutTracker = () => {
         date: latestBodyWeight.date,
         unit: latestBodyWeight.unit || 'kg'
       } : null,
+      bodyWeightHistory: allBWHistory,
       exportDate: new Date().toISOString(),
-      version: '1.1'
+      version: '1.2'
     };
 
     const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
@@ -2975,11 +2977,24 @@ const WorkoutTracker = () => {
         setCompletedWorkouts(validHistory);
         localStorage.setItem('history_backup', JSON.stringify(validHistory));
 
-        // Restore body weight and gender if present
-        if (backupData.bodyWeight) {
-          await dbOperations.saveBodyWeight(backupData.bodyWeight.weight, backupData.bodyWeight.gender || 'male');
-          setBodyWeight(backupData.bodyWeight.weight);
-          setGender(backupData.bodyWeight.gender || 'male');
+        // Restore body weight history
+        const bwEntries = backupData.bodyWeightHistory || (backupData.bodyWeight ? [backupData.bodyWeight] : []);
+        if (bwEntries.length > 0) {
+          const bwDb = await initDB();
+          const bwTx = bwDb.transaction('bodyWeight', 'readwrite');
+          await bwTx.objectStore('bodyWeight').clear();
+          await new Promise((res, rej) => { bwTx.oncomplete = res; bwTx.onerror = () => rej(bwTx.error); });
+          for (const entry of bwEntries) {
+            await dbOperations.saveBodyWeight(entry.weight, entry.gender || 'male');
+          }
+          const restoredHistory = await dbOperations.getBodyWeightHistory();
+          const sorted = [...restoredHistory].sort((a, b) => new Date(a.date) - new Date(b.date));
+          setBodyWeightHistory(sorted);
+          const latest = restoredHistory[0];
+          if (latest) {
+            setBodyWeight(latest.weight);
+            setGender(latest.gender || 'male');
+          }
         }
 
         const invalidCount = backupData.history.length - validHistory.length;
@@ -3789,9 +3804,31 @@ const WorkoutTracker = () => {
                   <div className={`text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-1`}>
                     {bodyWeight} kg
                   </div>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {gender === 'male' ? '♂ Male' : '♀ Female'} · Last updated {getRelativeDate(new Date().toISOString())}
+                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>
+                    {gender === 'male' ? '♂ Male' : '♀ Female'} · Last updated {bodyWeightHistory.length > 0 ? getRelativeDate([...bodyWeightHistory].sort((a,b) => new Date(b.date)-new Date(a.date))[0].date) : getRelativeDate(new Date().toISOString())}
                   </div>
+                  {bodyWeightHistory.length > 1 && (() => {
+                    const sorted = [...bodyWeightHistory].sort((a,b) => new Date(b.date) - new Date(a.date));
+                    const visible = showAllBWHistory ? sorted : sorted.slice(0, 3);
+                    return (
+                      <div className="space-y-1">
+                        {visible.map((entry, i) => (
+                          <div key={entry.id ?? i} className={`flex justify-between text-sm py-1 border-b ${darkMode ? 'border-gray-700 text-gray-300' : 'border-gray-100 text-gray-700'}`}>
+                            <span>{new Date(entry.date).toLocaleDateString()}</span>
+                            <span className="font-medium">{entry.weight} kg</span>
+                          </div>
+                        ))}
+                        {sorted.length > 3 && (
+                          <button
+                            onClick={() => setShowAllBWHistory(v => !v)}
+                            className={`text-xs mt-1 ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-600'}`}
+                          >
+                            {showAllBWHistory ? 'Show less' : `··· ${sorted.length - 3} more`}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div>
