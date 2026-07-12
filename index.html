@@ -3738,7 +3738,7 @@ const WorkoutTracker = () => {
                   </h2>
                   <button
                     data-testid="program-dropdown-trigger"
-                    onClick={() => { setShowProgramDropdown(!showProgramDropdown); setProgramManageMode(false); setNewProgramName(null); }}
+                    onClick={() => { setShowProgramDropdown(!showProgramDropdown); setProgramManageMode(false); setNewProgramName(null); setEditingProgramName(null); }}
                     className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold text-sm transition-colors`}
                     style={{ padding: '0.375rem 0.75rem' }}
                   >
@@ -3749,7 +3749,7 @@ const WorkoutTracker = () => {
 
                 {showProgramDropdown && (
                   <React.Fragment>
-                    <div className="fixed inset-0" style={{ zIndex: 40 }} onClick={() => { setShowProgramDropdown(false); setProgramManageMode(false); setNewProgramName(null); }} />
+                    <div className="fixed inset-0" style={{ zIndex: 40 }} onClick={() => { setShowProgramDropdown(false); setProgramManageMode(false); setNewProgramName(null); setEditingProgramName(null); }} />
                     <div
                       className={`absolute right-0 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-xl shadow-lg p-2`}
                       style={{ top: '2.75rem', zIndex: 50, minWidth: '14rem' }}
@@ -3771,7 +3771,7 @@ const WorkoutTracker = () => {
                           ) : (
                             <React.Fragment>
                               <button
-                                onClick={() => { switchProgram(program.id); setShowProgramDropdown(false); setProgramManageMode(false); }}
+                                onClick={() => { switchProgram(program.id); setShowProgramDropdown(false); setProgramManageMode(false); setEditingProgramName(null); }}
                                 className={`flex-1 text-left px-3 py-2 rounded-lg text-sm font-semibold ${darkMode ? 'text-white hover:bg-gray-700' : 'text-gray-900 hover:bg-gray-100'}`}
                               >
                                 {program.id === activeProgramId ? '✓ ' : ''}{program.name}
@@ -5494,7 +5494,7 @@ const WorkoutTracker = () => {
       {/* Delete Program Confirmation Modal */}
       {showDeleteProgram !== null && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
-          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-sm w-full`}>
+          <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-md w-full`}>
             <h3 className={`text-lg font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Delete program?</h3>
             <p className={`text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               Delete "{(programs.find(p => p.id === showDeleteProgram) || {}).name}" and its {((programs.find(p => p.id === showDeleteProgram) || {}).workouts || []).length} workout day(s)? Logged history is kept.
