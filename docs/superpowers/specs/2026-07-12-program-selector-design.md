@@ -90,8 +90,13 @@ const workouts = activeProgram ? activeProgram.workouts : [];
 ### Export (program-scoped)
 Exports the ACTIVE program only. Format: existing export shape plus `programName`. Filename includes program name.
 
-### Import (creates program)
-Import file → new program (name from file's `programName`, else filename, else "Imported Program"), made active. Never merges into an existing program. Old-format files (bare workouts array / current format) import the same way with fallback name.
+### Import (creates program — one-click, zero dialogs)
+Import file → new program, made active, home list switches to it immediately. **The entire flow is: tap Import → pick file → done.** No name prompt, no merge question, no confirmation dialog of any kind.
+
+- Name resolved automatically: file's `programName` → filename (extension stripped) → "Imported Program". Duplicate names allowed (ids differ); user can rename later via Manage.
+- Never merges into an existing program.
+- Old-format files (bare workouts array / current format without `programName`) import identically with fallback name.
+- Parse failure → existing error toast/alert pattern; nothing created.
 
 ### Backup file (v1.2 → v1.3)
 - v1.3 adds `programs: [...]` and `activeProgramId`; drops top-level `workouts` from what's written.
@@ -117,7 +122,7 @@ Seed/verify via existing harness conventions (`__test-*.js` at root, global npm 
 2. **Switch:** create second program, add day to it, switch back and forth — lists filter correctly; `activeProgramId` survives reload.
 3. **CRUD:** create, rename, delete (with days); last-program delete blocked.
 4. **Add Day** goes to active program only.
-5. **Export/Import round-trip:** export program A, import → new program appears, active.
+5. **Export/Import round-trip:** export program A, import → new program appears, active — with NO intermediate dialog (one-click requirement).
 6. **Backup:** v1.3 backup/restore round-trip; restore of a real v1.2 backup file wraps into default program.
 7. **Regression:** log a workout end-to-end (start → sets → finish) from a non-default program; history entry renders; week stats count it.
 
