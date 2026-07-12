@@ -830,7 +830,8 @@ const migrateWorkoutsToPrograms = async () => {
 };
 
 // Intelligent markdown parser - auto-detects any format
-const parseMarkdownWorkout = (markdownText) => {
+const parseMarkdownWorkout = (markdownText, opts = {}) => {
+  const strict = !!opts.strict;
   // Helper: Check if line is likely a workout day separator
   const isWorkoutDayHeader = (line, upperLine) => {
     // Pattern 1: Starts with # or ##
@@ -903,8 +904,11 @@ const parseMarkdownWorkout = (markdownText) => {
 
     const upperLine = line.toUpperCase();
 
-    // STEP 1: Detect workout day headers using intelligent heuristics
-    if (isWorkoutDayHeader(line, upperLine)) {
+    // STEP 1: Detect workout day headers.
+    // Strict mode (app-exported files, self-describing): single '#' = day, '##'+ never is.
+    // Non-strict (foreign files): fall back to the keyword/number heuristic.
+    const isDayHeader = strict ? /^#\s/.test(line) : isWorkoutDayHeader(line, upperLine);
+    if (isDayHeader) {
       // Save previous workout
       if (currentWorkout && currentWorkout.exercises.length > 0) {
         workouts.push(currentWorkout);
@@ -1031,7 +1035,7 @@ const parseMarkdownWorkout = (markdownText) => {
     }
 
     // STEP 5: Parse list/heading format exercises (## Exercise or - Exercise)
-    if (line.startsWith('##') && !isWorkoutDayHeader(line, upperLine)) {
+    if (line.startsWith('##') && !isDayHeader) {
       // Auto-create workout if needed
       if (!currentWorkout) {
         currentWorkout = {
@@ -2910,13 +2914,15 @@ const WorkoutTracker = () => {
         console.log('Markdown text length:', text.length);
         console.log('First 200 chars:', text.substring(0, 200));
         const nameMatch = text.match(/^<!--\s*program:\s*(.+?)\s*-->\s*\n?/);
+        let strict = false;
         if (nameMatch) {
           programName = nameMatch[1];
+          strict = true;
           text = text.slice(nameMatch[0].length);
           // Drop the program-title heading so it is not parsed as a phantom day
           text = text.replace(/^#\s[^\n]*\n/, '');
         }
-        parsed = parseMarkdownWorkout(text);
+        parsed = parseMarkdownWorkout(text, { strict });
         console.log('Parsed workouts:', parsed.length, parsed);
       } else if (isCSV) {
         const text = await file.text();
