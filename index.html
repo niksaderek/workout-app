@@ -1316,6 +1316,7 @@ const WorkoutTracker = () => {
   const workouts = activeProgram ? activeProgram.workouts : [];
 
   const [completedWorkouts, setCompletedWorkouts] = useState([]);
+
   const [activeView, setActiveView] = useState('home');
   const [currentLog, setCurrentLog] = useState(null);
   const [editingWorkout, setEditingWorkout] = useState(null);
@@ -1341,6 +1342,14 @@ const WorkoutTracker = () => {
   const [showStrengthStandards, setShowStrengthStandards] = useState(false); // collapsible Strength Standards (default: hidden)
   const [expandedWorkouts, setExpandedWorkouts] = useState({}); // {workoutId: boolean} - track which workout previews are expanded
   const [statsPeriod, setStatsPeriod] = useState('week'); // 'week', 'month', 'all' - period selector for stats
+  const [statsProgramFilter, setStatsProgramFilter] = useState('all'); // 'all' or programId — Detailed Stats scope
+
+  // History slice feeding the Detailed Stats view. Untagged (pre-feature)
+  // records and records of deleted programs only appear under 'all'.
+  const statsHistory = statsProgramFilter === 'all'
+    ? completedWorkouts
+    : completedWorkouts.filter(w => w.programId === statsProgramFilter);
+
   const [bodyWeight, setBodyWeight] = useState(null); // Current body weight in kg
   const [bodyWeightHistory, setBodyWeightHistory] = useState([]); // All BW entries (ascending by date) for nearest-date lookup
   const [gender, setGender] = useState('male'); // 'male' or 'female'
@@ -1862,7 +1871,7 @@ const WorkoutTracker = () => {
   const getAll1RMs = () => {
     const exerciseMaxes = {}; // { exerciseName: best1RM }
 
-    completedWorkouts.forEach(workout => {
+    statsHistory.forEach(workout => {
       workout.exercises.forEach(exercise => {
         const exerciseName = exercise.name;
 
@@ -1932,7 +1941,7 @@ const WorkoutTracker = () => {
     // Check if this is a main lift category
     const isMainLift = ['Bench Press', 'Squat', 'Deadlift', 'Overhead Press'].includes(exerciseName);
 
-    completedWorkouts.forEach(workout => {
+    statsHistory.forEach(workout => {
       let best1RMForWorkout = 0;
 
       // Find matching exercises in this workout
@@ -1979,7 +1988,7 @@ const WorkoutTracker = () => {
     const all1RMs = getAll1RMs();
     const bestSets = {};
 
-    completedWorkouts.forEach(workout => {
+    statsHistory.forEach(workout => {
       workout.exercises.forEach(exercise => {
         const exerciseName = exercise.name;
 
@@ -3247,12 +3256,12 @@ const WorkoutTracker = () => {
       return { volume: Math.round(volume), reps, sets, coreSets, workouts: workouts.length };
     };
     
-    const thisWeekWorkouts = completedWorkouts.filter(w => new Date(w.date) >= thisWeekStart);
-    const lastWeekWorkouts = completedWorkouts.filter(w => 
+    const thisWeekWorkouts = statsHistory.filter(w => new Date(w.date) >= thisWeekStart);
+    const lastWeekWorkouts = statsHistory.filter(w => 
       new Date(w.date) >= lastWeekStart && new Date(w.date) < thisWeekStart
     );
-    const thisMonthWorkouts = completedWorkouts.filter(w => new Date(w.date) >= thisMonthStart);
-    const lastMonthWorkouts = completedWorkouts.filter(w => 
+    const thisMonthWorkouts = statsHistory.filter(w => new Date(w.date) >= thisMonthStart);
+    const lastMonthWorkouts = statsHistory.filter(w => 
       new Date(w.date) >= lastMonthStart && new Date(w.date) < thisMonthStart
     );
     
@@ -3277,7 +3286,7 @@ const WorkoutTracker = () => {
       'Overhead Press': { weight: null, exerciseName: null }
     };
 
-    completedWorkouts.forEach(workout => {
+    statsHistory.forEach(workout => {
       workout.exercises.forEach(exercise => {
         const category = categorizeExercise(exercise.name);
 
@@ -3312,7 +3321,7 @@ const WorkoutTracker = () => {
     let allTimeVolume = 0;
     let allTimeReps = 0;
     let allTimeCoreSets = 0;
-    completedWorkouts.forEach(workout => {
+    statsHistory.forEach(workout => {
       workout.exercises.forEach(exercise => {
         const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsVolume || getMuscleGroup(exercise.name) === 'core';
 
@@ -3334,9 +3343,9 @@ const WorkoutTracker = () => {
     
     // Calculate average workouts per week (from first workout to today)
     let avgWorkoutsPerWeek = 0;
-    if (completedWorkouts.length > 0) {
+    if (statsHistory.length > 0) {
       // Sort workouts by date to find the earliest one
-      const sortedWorkouts = [...completedWorkouts].sort((a, b) => new Date(a.date) - new Date(b.date));
+      const sortedWorkouts = [...statsHistory].sort((a, b) => new Date(a.date) - new Date(b.date));
       const firstWorkoutDate = new Date(sortedWorkouts[0].date);
       firstWorkoutDate.setHours(0, 0, 0, 0);
 
@@ -3348,9 +3357,9 @@ const WorkoutTracker = () => {
 
       // If less than a week of data, show workouts this week
       if (weeksSinceFirst < 1) {
-        avgWorkoutsPerWeek = completedWorkouts.length;
+        avgWorkoutsPerWeek = statsHistory.length;
       } else {
-        avgWorkoutsPerWeek = Math.round((completedWorkouts.length / weeksSinceFirst) * 10) / 10;
+        avgWorkoutsPerWeek = Math.round((statsHistory.length / weeksSinceFirst) * 10) / 10;
       }
     }
     
@@ -3385,7 +3394,7 @@ const WorkoutTracker = () => {
     // Calculate muscle group stats for each period
     const muscleGroupStatsWeek = calculateMuscleGroupStats(thisWeekWorkouts);
     const muscleGroupStatsMonth = calculateMuscleGroupStats(thisMonthWorkouts);
-    const muscleGroupStatsAll = calculateMuscleGroupStats(completedWorkouts);
+    const muscleGroupStatsAll = calculateMuscleGroupStats(statsHistory);
 
     return {
       thisWeek,
@@ -3396,7 +3405,7 @@ const WorkoutTracker = () => {
       monthVolumeChange,
       exerciseMaxes,
       avgVolumePerWorkout,
-      totalWorkouts: completedWorkouts.length,
+      totalWorkouts: statsHistory.length,
       allTimeVolume: Math.round(allTimeVolume),
       allTimeReps,
       allTimeCoreSets,
@@ -3408,7 +3417,7 @@ const WorkoutTracker = () => {
   };
 
   const getEnergyVolumeStats = () => {
-    const rated = completedWorkouts.filter(w => w.energyLevel);
+    const rated = statsHistory.filter(w => w.energyLevel);
     if (rated.length < 3) return null;
 
     const getWorkoutVolume = (workout) =>
@@ -3444,7 +3453,7 @@ const WorkoutTracker = () => {
   };
 
   const getTimelineData = () => {
-    if (completedWorkouts.length === 0) return [];
+    if (statsHistory.length === 0) return [];
 
     const now = new Date();
     let startDate;
@@ -3468,7 +3477,7 @@ const WorkoutTracker = () => {
         startDate.setMonth(now.getMonth() - 6);
         break;
       case 'all':
-        const sortedWorkouts = [...completedWorkouts].sort((a, b) => new Date(a.date) - new Date(b.date));
+        const sortedWorkouts = [...statsHistory].sort((a, b) => new Date(a.date) - new Date(b.date));
         startDate = new Date(sortedWorkouts[0].date);
         break;
     }
@@ -3476,7 +3485,7 @@ const WorkoutTracker = () => {
     // Group workouts by day (always daily)
     const grouped = {};
 
-    completedWorkouts.forEach(workout => {
+    statsHistory.forEach(workout => {
       const workoutDate = new Date(workout.date);
       if (workoutDate < startDate) return;
 
@@ -4112,6 +4121,30 @@ const WorkoutTracker = () => {
                 </div>
               )}
             </div>
+
+            {programs.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                <button
+                  data-testid="stats-program-chip-all"
+                  onClick={() => setStatsProgramFilter('all')}
+                  style={{ paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
+                  className={`px-3 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${statsProgramFilter === 'all' ? 'bg-blue-600 text-white' : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`}
+                >
+                  All
+                </button>
+                {programs.map(program => (
+                  <button
+                    key={program.id}
+                    data-testid={`stats-program-chip-${program.id}`}
+                    onClick={() => setStatsProgramFilter(program.id)}
+                    style={{ paddingTop: '0.375rem', paddingBottom: '0.375rem' }}
+                    className={`px-3 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${statsProgramFilter === program.id ? 'bg-blue-600 text-white' : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`}
+                  >
+                    {program.name}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Performance Overview */}
             <div className={`${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`}>
