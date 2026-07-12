@@ -621,6 +621,60 @@ const initDB = () => {
   });
 };
 
+// Seed data for a brand-new install (no IndexedDB, no localStorage mirror).
+const DEFAULT_WORKOUTS = [
+  {
+    id: 1,
+    name: "DAY 1 – PUSH A (Heavy Bench & Quads)",
+    emoji: "🦵",
+    exercises: [
+      { name: "Bench Press", sets: 3, reps: 5, notes: "Main lift. Last set AMRAP.", muscleGroup: "chest" },
+      { name: "Back Squat", sets: 3, reps: 8, notes: "Focus on depth and control.", muscleGroup: "legs" },
+      { name: "Lateral Raises", sets: 4, reps: "15–20", notes: "Light weight, burn effect.", muscleGroup: "shoulders" },
+      { name: "Triceps Pushdown", sets: 3, reps: 12, notes: "Focus on full lockout.", muscleGroup: "arms" },
+      { name: "Ab Wheel Rollout", sets: 3, reps: "8–10", notes: "Anti-extension core.", muscleGroup: "core" }
+    ]
+  },
+  {
+    id: 2,
+    name: "DAY 2 – PULL A (Deadlift & Lat Width)",
+    emoji: "💪",
+    exercises: [
+      { name: "Trap Bar Deadlift", sets: 3, reps: 5, notes: "Explosive from the floor.", muscleGroup: "back" },
+      { name: "Pull-ups / Lat Pulldown", sets: 3, reps: "8–10", notes: "Wide grip for V-taper.", muscleGroup: "back" },
+      { name: "Face Pulls", sets: 3, reps: 15, notes: "1-second pause at contraction.", muscleGroup: "shoulders" },
+      { name: "Hammer Curls", sets: 3, reps: 12, notes: "Bicep and forearm thickness.", muscleGroup: "arms" },
+      { name: "Back Extension", sets: 3, reps: 12, notes: "Lower back strength.", muscleGroup: "back" },
+      { name: "Dead Bug", sets: 2, reps: "10/side", notes: "Core stability.", muscleGroup: "core" }
+    ]
+  },
+  {
+    id: 3,
+    name: "DAY 3 – PUSH B (Heavy OHP & Upper Chest)",
+    emoji: "⚡",
+    exercises: [
+      { name: "Overhead Press", sets: 3, reps: "5–6", notes: "Squeeze glutes, no cheating.", muscleGroup: "shoulders" },
+      { name: "Bulgarian Split Squat", sets: 3, reps: 10, notes: "Per leg. Key for athletic build.", muscleGroup: "legs" },
+      { name: "Incline DB Press", sets: 3, reps: "10–12", notes: "Focus on upper chest.", muscleGroup: "chest" },
+      { name: "Dips", sets: 3, reps: "To failure", notes: "Lean forward.", muscleGroup: "chest" },
+      { name: "Pallof Press", sets: 3, reps: "12/side", notes: "Anti-rotation core.", muscleGroup: "core" },
+      { name: "Side Plank", sets: 2, reps: "30–45 s", notes: "Oblique stability.", muscleGroup: "core" }
+    ]
+  },
+  {
+    id: 4,
+    name: "DAY 4 – PULL B (Posterior Chain & Back Thickness)",
+    emoji: "🎯",
+    exercises: [
+      { name: "Romanian Deadlift", sets: 3, reps: 10, notes: "Focus on hamstring stretch.", muscleGroup: "back" },
+      { name: "Dumbbell Row", sets: 3, reps: 10, notes: "Pull elbow to hip.", muscleGroup: "back" },
+      { name: "Farmer's Walk", sets: 3, reps: "40 m", notes: "Heavy dumbbells (grip and core).", muscleGroup: "other" },
+      { name: "Hanging Leg Raises", sets: 3, reps: "12–15", notes: "Controlled leg lift.", muscleGroup: "core" },
+      { name: "Back Extension Hold", sets: 2, reps: "30 s", notes: "Erector spinae endurance.", muscleGroup: "back" }
+    ]
+  }
+];
+
 // Wraps a flat workout-day array into a program record.
 // Used by v2→v3 migration and by pre-1.3 backup restore.
 const wrapWorkoutsAsProgram = (workoutsArr, name = 'My Program') => ({
@@ -1249,58 +1303,13 @@ const soundSystem = {
 };
 
 const WorkoutTracker = () => {
-  const [workouts, setWorkouts] = useState([
-    {
-      id: 1,
-      name: "DAY 1 – PUSH A (Heavy Bench & Quads)",
-      emoji: "🦵",
-      exercises: [
-        { name: "Bench Press", sets: 3, reps: 5, notes: "Main lift. Last set AMRAP.", muscleGroup: "chest" },
-        { name: "Back Squat", sets: 3, reps: 8, notes: "Focus on depth and control.", muscleGroup: "legs" },
-        { name: "Lateral Raises", sets: 4, reps: "15–20", notes: "Light weight, burn effect.", muscleGroup: "shoulders" },
-        { name: "Triceps Pushdown", sets: 3, reps: 12, notes: "Focus on full lockout.", muscleGroup: "arms" },
-        { name: "Ab Wheel Rollout", sets: 3, reps: "8–10", notes: "Anti-extension core.", muscleGroup: "core" }
-      ]
-    },
-    {
-      id: 2,
-      name: "DAY 2 – PULL A (Deadlift & Lat Width)",
-      emoji: "💪",
-      exercises: [
-        { name: "Trap Bar Deadlift", sets: 3, reps: 5, notes: "Explosive from the floor.", muscleGroup: "back" },
-        { name: "Pull-ups / Lat Pulldown", sets: 3, reps: "8–10", notes: "Wide grip for V-taper.", muscleGroup: "back" },
-        { name: "Face Pulls", sets: 3, reps: 15, notes: "1-second pause at contraction.", muscleGroup: "shoulders" },
-        { name: "Hammer Curls", sets: 3, reps: 12, notes: "Bicep and forearm thickness.", muscleGroup: "arms" },
-        { name: "Back Extension", sets: 3, reps: 12, notes: "Lower back strength.", muscleGroup: "back" },
-        { name: "Dead Bug", sets: 2, reps: "10/side", notes: "Core stability.", muscleGroup: "core" }
-      ]
-    },
-    {
-      id: 3,
-      name: "DAY 3 – PUSH B (Heavy OHP & Upper Chest)",
-      emoji: "⚡",
-      exercises: [
-        { name: "Overhead Press", sets: 3, reps: "5–6", notes: "Squeeze glutes, no cheating.", muscleGroup: "shoulders" },
-        { name: "Bulgarian Split Squat", sets: 3, reps: 10, notes: "Per leg. Key for athletic build.", muscleGroup: "legs" },
-        { name: "Incline DB Press", sets: 3, reps: "10–12", notes: "Focus on upper chest.", muscleGroup: "chest" },
-        { name: "Dips", sets: 3, reps: "To failure", notes: "Lean forward.", muscleGroup: "chest" },
-        { name: "Pallof Press", sets: 3, reps: "12/side", notes: "Anti-rotation core.", muscleGroup: "core" },
-        { name: "Side Plank", sets: 2, reps: "30–45 s", notes: "Oblique stability.", muscleGroup: "core" }
-      ]
-    },
-    {
-      id: 4,
-      name: "DAY 4 – PULL B (Posterior Chain & Back Thickness)",
-      emoji: "🎯",
-      exercises: [
-        { name: "Romanian Deadlift", sets: 3, reps: 10, notes: "Focus on hamstring stretch.", muscleGroup: "back" },
-        { name: "Dumbbell Row", sets: 3, reps: 10, notes: "Pull elbow to hip.", muscleGroup: "back" },
-        { name: "Farmer's Walk", sets: 3, reps: "40 m", notes: "Heavy dumbbells (grip and core).", muscleGroup: "other" },
-        { name: "Hanging Leg Raises", sets: 3, reps: "12–15", notes: "Controlled leg lift.", muscleGroup: "core" },
-        { name: "Back Extension Hold", sets: 2, reps: "30 s", notes: "Erector spinae endurance.", muscleGroup: "back" }
-      ]
-    }
-  ]);
+  const [programs, setPrograms] = useState([]);
+  const [activeProgramId, setActiveProgramId] = useState(null);
+
+  // Flat workout-day list for the active program. Same name as the former
+  // useState so every downstream consumer keeps reading a flat array.
+  const activeProgram = programs.find(p => p.id === activeProgramId) || null;
+  const workouts = activeProgram ? activeProgram.workouts : [];
 
   const [completedWorkouts, setCompletedWorkouts] = useState([]);
   const [activeView, setActiveView] = useState('home');
@@ -1573,55 +1582,44 @@ const WorkoutTracker = () => {
     try {
       setLoading(true);
       await migrateWorkoutsToPrograms();
-      const savedWorkouts = await dbOperations.getWorkouts();
+      let savedPrograms = await dbOperations.getPrograms();
       let savedHistory = await dbOperations.getHistory();
       const latestBodyWeight = await dbOperations.getLatestBodyWeight();
       const allBodyWeights = await dbOperations.getBodyWeightHistory();
       // Sort ascending (oldest -> newest) for getBodyWeightAt nearest-date lookup
       setBodyWeightHistory([...allBodyWeights].sort((a, b) => new Date(a.date) - new Date(b.date)));
 
-      // Check if IndexedDB is empty but localStorage has backup
-      const hasIndexedDBData = (savedWorkouts && savedWorkouts.length > 0) || (savedHistory && savedHistory.length > 0);
-      const workoutsBackup = localStorage.getItem('workouts_backup');
-      const historyBackup = localStorage.getItem('history_backup');
-      const hasBackupData = workoutsBackup || historyBackup;
-
-      if (!hasIndexedDBData && hasBackupData) {
-        console.log('Restoring data from localStorage backup...');
-
-        // Restore workouts
-        if (workoutsBackup) {
-          const parsedWorkouts = JSON.parse(workoutsBackup);
-          await dbOperations.saveWorkouts(parsedWorkouts);
-          setWorkouts(parsedWorkouts);
+      // Programs fallback chain: IDB → localStorage mirror → seeded default
+      if (!savedPrograms || savedPrograms.length === 0) {
+        const mirror = localStorage.getItem('programs_backup');
+        if (mirror) {
+          try { savedPrograms = JSON.parse(mirror); } catch (e) { savedPrograms = []; }
         }
+      }
+      if (!savedPrograms || savedPrograms.length === 0) {
+        savedPrograms = [wrapWorkoutsAsProgram(DEFAULT_WORKOUTS)];
+      }
+      await dbOperations.savePrograms(savedPrograms);
+      setPrograms(savedPrograms);
+      localStorage.setItem('programs_backup', JSON.stringify(savedPrograms));
 
-        // Restore history
-        if (historyBackup) {
-          const parsedHistory = JSON.parse(historyBackup);
-          for (const item of parsedHistory) {
-            await dbOperations.saveHistory(item);
-          }
-          setCompletedWorkouts(parsedHistory);
-        }
+      // Active program: stored id if it still exists, else first program
+      const storedActiveId = Number(localStorage.getItem('active_program_id'));
+      const activeId = savedPrograms.some(p => p.id === storedActiveId) ? storedActiveId : savedPrograms[0].id;
+      setActiveProgramId(activeId);
+      localStorage.setItem('active_program_id', String(activeId));
 
-        console.log('Data restored successfully!');
-      } else {
-        // Normal load path
-        if (savedWorkouts && savedWorkouts.length > 0) {
-          setWorkouts(savedWorkouts);
-          // Update backup
-          localStorage.setItem('workouts_backup', JSON.stringify(savedWorkouts));
-        } else {
-          await dbOperations.saveWorkouts(workouts);
-          localStorage.setItem('workouts_backup', JSON.stringify(workouts));
+      // History: IDB → localStorage fallback (unchanged behaviour)
+      if ((!savedHistory || savedHistory.length === 0) && localStorage.getItem('history_backup')) {
+        const parsedHistory = JSON.parse(localStorage.getItem('history_backup'));
+        for (const item of parsedHistory) {
+          await dbOperations.saveHistory(item);
         }
-
-        if (savedHistory && savedHistory.length > 0) {
-          setCompletedWorkouts(savedHistory);
-          // Update backup
-          localStorage.setItem('history_backup', JSON.stringify(savedHistory));
-        }
+        savedHistory = parsedHistory;
+      }
+      if (savedHistory && savedHistory.length > 0) {
+        setCompletedWorkouts(savedHistory);
+        localStorage.setItem('history_backup', JSON.stringify(savedHistory));
       }
 
       // Cleanup any corrupted data from history
@@ -1645,15 +1643,28 @@ const WorkoutTracker = () => {
     }
   };
 
-  const saveWorkouts = async (newWorkouts) => {
+  const savePrograms = async (newPrograms) => {
     try {
-      await dbOperations.saveWorkouts(newWorkouts);
-      setWorkouts(newWorkouts);
+      await dbOperations.savePrograms(newPrograms);
+      setPrograms(newPrograms);
       // Auto-backup to localStorage
-      localStorage.setItem('workouts_backup', JSON.stringify(newWorkouts));
+      localStorage.setItem('programs_backup', JSON.stringify(newPrograms));
     } catch (error) {
-      console.error('Error saving workouts:', error);
+      console.error('Error saving programs:', error);
     }
+  };
+
+  // Replaces the active program's day list. Drop-in for the old saveWorkouts.
+  const updateActiveWorkouts = async (newWorkouts) => {
+    const newPrograms = programs.map(p =>
+      p.id === activeProgramId ? { ...p, workouts: newWorkouts } : p
+    );
+    await savePrograms(newPrograms);
+  };
+
+  const switchProgram = (programId) => {
+    setActiveProgramId(programId);
+    localStorage.setItem('active_program_id', String(programId));
   };
 
   const saveHistory = async (newHistoryItem) => {
@@ -2765,7 +2776,7 @@ const WorkoutTracker = () => {
     const updatedWorkouts = workouts.map(w =>
       w.id === editingWorkout.id ? editingWorkout : w
     );
-    await saveWorkouts(updatedWorkouts);
+    await updateActiveWorkouts(updatedWorkouts);
     setEditingWorkout(null);
     setActiveView('home');
   };
@@ -2804,7 +2815,7 @@ const WorkoutTracker = () => {
 
   const deleteWorkoutDay = async (workoutId) => {
     const updatedWorkouts = workouts.filter(w => w.id !== workoutId);
-    await saveWorkouts(updatedWorkouts);
+    await updateActiveWorkouts(updatedWorkouts);
     setShowDeleteConfirm(null);
   };
 
@@ -2819,7 +2830,7 @@ const WorkoutTracker = () => {
       ]
     };
     const updatedWorkouts = [...workouts, newWorkout];
-    await saveWorkouts(updatedWorkouts);
+    await updateActiveWorkouts(updatedWorkouts);
     setShowAddDay(false);
     startEditWorkout(newWorkout);
   };
@@ -2913,7 +2924,7 @@ const WorkoutTracker = () => {
       finalWorkouts = [...workouts, ...updatedParsed];
     }
 
-    await saveWorkouts(finalWorkouts);
+    await updateActiveWorkouts(finalWorkouts);
     setShowUploadModal(false);
     setParsedWorkouts([]);
     alert(`Successfully imported ${parsedWorkouts.length} workout day(s)!`);
@@ -3008,15 +3019,18 @@ const WorkoutTracker = () => {
       try {
         const backupData = JSON.parse(e.target.result);
 
-        if (!backupData.workouts || !backupData.history) {
+        if ((!backupData.workouts && !backupData.programs) || !backupData.history) {
           alert('Invalid backup file format');
           return;
         }
 
-        // Restore workouts
-        await dbOperations.saveWorkouts(backupData.workouts);
-        setWorkouts(backupData.workouts);
-        localStorage.setItem('workouts_backup', JSON.stringify(backupData.workouts));
+        // Restore programs (temporary shim — reworked properly in Task 5)
+        const restoredPrograms = backupData.programs && backupData.programs.length > 0
+          ? backupData.programs
+          : [wrapWorkoutsAsProgram(backupData.workouts)];
+        await savePrograms(restoredPrograms);
+        switchProgram(backupData.activeProgramId && restoredPrograms.some(p => p.id === backupData.activeProgramId)
+          ? backupData.activeProgramId : restoredPrograms[0].id);
 
         // Validate and fix history items before restoring
         console.log(`Validating ${backupData.history.length} history items...`);
