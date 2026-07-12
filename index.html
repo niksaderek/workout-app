@@ -1322,8 +1322,6 @@ const WorkoutTracker = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [showAddDay, setShowAddDay] = useState(false);
   const [showDeleteHistory, setShowDeleteHistory] = useState(null);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [parsedWorkouts, setParsedWorkouts] = useState([]);
   const [draggedExerciseIndex, setDraggedExerciseIndex] = useState(null);
   const [draggedExercisePosition, setDraggedExercisePosition] = useState({ x: 0, y: 0 });
   const [dragStartPosition, setDragStartPosition] = useState({ x: 0, y: 0 });
@@ -2650,13 +2648,14 @@ const WorkoutTracker = () => {
   };
 
   const exportProgram = () => {
-    if (workouts.length === 0) {
+    if (!activeProgram || workouts.length === 0) {
       alert('No workout program to export!');
       return;
     }
 
     // Generate markdown format
-    let markdown = '# Workout Program\n\n';
+    let markdown = `<!-- program: ${activeProgram.name} -->\n`;
+    markdown += `# ${activeProgram.name}\n\n`;
     markdown += `Exported: ${new Date().toLocaleDateString('hr-HR')}\n\n`;
     markdown += '---\n\n';
 
@@ -2678,7 +2677,7 @@ const WorkoutTracker = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `workout-program-${new Date().toISOString().split('T')[0]}.md`;
+    a.download = `workout-program-${activeProgram.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -2904,11 +2903,19 @@ const WorkoutTracker = () => {
 
     try {
       let parsed = [];
+      let programName = null;
 
       if (isMarkdown) {
-        const text = await file.text();
+        let text = await file.text();
         console.log('Markdown text length:', text.length);
         console.log('First 200 chars:', text.substring(0, 200));
+        const nameMatch = text.match(/^<!--\s*program:\s*(.+?)\s*-->\s*\n?/);
+        if (nameMatch) {
+          programName = nameMatch[1];
+          text = text.slice(nameMatch[0].length);
+          // Drop the program-title heading so it is not parsed as a phantom day
+          text = text.replace(/^#\s[^\n]*\n/, '');
+        }
         parsed = parseMarkdownWorkout(text);
         console.log('Parsed workouts:', parsed.length, parsed);
       } else if (isCSV) {
@@ -2923,9 +2930,8 @@ const WorkoutTracker = () => {
       }
 
       if (parsed && parsed.length > 0) {
-        console.log('Setting parsed workouts and showing modal');
-        setParsedWorkouts(parsed);
-        setShowUploadModal(true);
+        const fallbackName = file.name.replace(/\.(md|csv|xlsx|xls)$/i, '').replace(/^workout-program-/i, '').replace(/-\d{4}-\d{2}-\d{2}$/, '').trim();
+        await importAsProgram(parsed, programName || fallbackName || 'Imported Program');
       } else {
         alert(`No valid workouts found in the file. Please check the format.\n\nFile: ${file.name}\nSize: ${file.size} bytes`);
       }
@@ -2938,29 +2944,13 @@ const WorkoutTracker = () => {
     e.target.value = '';
   };
 
-  const handleImportChoice = async (choice) => {
-    let finalWorkouts;
-
-    if (choice === 'replace') {
-      // Replace all - reassign clean sequential IDs starting from 1
-      finalWorkouts = parsedWorkouts.map((w, idx) => ({
-        ...w,
-        id: idx + 1
-      }));
-    } else {
-      // Add to existing - ensure unique IDs
-      const maxId = Math.max(...workouts.map(w => w.id), 0);
-      const updatedParsed = parsedWorkouts.map((w, idx) => ({
-        ...w,
-        id: maxId + idx + 1
-      }));
-      finalWorkouts = [...workouts, ...updatedParsed];
-    }
-
-    await updateActiveWorkouts(finalWorkouts);
-    setShowUploadModal(false);
-    setParsedWorkouts([]);
-    alert(`Successfully imported ${parsedWorkouts.length} workout day(s)!`);
+  // One-click import: every file becomes a NEW program, activated immediately.
+  const importAsProgram = async (parsedDays, programName) => {
+    const programId = Date.now();
+    const withIds = parsedDays.map((w, idx) => ({ ...w, id: programId + idx + 1 }));
+    const newProgram = { id: programId, name: programName, workouts: withIds };
+    await savePrograms([...programs, newProgram]);
+    switchProgram(programId);
   };
 
   const deleteHistoryEntry = async (entryId) => {
@@ -5529,57 +5519,6 @@ const WorkoutTracker = () => {
                 Add Day
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Upload Markdown Modal */}
-      {showUploadModal && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 overflow-y-auto"
-          onClick={(e) => {
-            // Close modal if clicking backdrop
-            if (e.target === e.currentTarget) {
-              setShowUploadModal(false);
-            }
-          }}
-        >
-          <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-md w-full shadow-2xl my-8`}>
-            <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-2`}>
-              Upload Workout Routine
-            </h3>
-            <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>
-              Found {parsedWorkouts.length} workout day(s) in the file.
-            </p>
-
-            <div className="mb-6">
-              <label className={`block text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-                How would you like to import these workouts?
-              </label>
-              <div className="space-y-2">
-                <button
-                  onClick={() => handleImportChoice('replace')}
-                  className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 active:bg-gray-500' : 'bg-gray-200 hover:bg-gray-300 active:bg-gray-400'} rounded-xl text-left transition-colors touch-manipulation`}
-                >
-                  <div className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Replace All</div>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Clear existing workouts and use only these</div>
-                </button>
-                <button
-                  onClick={() => handleImportChoice('add')}
-                  className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 active:bg-gray-500' : 'bg-gray-200 hover:bg-gray-300 active:bg-gray-400'} rounded-xl text-left transition-colors touch-manipulation`}
-                >
-                  <div className={`font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>Add to Existing</div>
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Keep current workouts and add these</div>
-                </button>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowUploadModal(false)}
-              className={`w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 active:bg-gray-500 text-white' : 'bg-gray-200 hover:bg-gray-300 active:bg-gray-400 text-gray-900'} rounded-xl font-semibold touch-manipulation`}
-            >
-              Cancel
-            </button>
           </div>
         </div>
       )}
