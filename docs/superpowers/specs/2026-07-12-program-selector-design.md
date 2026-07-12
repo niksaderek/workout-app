@@ -3,7 +3,7 @@ _Date: 2026-07-12_
 
 ## Summary
 
-Add a program layer above workout day templates. A dropdown selector on the main (home) page switches the active program; only the active program's workout days are shown and used by "Add Day". Programs support full CRUD. History, stats, and recommendations stay global and untouched.
+Add a program layer above workout day templates. A dropdown selector on the main (home) page switches the active program; only the active program's workout days are shown and used by "Add Day". Programs support full CRUD. New history entries are tagged with `programId`, and the Detailed Stats view gains a program filter (default All). History data and recommendations stay global.
 
 Storage is nested (each program record contains its workout days) but the React state layer derives a flat `workouts` array for the active program, so all existing downstream code paths (logging, editing, day CRUD, stats) keep working unchanged.
 
@@ -54,7 +54,7 @@ const workouts = activeProgram ? activeProgram.workouts : [];
 - `workouts` is DERIVED — the `useState` for `workouts` is removed.
 - A wrapper `updateActiveWorkouts(newWorkouts)` replaces the current `saveWorkouts(updatedWorkouts)` call sites: it maps `programs`, replacing the active program's `workouts` array, then persists via `dbOperations.savePrograms(...)` + updates `programs_backup`.
 - All downstream consumers (`startWorkout`, day edit/delete/duplicate, `showAddDay`, home list render, `getWeekStats`, logging flow) continue to read the flat `workouts` variable — no changes.
-- History records keep `workoutId` only (no `programId`). Recommendations key on exercise name — unaffected.
+- History records gain `programId` (see §4a). Recommendations key on exercise name — unaffected, always global.
 
 ### dbOperations changes
 
@@ -106,6 +106,21 @@ Import file → new program, made active, home list switches to it immediately. 
 
 ---
 
+## 4a. Stats Program Filter
+
+### History tagging
+`finishWorkout` stamps `programId: activeProgramId` on the saved history record (zero-migration, same pattern as `energyLevel`/`finishedAt` — old logs read as `undefined`).
+
+### Stats view filter
+- Filter chip row at top of Detailed Stats view: `All` + one chip per existing program. Default `All`.
+- Selecting a program filters the history set feeding ALL stats sections in that view (timeline, PRs, 1RM, strength standards, energy stats).
+- Untagged logs (pre-feature) and logs whose `programId` no longer matches an existing program appear ONLY under `All`.
+- Filter is view-local state, not persisted.
+- Home-page week cards stay GLOBAL (glanceable summary; filtering lives in stats view).
+- Edit-history view does NOT expose programId editing (out of scope).
+
+---
+
 ## 5. Error Handling
 
 - Missing/corrupt `activeProgramId` → first program.
@@ -124,13 +139,15 @@ Seed/verify via existing harness conventions (`__test-*.js` at root, global npm 
 4. **Add Day** goes to active program only.
 5. **Export/Import round-trip:** export program A, import → new program appears, active — with NO intermediate dialog (one-click requirement).
 6. **Backup:** v1.3 backup/restore round-trip; restore of a real v1.2 backup file wraps into default program.
-7. **Regression:** log a workout end-to-end (start → sets → finish) from a non-default program; history entry renders; week stats count it.
+7. **Regression:** log a workout end-to-end (start → sets → finish) from a non-default program; history entry renders; week stats count it; history record carries correct `programId`.
+8. **Stats filter:** seed tagged + untagged history; `All` shows everything; program chip shows only that program's logs; untagged absent from program chips.
 
 ---
 
 ## Out of Scope
 
-- Program-scoped history/stats/recommendations (deliberately global).
-- `programId` tagging on history entries.
+- Program-scoped recommendations (deliberately global — exercise-name keyed).
+- Retro-tagging old history entries with `programId`.
+- Editing `programId` in edit-history view.
 - Deleting the legacy `workouts` store (next release).
 - Program scheduling/rotation logic.
