@@ -1541,8 +1541,10 @@ const WorkoutTracker = () => {
         return exercise;
       });
 
-      // Ensure required fields exist
+      // Normalize required fields; preserve everything else (programId,
+      // energyLevel, finishedAt, bodyWeightSnapshot, future fields).
       return {
+        ...item,
         id: item.id || Date.now(),
         workoutId: item.workoutId || 0,
         workoutName: item.workoutName || 'Unknown',
