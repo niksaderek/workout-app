@@ -587,7 +587,7 @@
 
 // IndexedDB wrapper
 const DB_NAME = 'WorkoutTrackerDB';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 const initDB = () => {
   return new Promise((resolve, reject) => {
@@ -613,9 +613,21 @@ const initDB = () => {
         const bodyWeightStore = db.createObjectStore('bodyWeight', { keyPath: 'id', autoIncrement: true });
         bodyWeightStore.createIndex('date', 'date', { unique: false });
       }
+
+      if (!db.objectStoreNames.contains('programs')) {
+        db.createObjectStore('programs', { keyPath: 'id' });
+      }
     };
   });
 };
+
+// Wraps a flat workout-day array into a program record.
+// Used by v2→v3 migration and by pre-1.3 backup restore.
+const wrapWorkoutsAsProgram = (workoutsArr, name = 'My Program') => ({
+  id: Date.now(),
+  name,
+  workouts: workoutsArr
+});
 
 const dbOperations = {
   async saveWorkouts(workouts) {
@@ -639,13 +651,41 @@ const dbOperations = {
     const tx = db.transaction('workouts', 'readonly');
     const store = tx.objectStore('workouts');
     const request = store.getAll();
-    
+
     return new Promise((resolve, reject) => {
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
     });
   },
-  
+
+  async savePrograms(programs) {
+    const db = await initDB();
+    const tx = db.transaction('programs', 'readwrite');
+    const store = tx.objectStore('programs');
+
+    await store.clear();
+    for (const program of programs) {
+      await store.put(program);
+    }
+
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+
+  async getPrograms() {
+    const db = await initDB();
+    const tx = db.transaction('programs', 'readonly');
+    const store = tx.objectStore('programs');
+    const request = store.getAll();
+
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  },
+
   async saveHistory(history) {
     const db = await initDB();
     const tx = db.transaction('history', 'readwrite');
@@ -712,6 +752,27 @@ const dbOperations = {
     const history = await this.getBodyWeightHistory();
     return history.length > 0 ? history[0] : null;
   }
+};
+
+// One-time v2→v3 data move: wraps legacy flat workout days into a single
+// default program. Legacy 'workouts' store is left intact as a safety net.
+// Falls back to the localStorage mirror when the legacy store is empty.
+const migrateWorkoutsToPrograms = async () => {
+  const existingPrograms = await dbOperations.getPrograms();
+  if (existingPrograms.length > 0) return null; // already migrated
+
+  let legacyWorkouts = await dbOperations.getWorkouts();
+  if (!legacyWorkouts || legacyWorkouts.length === 0) {
+    const backup = localStorage.getItem('workouts_backup');
+    if (backup) {
+      try { legacyWorkouts = JSON.parse(backup); } catch (e) { legacyWorkouts = []; }
+    }
+  }
+  if (!legacyWorkouts || legacyWorkouts.length === 0) return null;
+
+  const migrated = [wrapWorkoutsAsProgram(legacyWorkouts)];
+  await dbOperations.savePrograms(migrated);
+  return migrated;
 };
 
 // Intelligent markdown parser - auto-detects any format
@@ -1511,6 +1572,7 @@ const WorkoutTracker = () => {
   const loadData = async () => {
     try {
       setLoading(true);
+      await migrateWorkoutsToPrograms();
       const savedWorkouts = await dbOperations.getWorkouts();
       let savedHistory = await dbOperations.getHistory();
       const latestBodyWeight = await dbOperations.getLatestBodyWeight();
