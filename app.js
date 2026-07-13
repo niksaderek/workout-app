@@ -3082,6 +3082,7 @@ const WorkoutTracker = () => {
           name: ex.name,
           plannedSets: ex.sets,
           plannedReps: ex.reps,
+          notes: ex.notes,
           muscleGroup: ex.muscleGroup || getMuscleGroup(ex.name),
           // Auto-assign if missing
           unit: ex.unit,
@@ -5224,7 +5225,9 @@ const WorkoutTracker = () => {
     }, "Cancel"));
   })(), /*#__PURE__*/React.createElement("div", {
     className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`
-  }, "Target: ", exercise.plannedSets, " \xD7 ", formatPlannedTarget(exercise.plannedReps, UNIT_CONFIG[getExerciseUnit(exercise)].label)), (() => {
+  }, "Target: ", exercise.plannedSets, " \xD7 ", formatPlannedTarget(exercise.plannedReps, UNIT_CONFIG[getExerciseUnit(exercise)].label)), exercise.notes && /*#__PURE__*/React.createElement("div", {
+    className: `text-xs italic ${darkMode ? 'text-gray-500' : 'text-gray-500'} mb-2`
+  }, exercise.notes), (() => {
     const suggestion = getSmartWeightSuggestion(exercise.name, exercise.plannedReps);
     if (!suggestion) return null;
 

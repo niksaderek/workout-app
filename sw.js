@@ -1,5 +1,5 @@
 // Service Worker for Workout Pro PWA
-const CACHE_NAME = 'workout-pro-v18';
+const CACHE_NAME = 'workout-pro-v19';
 const urlsToCache = [
   '/',
   '/index.html',
