@@ -1,13 +1,13 @@
 // Service Worker for Workout Pro PWA
-const CACHE_NAME = 'workout-pro-v16';
+const CACHE_NAME = 'workout-pro-v17';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/app.js',
   '/styles.css',
   '/manifest.json',
   'https://unpkg.com/react@18/umd/react.production.min.js',
-  'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
-  'https://unpkg.com/@babel/standalone@7.24.0/babel.min.js'
+  'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js'
 ];
 
 // Install event - cache resources
@@ -56,27 +56,28 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch event - network first for HTML, cache first for everything else
+// Fetch event - stale-while-revalidate for HTML, cache first for everything else
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Network-first strategy for HTML files (app updates)
+  // Stale-while-revalidate for HTML: serve cache immediately for fast launch,
+  // refresh cache in background so next launch gets the new version
   if (event.request.mode === 'navigate' ||
       (event.request.method === 'GET' && event.request.headers.get('accept').includes('text/html'))) {
     event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          // Update cache with fresh HTML
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
-          return response;
-        })
-        .catch(() => {
-          // Fall back to cache if offline
-          return caches.match(event.request);
-        })
+      caches.match(event.request).then(cached => {
+        const networkFetch = fetch(event.request)
+          .then(response => {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+            return response;
+          })
+          .catch(() => cached);
+        event.waitUntil(networkFetch.catch(() => {}));
+        return cached || networkFetch;
+      })
     );
     return;
   }

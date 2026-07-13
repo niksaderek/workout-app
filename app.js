@@ -1,0 +1,5958 @@
+// ABOUTME: Workout Pro app source (JSX) — entire React app, compiled to app.js by Babel at build time.
+// ABOUTME: Edit THIS file, not app.js. Build: npm run build:js (Netlify runs it on deploy).
+const {
+  useState,
+  useEffect
+} = React;
+
+// Simple SVG icon components
+const Dumbbell = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "m6.5 6.5 11 11"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "m21 21-1-1"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "m3 3 1 1"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "m18 22 4-4"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "m2 6 4-4"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "m3 10 7-7"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "m14 21 7-7"
+}));
+const TrendingUp = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("polyline", {
+  points: "22 7 13.5 15.5 8.5 10.5 2 17"
+}), /*#__PURE__*/React.createElement("polyline", {
+  points: "16 7 22 7 22 13"
+}));
+const Calendar = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("rect", {
+  width: "18",
+  height: "18",
+  x: "3",
+  y: "4",
+  rx: "2",
+  ry: "2"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "16",
+  x2: "16",
+  y1: "2",
+  y2: "6"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "8",
+  x2: "8",
+  y1: "2",
+  y2: "6"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "3",
+  x2: "21",
+  y1: "10",
+  y2: "10"
+}));
+const Download = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+}), /*#__PURE__*/React.createElement("polyline", {
+  points: "7 10 12 15 17 10"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "12",
+  x2: "12",
+  y1: "15",
+  y2: "3"
+}));
+const Upload = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+}), /*#__PURE__*/React.createElement("polyline", {
+  points: "17 8 12 3 7 8"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "12",
+  x2: "12",
+  y1: "3",
+  y2: "15"
+}));
+const Edit2 = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "m15 5 4 4"
+}));
+const Plus = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M5 12h14"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M12 5v14"
+}));
+const PlusCircle = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("circle", {
+  cx: "12",
+  cy: "12",
+  r: "10"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M8 12h8"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M12 8v8"
+}));
+const Trash2 = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M3 6h18"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "10",
+  x2: "10",
+  y1: "11",
+  y2: "17"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "14",
+  x2: "14",
+  y1: "11",
+  y2: "17"
+}));
+const Check = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("polyline", {
+  points: "20 6 9 17 4 12"
+}));
+const X = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M18 6 6 18"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "m6 6 12 12"
+}));
+const RepeatIcon = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "m17 2 4 4-4 4"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M3 11v-1a4 4 0 0 1 4-4h14"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "m7 22-4-4 4-4"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M21 13v1a4 4 0 0 1-4 4H3"
+}));
+const ChevronRight = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "m9 18 6-6-6-6"
+}));
+const ChevronUp = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "m18 15-6-6-6 6"
+}));
+const ChevronDown = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "m6 9 6 6 6-6"
+}));
+const Sun = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("circle", {
+  cx: "12",
+  cy: "12",
+  r: "4"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M12 2v2"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M12 20v2"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "m4.93 4.93 1.41 1.41"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "m17.66 17.66 1.41 1.41"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M2 12h2"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M20 12h2"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "m6.34 17.66-1.41 1.41"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "m19.07 4.93-1.41 1.41"
+}));
+const Moon = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"
+}));
+const BarChart3 = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M3 3v18h18"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M18 17V9"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M13 17V5"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M8 17v-3"
+}));
+const Zap = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("polygon", {
+  points: "13 2 3 14 12 14 11 22 21 10 12 10 13 2"
+}));
+const Target = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("circle", {
+  cx: "12",
+  cy: "12",
+  r: "10"
+}), /*#__PURE__*/React.createElement("circle", {
+  cx: "12",
+  cy: "12",
+  r: "6"
+}), /*#__PURE__*/React.createElement("circle", {
+  cx: "12",
+  cy: "12",
+  r: "2"
+}));
+const Award = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("circle", {
+  cx: "12",
+  cy: "8",
+  r: "6"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"
+}));
+
+// Additional workout-specific icons
+const Activity = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M22 12h-4l-3 9L9 3l-3 9H2"
+}));
+const GripVertical = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("circle", {
+  cx: "9",
+  cy: "12",
+  r: "1"
+}), /*#__PURE__*/React.createElement("circle", {
+  cx: "9",
+  cy: "5",
+  r: "1"
+}), /*#__PURE__*/React.createElement("circle", {
+  cx: "9",
+  cy: "19",
+  r: "1"
+}), /*#__PURE__*/React.createElement("circle", {
+  cx: "15",
+  cy: "12",
+  r: "1"
+}), /*#__PURE__*/React.createElement("circle", {
+  cx: "15",
+  cy: "5",
+  r: "1"
+}), /*#__PURE__*/React.createElement("circle", {
+  cx: "15",
+  cy: "19",
+  r: "1"
+}));
+const Flame = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("path", {
+  d: "M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"
+}));
+const FaceMeh = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("circle", {
+  cx: "12",
+  cy: "12",
+  r: "10"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "8",
+  x2: "16",
+  y1: "15",
+  y2: "15"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "9",
+  x2: "9.01",
+  y1: "9",
+  y2: "9"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "15",
+  x2: "15.01",
+  y1: "9",
+  y2: "9"
+}));
+const FaceSmile = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("circle", {
+  cx: "12",
+  cy: "12",
+  r: "10"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M8 13s1.5 2 4 2 4-2 4-2"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "9",
+  x2: "9.01",
+  y1: "9",
+  y2: "9"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "15",
+  x2: "15.01",
+  y1: "9",
+  y2: "9"
+}));
+const FaceLaugh = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("circle", {
+  cx: "12",
+  cy: "12",
+  r: "10"
+}), /*#__PURE__*/React.createElement("path", {
+  d: "M7 13s1 3 5 3 5-3 5-3"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "9",
+  x2: "9.01",
+  y1: "9",
+  y2: "9"
+}), /*#__PURE__*/React.createElement("line", {
+  x1: "15",
+  x2: "15.01",
+  y1: "9",
+  y2: "9"
+}));
+const Clock = ({
+  size = 24,
+  className = ""
+}) => /*#__PURE__*/React.createElement("svg", {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: size,
+  height: size,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  className: className
+}, /*#__PURE__*/React.createElement("circle", {
+  cx: "12",
+  cy: "12",
+  r: "10"
+}), /*#__PURE__*/React.createElement("polyline", {
+  points: "12 6 12 12 16 14"
+}));
+
+// Popular exercises database - organized by category
+const popularExercises = {
+  chest: ['Bench Press', 'Incline Bench Press', 'Decline Bench Press', 'Dumbbell Bench Press', 'Incline DB Press', 'Chest Fly', 'Cable Fly', 'Machine Chest Press', 'Push-ups', 'Diamond Push-ups', 'Wide Push-ups', 'Incline Push-ups', 'Knee Push-ups', 'Dips (Chest Focus)'],
+  back: ['Deadlift', 'Trap Bar Deadlift', 'Romanian Deadlift (RDL)', 'Barbell Row', 'Pendlay Row', 'Dumbbell Row', 'T-Bar Row', 'Chest-Supported Row', 'Inverted Row', 'Pull-ups', 'Chin-ups', 'Lat Pulldown', 'Single-Arm Lat Pulldown', 'Straight-Arm Pulldown', 'Cable Row', 'Face Pulls', 'Shrugs'],
+  shoulders: ['Overhead Press (OHP)', 'Military Press', 'Dumbbell Shoulder Press', 'Machine Shoulder Press', 'Lateral Raises', 'Cable Lateral Raise', 'Front Raises', 'Rear Delt Fly', 'Reverse Pec Deck', 'Arnold Press', 'Upright Row', 'Pike Push-ups'],
+  legs: ['Back Squat', 'Front Squat', 'Goblet Squat', 'Bodyweight Squat', 'Leg Press', 'Hack Squat', 'Bulgarian Split Squat', 'Lunges', 'Step-ups', 'Pistol Squat', 'Wall Sit', 'Jump Squats', 'Romanian Deadlift', 'Hip Thrust', 'Glute Bridge', 'Leg Extension', 'Leg Curl', 'Seated Leg Curl', 'Calf Raises'],
+  arms: ['Barbell Curl', 'EZ-Bar Curl', 'Dumbbell Curl', 'Hammer Curls', 'Preacher Curl', 'Concentration Curl', 'Cable Curl', 'Triceps Pushdown', 'Rope Pushdown', 'Overhead Triceps Extension', 'Skull Crushers', 'Tricep Kickback', 'Close-Grip Bench Press', 'Bench Dips', 'Dips (Triceps Focus)'],
+  core: ['Plank', 'Side Plank', 'Ab Wheel Rollout', 'Hanging Leg Raises', 'Leg Raises', 'Cable Crunch', 'Crunches', 'Reverse Crunches', 'Sit-ups', 'Decline Sit-ups', 'V-ups', 'Toe Touches', 'Flutter Kicks', 'Russian Twist', 'Dead Bug', 'Pallof Press', 'Bicycle Crunches', 'Mountain Climbers'],
+  other: ["Farmer's Walk", 'Sled Push', 'Sled Pull', 'Battle Ropes', 'Box Jumps', 'Burpees', 'Jumping Jacks', 'Plain Dips', 'Kettlebell Swings']
+};
+
+// Flatten all exercises into single searchable array
+const allExercises = Object.values(popularExercises).flat().sort();
+
+// Icon mapper - maps emoji to icon component
+const WorkoutIcon = ({
+  emoji,
+  size = 40,
+  className = ""
+}) => {
+  const iconMap = {
+    '🦵': /*#__PURE__*/React.createElement(Dumbbell, {
+      size: size,
+      className: className
+    }),
+    '💪': /*#__PURE__*/React.createElement(Activity, {
+      size: size,
+      className: className
+    }),
+    '⚡': /*#__PURE__*/React.createElement(Zap, {
+      size: size,
+      className: className
+    }),
+    '🎯': /*#__PURE__*/React.createElement(Target, {
+      size: size,
+      className: className
+    }),
+    '🔥': /*#__PURE__*/React.createElement(Flame, {
+      size: size,
+      className: className
+    })
+  };
+  return iconMap[emoji] || /*#__PURE__*/React.createElement("span", {
+    className: "text-4xl"
+  }, emoji);
+};
+
+// LineChart component for timeline visualization
+const LineChart = ({
+  data,
+  metric,
+  darkMode,
+  onPointClick,
+  selectedPoint
+}) => {
+  if (!data || data.length === 0) return null;
+  const [hoveredPoint, setHoveredPoint] = React.useState(null);
+  const width = 350;
+  const height = 220;
+  const padding = {
+    top: 20,
+    right: 20,
+    bottom: 45,
+    left: 50
+  };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+
+  // Get values for the selected metric
+  const values = data.map(d => {
+    if (metric === 'volume') return d.volume;
+    if (metric === 'reps') return d.reps;
+    return 0;
+  });
+  const maxValue = Math.max(...values, 1);
+  const minValue = Math.min(...values, 0);
+
+  // Scale functions
+  const scaleX = index => {
+    if (data.length === 1) return padding.left + chartWidth / 2;
+    return padding.left + index / (data.length - 1) * chartWidth;
+  };
+  const scaleY = value => padding.top + chartHeight - (value - minValue) / (maxValue - minValue) * chartHeight;
+
+  // Generate path for line
+  const pathData = data.map((point, i) => {
+    const x = scaleX(i);
+    const y = scaleY(values[i]);
+    return i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
+  }).join(' ');
+
+  // Format date labels
+  const formatDate = dateStr => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    const month = date.toLocaleDateString('en-US', {
+      month: 'short'
+    });
+    const day = date.getDate();
+    return `${month} ${day}`;
+  };
+
+  // Y-axis labels
+  const yAxisLabels = [maxValue, Math.round(maxValue / 2), 0];
+  return /*#__PURE__*/React.createElement("svg", {
+    width: width,
+    height: height,
+    className: "touch-manipulation"
+  }, yAxisLabels.map((value, i) => {
+    const y = scaleY(value);
+    return /*#__PURE__*/React.createElement("g", {
+      key: i
+    }, /*#__PURE__*/React.createElement("line", {
+      x1: padding.left,
+      y1: y,
+      x2: width - padding.right,
+      y2: y,
+      stroke: darkMode ? '#374151' : '#E5E7EB',
+      strokeWidth: "1",
+      strokeDasharray: "3,3"
+    }), /*#__PURE__*/React.createElement("text", {
+      x: padding.left - 10,
+      y: y + 4,
+      textAnchor: "end",
+      fontSize: "12",
+      fill: darkMode ? '#9CA3AF' : '#6B7280'
+    }, value));
+  }), /*#__PURE__*/React.createElement("path", {
+    d: pathData,
+    fill: "none",
+    stroke: darkMode ? '#60A5FA' : '#3B82F6',
+    strokeWidth: "3",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }), data.map((point, i) => {
+    const x = scaleX(i);
+    const y = scaleY(values[i]);
+    const isSelected = selectedPoint && selectedPoint.date === point.date;
+    const isHovered = hoveredPoint && hoveredPoint.date === point.date;
+    return /*#__PURE__*/React.createElement("g", {
+      key: i
+    }, /*#__PURE__*/React.createElement("circle", {
+      cx: x,
+      cy: y,
+      r: isSelected ? 8 : 5,
+      fill: darkMode ? '#60A5FA' : '#3B82F6',
+      stroke: darkMode ? '#1F2937' : '#FFFFFF',
+      strokeWidth: "2",
+      style: {
+        cursor: 'pointer'
+      },
+      onClick: () => onPointClick(point),
+      onMouseEnter: () => setHoveredPoint(point),
+      onMouseLeave: () => setHoveredPoint(null),
+      className: "transition-all"
+    }), metric === 'volume' && point.energyLevel && /*#__PURE__*/React.createElement("text", {
+      x: x,
+      y: y - 12,
+      textAnchor: "middle",
+      fontSize: "10"
+    }, point.energyLevel === 'low' ? '😑' : point.energyLevel === 'medium' ? '🙂' : '😄'), isHovered && /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("rect", {
+      x: x - 35,
+      y: y - 40,
+      width: "70",
+      height: metric === 'volume' && point.energyLevel ? 42 : 30,
+      fill: darkMode ? '#1F2937' : '#FFFFFF',
+      stroke: darkMode ? '#374151' : '#E5E7EB',
+      strokeWidth: "1",
+      rx: "4"
+    }), /*#__PURE__*/React.createElement("text", {
+      x: x,
+      y: y - 28,
+      textAnchor: "middle",
+      fontSize: "11",
+      fontWeight: "bold",
+      fill: darkMode ? '#60A5FA' : '#3B82F6'
+    }, metric === 'volume' ? `${values[i].toLocaleString()} kg` : `${values[i]} reps`), /*#__PURE__*/React.createElement("text", {
+      x: x,
+      y: y - 16,
+      textAnchor: "middle",
+      fontSize: "9",
+      fill: darkMode ? '#9CA3AF' : '#6B7280'
+    }, formatDate(point.date)), metric === 'volume' && point.energyLevel && /*#__PURE__*/React.createElement("text", {
+      x: x,
+      y: y - 4,
+      textAnchor: "middle",
+      fontSize: "9",
+      fill: darkMode ? '#9CA3AF' : '#6B7280'
+    }, `Energy: ${point.energyLevel === 'low' ? '😑 Low' : point.energyLevel === 'medium' ? '🙂 Med' : '😄 High'}`)), (() => {
+      const dataCount = data.length;
+      let shouldShowLabel = false;
+      if (dataCount <= 7) {
+        // Show all labels for ≤7 days
+        shouldShowLabel = true;
+      } else if (dataCount <= 14) {
+        // Show every other label for 8-14 days
+        shouldShowLabel = i % 2 === 0 || i === dataCount - 1;
+      } else if (dataCount <= 30) {
+        // Show ~5 labels for 15-30 days
+        const step = Math.floor(dataCount / 5);
+        shouldShowLabel = i % step === 0 || i === dataCount - 1;
+      } else if (dataCount <= 90) {
+        // Show ~7 labels for 31-90 days
+        const step = Math.floor(dataCount / 7);
+        shouldShowLabel = i % step === 0 || i === dataCount - 1;
+      } else {
+        // Show ~10 labels for >90 days
+        const step = Math.floor(dataCount / 10);
+        shouldShowLabel = i % step === 0 || i === dataCount - 1;
+      }
+      return shouldShowLabel ? /*#__PURE__*/React.createElement("text", {
+        x: x,
+        y: height - padding.bottom + 20,
+        textAnchor: "middle",
+        fontSize: "11",
+        fill: darkMode ? '#9CA3AF' : '#6B7280'
+      }, formatDate(point.date)) : null;
+    })());
+  }));
+};
+
+// Exercise input with autocomplete dropdown
+const ExerciseInput = ({
+  value,
+  onChange,
+  darkMode,
+  placeholder = "Exercise name"
+}) => {
+  const [showDropdown, setShowDropdown] = React.useState(false);
+  const [filteredExercises, setFilteredExercises] = React.useState([]);
+  const inputRef = React.useRef(null);
+  React.useEffect(() => {
+    if (value && value.length > 0) {
+      const filtered = allExercises.filter(ex => ex.toLowerCase().includes(value.toLowerCase())).slice(0, 8); // Show max 8 suggestions
+      setFilteredExercises(filtered);
+    } else {
+      setFilteredExercises([]);
+    }
+  }, [value]);
+  const handleInputChange = e => {
+    onChange(e.target.value);
+    setShowDropdown(true);
+  };
+  const handleSelect = exercise => {
+    onChange(exercise);
+    setShowDropdown(false);
+    inputRef.current?.blur();
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "relative flex-1"
+  }, /*#__PURE__*/React.createElement("input", {
+    ref: inputRef,
+    type: "text",
+    value: value,
+    onChange: handleInputChange,
+    onFocus: () => setShowDropdown(true),
+    onBlur: () => setTimeout(() => setShowDropdown(false), 200),
+    className: `w-full px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg focus:border-gray-500 focus:outline-none`,
+    placeholder: placeholder
+  }), showDropdown && filteredExercises.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: `absolute z-[999] w-full mt-1 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} border rounded-lg shadow-lg max-h-60 overflow-y-auto`
+  }, filteredExercises.map((exercise, idx) => /*#__PURE__*/React.createElement("button", {
+    key: idx,
+    type: "button",
+    onClick: () => handleSelect(exercise),
+    className: `w-full text-left px-3 py-2 ${darkMode ? 'hover:bg-gray-700 text-gray-200' : 'hover:bg-gray-100 text-gray-900'} transition-colors text-sm`
+  }, exercise))));
+};
+
+// Icon picker component for selecting workout icons
+const IconPicker = ({
+  selectedEmoji,
+  onSelect,
+  darkMode
+}) => {
+  const availableIcons = [{
+    emoji: '🦵',
+    name: 'Dumbbell'
+  }, {
+    emoji: '💪',
+    name: 'Activity'
+  }, {
+    emoji: '⚡',
+    name: 'Zap'
+  }, {
+    emoji: '🎯',
+    name: 'Target'
+  }, {
+    emoji: '🔥',
+    name: 'Flame'
+  }];
+  return /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-5 gap-2 mt-2"
+  }, availableIcons.map(icon => /*#__PURE__*/React.createElement("button", {
+    key: icon.emoji,
+    type: "button",
+    onClick: () => onSelect(icon.emoji),
+    className: `p-3 rounded-lg transition-colors ${selectedEmoji === icon.emoji ? 'bg-blue-600 ring-2 ring-blue-400' : darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'}`
+  }, /*#__PURE__*/React.createElement(WorkoutIcon, {
+    emoji: icon.emoji,
+    size: 24,
+    className: selectedEmoji === icon.emoji ? 'text-white' : darkMode ? 'text-gray-300' : 'text-gray-700'
+  }))));
+};
+
+// IndexedDB wrapper
+const DB_NAME = 'WorkoutTrackerDB';
+const DB_VERSION = 3;
+const initDB = () => {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = event => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains('workouts')) {
+        db.createObjectStore('workouts', {
+          keyPath: 'id'
+        });
+      }
+      if (!db.objectStoreNames.contains('history')) {
+        const historyStore = db.createObjectStore('history', {
+          keyPath: 'id',
+          autoIncrement: true
+        });
+        historyStore.createIndex('date', 'date', {
+          unique: false
+        });
+        historyStore.createIndex('workoutId', 'workoutId', {
+          unique: false
+        });
+      }
+      if (!db.objectStoreNames.contains('bodyWeight')) {
+        const bodyWeightStore = db.createObjectStore('bodyWeight', {
+          keyPath: 'id',
+          autoIncrement: true
+        });
+        bodyWeightStore.createIndex('date', 'date', {
+          unique: false
+        });
+      }
+      if (!db.objectStoreNames.contains('programs')) {
+        db.createObjectStore('programs', {
+          keyPath: 'id'
+        });
+      }
+    };
+  });
+};
+
+// Seed data for a brand-new install (no IndexedDB, no localStorage mirror).
+const DEFAULT_WORKOUTS = [{
+  id: 1,
+  name: "DAY 1 – PUSH A (Heavy Bench & Quads)",
+  emoji: "🦵",
+  exercises: [{
+    name: "Bench Press",
+    sets: 3,
+    reps: 5,
+    notes: "Main lift. Last set AMRAP.",
+    muscleGroup: "chest"
+  }, {
+    name: "Back Squat",
+    sets: 3,
+    reps: 8,
+    notes: "Focus on depth and control.",
+    muscleGroup: "legs"
+  }, {
+    name: "Lateral Raises",
+    sets: 4,
+    reps: "15–20",
+    notes: "Light weight, burn effect.",
+    muscleGroup: "shoulders"
+  }, {
+    name: "Triceps Pushdown",
+    sets: 3,
+    reps: 12,
+    notes: "Focus on full lockout.",
+    muscleGroup: "arms"
+  }, {
+    name: "Ab Wheel Rollout",
+    sets: 3,
+    reps: "8–10",
+    notes: "Anti-extension core.",
+    muscleGroup: "core"
+  }]
+}, {
+  id: 2,
+  name: "DAY 2 – PULL A (Deadlift & Lat Width)",
+  emoji: "💪",
+  exercises: [{
+    name: "Trap Bar Deadlift",
+    sets: 3,
+    reps: 5,
+    notes: "Explosive from the floor.",
+    muscleGroup: "back"
+  }, {
+    name: "Pull-ups / Lat Pulldown",
+    sets: 3,
+    reps: "8–10",
+    notes: "Wide grip for V-taper.",
+    muscleGroup: "back"
+  }, {
+    name: "Face Pulls",
+    sets: 3,
+    reps: 15,
+    notes: "1-second pause at contraction.",
+    muscleGroup: "shoulders"
+  }, {
+    name: "Hammer Curls",
+    sets: 3,
+    reps: 12,
+    notes: "Bicep and forearm thickness.",
+    muscleGroup: "arms"
+  }, {
+    name: "Back Extension",
+    sets: 3,
+    reps: 12,
+    notes: "Lower back strength.",
+    muscleGroup: "back"
+  }, {
+    name: "Dead Bug",
+    sets: 2,
+    reps: "10/side",
+    notes: "Core stability.",
+    muscleGroup: "core"
+  }]
+}, {
+  id: 3,
+  name: "DAY 3 – PUSH B (Heavy OHP & Upper Chest)",
+  emoji: "⚡",
+  exercises: [{
+    name: "Overhead Press",
+    sets: 3,
+    reps: "5–6",
+    notes: "Squeeze glutes, no cheating.",
+    muscleGroup: "shoulders"
+  }, {
+    name: "Bulgarian Split Squat",
+    sets: 3,
+    reps: 10,
+    notes: "Per leg. Key for athletic build.",
+    muscleGroup: "legs"
+  }, {
+    name: "Incline DB Press",
+    sets: 3,
+    reps: "10–12",
+    notes: "Focus on upper chest.",
+    muscleGroup: "chest"
+  }, {
+    name: "Dips",
+    sets: 3,
+    reps: "To failure",
+    notes: "Lean forward.",
+    muscleGroup: "chest"
+  }, {
+    name: "Pallof Press",
+    sets: 3,
+    reps: "12/side",
+    notes: "Anti-rotation core.",
+    muscleGroup: "core"
+  }, {
+    name: "Side Plank",
+    sets: 2,
+    reps: "30–45 s",
+    notes: "Oblique stability.",
+    muscleGroup: "core"
+  }]
+}, {
+  id: 4,
+  name: "DAY 4 – PULL B (Posterior Chain & Back Thickness)",
+  emoji: "🎯",
+  exercises: [{
+    name: "Romanian Deadlift",
+    sets: 3,
+    reps: 10,
+    notes: "Focus on hamstring stretch.",
+    muscleGroup: "back"
+  }, {
+    name: "Dumbbell Row",
+    sets: 3,
+    reps: 10,
+    notes: "Pull elbow to hip.",
+    muscleGroup: "back"
+  }, {
+    name: "Farmer's Walk",
+    sets: 3,
+    reps: "40 m",
+    notes: "Heavy dumbbells (grip and core).",
+    muscleGroup: "other"
+  }, {
+    name: "Hanging Leg Raises",
+    sets: 3,
+    reps: "12–15",
+    notes: "Controlled leg lift.",
+    muscleGroup: "core"
+  }, {
+    name: "Back Extension Hold",
+    sets: 2,
+    reps: "30 s",
+    notes: "Erector spinae endurance.",
+    muscleGroup: "back"
+  }]
+}];
+
+// Wraps a flat workout-day array into a program record.
+// Used by v2→v3 migration and by pre-1.3 backup restore.
+const wrapWorkoutsAsProgram = (workoutsArr, name = 'My Program') => ({
+  id: Date.now(),
+  name,
+  workouts: workoutsArr || []
+});
+const dbOperations = {
+  async saveWorkouts(workouts) {
+    const db = await initDB();
+    const tx = db.transaction('workouts', 'readwrite');
+    const store = tx.objectStore('workouts');
+    await store.clear();
+    for (const workout of workouts) {
+      await store.put(workout);
+    }
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+  async getWorkouts() {
+    const db = await initDB();
+    const tx = db.transaction('workouts', 'readonly');
+    const store = tx.objectStore('workouts');
+    const request = store.getAll();
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  },
+  async savePrograms(programs) {
+    const db = await initDB();
+    const tx = db.transaction('programs', 'readwrite');
+    const store = tx.objectStore('programs');
+    await store.clear();
+    for (const program of programs) {
+      await store.put(program);
+    }
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+  async getPrograms() {
+    const db = await initDB();
+    const tx = db.transaction('programs', 'readonly');
+    const store = tx.objectStore('programs');
+    const request = store.getAll();
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  },
+  async saveHistory(history) {
+    const db = await initDB();
+    const tx = db.transaction('history', 'readwrite');
+    const store = tx.objectStore('history');
+    await store.put(history);
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+  async getHistory() {
+    const db = await initDB();
+    const tx = db.transaction('history', 'readonly');
+    const store = tx.objectStore('history');
+    const request = store.getAll();
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  },
+  async saveBodyWeight(weight, gender = 'male') {
+    const db = await initDB();
+    const tx = db.transaction('bodyWeight', 'readwrite');
+    const store = tx.objectStore('bodyWeight');
+    const entry = {
+      weight: Number(weight),
+      gender: gender,
+      date: new Date().toISOString(),
+      unit: 'kg'
+    };
+    await store.put(entry);
+    return new Promise((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+  async getBodyWeightHistory() {
+    const db = await initDB();
+    const tx = db.transaction('bodyWeight', 'readonly');
+    const store = tx.objectStore('bodyWeight');
+    const request = store.getAll();
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => {
+        const records = request.result;
+        // Sort by date descending (newest first)
+        records.sort((a, b) => new Date(b.date) - new Date(a.date));
+        resolve(records);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  },
+  async getLatestBodyWeight() {
+    const history = await this.getBodyWeightHistory();
+    return history.length > 0 ? history[0] : null;
+  }
+};
+
+// One-time v2→v3 data move: wraps legacy flat workout days into a single
+// default program. Legacy 'workouts' store is left intact as a safety net.
+// Falls back to the localStorage mirror when the legacy store is empty.
+const migrateWorkoutsToPrograms = async () => {
+  const existingPrograms = await dbOperations.getPrograms();
+  if (existingPrograms.length > 0) return null; // already migrated
+
+  let legacyWorkouts = await dbOperations.getWorkouts();
+  if (!legacyWorkouts || legacyWorkouts.length === 0) {
+    const backup = localStorage.getItem('workouts_backup');
+    if (backup) {
+      try {
+        legacyWorkouts = JSON.parse(backup);
+      } catch (e) {
+        legacyWorkouts = [];
+      }
+    }
+  }
+  if (!legacyWorkouts || legacyWorkouts.length === 0) return null;
+  const migrated = [wrapWorkoutsAsProgram(legacyWorkouts)];
+  await dbOperations.savePrograms(migrated);
+  return migrated;
+};
+
+// Intelligent markdown parser - auto-detects any format
+const parseMarkdownWorkout = (markdownText, opts = {}) => {
+  const strict = !!opts.strict;
+  // Helper: Check if line is likely a workout day separator
+  const isWorkoutDayHeader = (line, upperLine) => {
+    // Pattern 1: Starts with # or ##
+    if (!line.startsWith('#')) return false;
+
+    // Pattern 2: Contains day indicators
+    const dayIndicators = ['DAY', 'DAN', 'WORKOUT', 'TRAINING', 'TRENING', 'WEEK', 'СЕДМИЦА'];
+    const hasDay = dayIndicators.some(indicator => upperLine.includes(indicator));
+
+    // Pattern 3: Contains numbers (Day 1, Dan 2, etc.)
+    const hasNumber = /\d/.test(line);
+
+    // Pattern 4: Contains common workout types
+    const workoutTypes = ['PUSH', 'PULL', 'LEG', 'UPPER', 'LOWER', 'FULL', 'CARDIO', 'STRENGTH'];
+    const hasWorkoutType = workoutTypes.some(type => upperLine.includes(type));
+
+    // Heuristic: It's a workout day if it has day indicator + number, or H1/H2 with workout type
+    return hasDay && hasNumber || line.match(/^#{1,2}\s/) && hasWorkoutType;
+  };
+
+  // Helper: Extract numeric value (handles ranges like "3-4", "8–10")
+  const extractNumber = text => {
+    const match = text.match(/(\d+)/);
+    return match ? parseInt(match[1]) : null;
+  };
+
+  // Helper: Check if text looks like exercise data (sets/reps)
+  const looksLikeExerciseData = text => {
+    // Pattern: Contains numbers or x notation (3x8, 3 x 10, etc.)
+    return /\d+\s*[xX×]\s*\d+/.test(text) || /\d+/.test(text);
+  };
+
+  // Helper: Detect if line is likely a table header
+  const isTableHeader = cells => {
+    if (!cells || cells.length === 0) return false;
+    const firstCell = cells[0].toLowerCase();
+    const headerWords = ['exercise', 'vježba', 'vjezba', 'name', 'naziv', 'sets', 'serije', 'reps', 'ponavljanja'];
+    return headerWords.some(word => firstCell.includes(word));
+  };
+
+  // Helper: Smart extraction of sets/reps from any text
+  const extractSetsReps = text => {
+    // Try compact format first: "3x8", "4 x 10-12"
+    const compactMatch = text.match(/(\d+)\s*[xX×]\s*([\d\-–s]+)/);
+    if (compactMatch) {
+      return {
+        sets: parseInt(compactMatch[1]),
+        reps: compactMatch[2]
+      };
+    }
+
+    // Try separate format: "Sets: 3" "Reps: 8"
+    const setsMatch = text.match(/(?:sets?|serije):\s*(\d+)/i);
+    const repsMatch = text.match(/(?:reps?|ponavljanja):\s*([\d\-–s]+)/i);
+    return {
+      sets: setsMatch ? parseInt(setsMatch[1]) : null,
+      reps: repsMatch ? repsMatch[1] : null
+    };
+  };
+  const workouts = [];
+  let currentWorkout = null;
+  let currentExercise = null;
+  const lines = markdownText.split('\n');
+  for (let line of lines) {
+    line = line.trim();
+
+    // Skip empty lines, dividers, and markdown table alignment rows
+    if (!line || line.startsWith('|---') || line === '---' || line.startsWith('|') && line.includes(':---')) continue; // Markdown table alignment (| :--- | :---: |)
+
+    const upperLine = line.toUpperCase();
+
+    // STEP 1: Detect workout day headers.
+    // Strict mode (app-exported files, self-describing): single '#' = day, '##'+ never is.
+    // Non-strict (foreign files): fall back to the keyword/number heuristic.
+    const isDayHeader = strict ? /^#\s/.test(line) : isWorkoutDayHeader(line, upperLine);
+    if (isDayHeader) {
+      // Save previous workout
+      if (currentWorkout && currentWorkout.exercises.length > 0) {
+        workouts.push(currentWorkout);
+      }
+
+      // Extract emoji
+      const emojiMatch = line.match(/[\u{1F300}-\u{1F9FF}]/u);
+      const emoji = emojiMatch ? emojiMatch[0] : '🔥';
+
+      // Clean up name
+      let name = line.replace(/^#+\s*/, '').replace(emoji, '').trim();
+      currentWorkout = {
+        id: Date.now() + workouts.length,
+        name: name || 'Workout',
+        emoji: emoji,
+        exercises: []
+      };
+      currentExercise = null;
+      continue;
+    }
+
+    // STEP 2: Append descriptions (H3 headers only - NOT bold exercise names)
+    if (line.startsWith('###')) {
+      const description = line.replace(/^###\s*/, '').trim();
+
+      // Only append if it looks like a description (contains keywords or is short)
+      const isDescription = description.length < 80 && (description.toLowerCase().includes('fokus') || description.toLowerCase().includes('focus') || description.toLowerCase().includes(':'));
+      if (isDescription && currentWorkout) {
+        const cleanDesc = description.replace(/^(?:fokus|focus):\s*/i, '').trim();
+        if (cleanDesc && !currentWorkout.name.includes(cleanDesc)) {
+          currentWorkout.name = `${currentWorkout.name} - ${cleanDesc}`;
+        }
+      }
+      continue;
+    }
+
+    // STEP 3: Parse table rows (most common format)
+    if (line.startsWith('|') && line.endsWith('|')) {
+      const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
+
+      // Skip headers
+      if (isTableHeader(cells)) continue;
+
+      // Auto-create workout if table appears without header
+      if (!currentWorkout) {
+        currentWorkout = {
+          id: Date.now(),
+          name: 'Workout',
+          emoji: '🔥',
+          exercises: []
+        };
+      }
+
+      // Smart column detection - find exercise name, sets, reps
+      if (cells.length >= 2) {
+        // Remove bold markers (**text**) and italic markers (*text* or _text_)
+        const exerciseName = cells[0].trim().replace(/^\*\*/, '').replace(/\*\*$/, '') // Remove bold
+        .replace(/^\*/, '').replace(/\*$/, '') // Remove italic (*)
+        .replace(/^_/, '').replace(/_$/, ''); // Remove italic (_)
+
+        // Skip if first cell looks like data, not exercise name
+        if (exerciseName.length < 3 || /^\d+$/.test(exerciseName)) continue;
+        let sets = 3,
+          reps = 10,
+          notes = '';
+
+        // Intelligently detect which columns contain sets/reps
+        for (let i = 1; i < cells.length; i++) {
+          const cell = cells[i];
+          const extracted = extractSetsReps(cell);
+          if (extracted.sets !== null) sets = extracted.sets;
+          if (extracted.reps !== null) reps = extracted.reps;
+
+          // Check if cell is pure number (likely sets or reps)
+          if (/^\d+$/.test(cell) && i === 1) sets = parseInt(cell);else if (/^[\d\-–s]+$/.test(cell) && i === 2) reps = cell;
+
+          // Last column or cells with text = notes
+          if (i >= 4 && cell.length > 2 && !/^\d/.test(cell)) {
+            // Clean up notes (remove bold/italic markers)
+            notes = cell.replace(/\*\*/g, '') // Remove all bold markers
+            .replace(/\*/g, '') // Remove all italic markers (*)
+            .replace(/_/g, ''); // Remove all italic markers (_)
+          }
+        }
+        currentWorkout.exercises.push({
+          name: exerciseName,
+          sets,
+          reps,
+          notes
+        });
+      }
+      continue;
+    }
+
+    // STEP 4: Parse bold exercise format (common in workout logs)
+    // Pattern: **Exercise Name**
+    //          70kg — 3x5
+    // Also handles: **Exercise** *(notes in italics)*
+    const boldExerciseMatch = line.match(/^\*\*(.+?)\*\*/);
+    if (boldExerciseMatch) {
+      // Auto-create workout if needed
+      if (!currentWorkout) {
+        currentWorkout = {
+          id: Date.now(),
+          name: 'Workout Log',
+          emoji: '🔥',
+          exercises: []
+        };
+      }
+      const exerciseName = boldExerciseMatch[1].trim();
+
+      // Extract inline notes (e.g., *(superset with X)*)
+      const inlineNotesMatch = line.match(/\*\*\s*\*(.+?)\*/);
+      const inlineNotes = inlineNotesMatch ? inlineNotesMatch[1].trim() : '';
+      currentExercise = {
+        name: exerciseName,
+        sets: 3,
+        reps: 10,
+        notes: inlineNotes
+      };
+      currentWorkout.exercises.push(currentExercise);
+      continue;
+    }
+
+    // STEP 5: Parse list/heading format exercises (## Exercise or - Exercise)
+    if (line.startsWith('##') && !isDayHeader) {
+      // Auto-create workout if needed
+      if (!currentWorkout) {
+        currentWorkout = {
+          id: Date.now(),
+          name: 'Workout',
+          emoji: '🔥',
+          exercises: []
+        };
+      }
+
+      // Remove header marker and formatting (bold/italic)
+      const exerciseName = line.replace(/^##\s*/, '').trim().replace(/^\*\*/, '').replace(/\*\*$/, '') // Remove bold
+      .replace(/^\*/, '').replace(/\*$/, '') // Remove italic (*)
+      .replace(/^_/, '').replace(/_$/, ''); // Remove italic (_)
+
+      currentExercise = {
+        name: exerciseName,
+        sets: 3,
+        reps: 10,
+        notes: ''
+      };
+      currentWorkout.exercises.push(currentExercise);
+      continue;
+    }
+
+    // STEP 6: Parse exercise details (sets/reps/notes on following lines)
+    if (currentExercise) {
+      // Try to extract weight + sets×reps format: "70kg — 3x5" or "20kg — 2x5, 1x10"
+      const weightSetsMatch = line.match(/(\d+(?:\.\d+)?)\s*kg\s*[—–-]\s*(.+)/i);
+      if (weightSetsMatch) {
+        const weight = weightSetsMatch[1];
+        const setsRepsText = weightSetsMatch[2].trim();
+
+        // Extract RPE/notes if present (e.g., "@ RPE 9.5" or "(superset with X)")
+        const notesMatch = setsRepsText.match(/[@\(](.+)/);
+        if (notesMatch) {
+          currentExercise.notes = notesMatch[1].trim().replace(/^\s*RPE\s*/i, 'RPE ').replace(/[\(\)]/g, '');
+        }
+
+        // Parse sets×reps (handles "3x5" or "2x5, 1x10")
+        const cleanSetsReps = setsRepsText.split(/[@\(]/)[0].trim();
+        const extracted = extractSetsReps(cleanSetsReps);
+        if (extracted.sets) currentExercise.sets = extracted.sets;
+        if (extracted.reps) currentExercise.reps = extracted.reps;
+
+        // Store weight in notes if not already present
+        if (!currentExercise.notes || !currentExercise.notes.includes(weight)) {
+          const weightNote = `${weight}kg`;
+          currentExercise.notes = currentExercise.notes ? `${weightNote} | ${currentExercise.notes}` : weightNote;
+        }
+        continue;
+      }
+
+      // Fallback: standard sets/reps extraction
+      const extracted = extractSetsReps(line);
+      if (extracted.sets) currentExercise.sets = extracted.sets;
+      if (extracted.reps) currentExercise.reps = extracted.reps;
+
+      // Notes detection
+      const notesMatch = line.match(/(?:notes?|napomena):\s*(.+)/i);
+      if (notesMatch) currentExercise.notes = notesMatch[1];
+    }
+  }
+
+  // Save last workout
+  if (currentWorkout && currentWorkout.exercises.length > 0) {
+    workouts.push(currentWorkout);
+  }
+
+  // Auto-assign icons cyclically
+  const defaultIcons = ['🦵', '💪', '⚡', '🎯', '🔥'];
+  workouts.forEach((workout, idx) => {
+    if (workout.emoji === '🔥') {
+      workout.emoji = defaultIcons[idx % defaultIcons.length];
+    }
+  });
+  return workouts;
+};
+
+// CSV/Excel parser - auto-detects workout structure
+const parseCSVWorkout = csvText => {
+  const workouts = [];
+  let currentWorkout = null;
+
+  // Parse CSV (simple split by comma, handling quoted values)
+  const lines = csvText.split('\n').map(line => line.trim()).filter(line => line);
+
+  // Helper: Parse CSV line with quoted value support
+  const parseCSVLine = line => {
+    const cells = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        cells.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    cells.push(current.trim());
+    return cells;
+  };
+
+  // Detect headers
+  let headerRow = null;
+  let workoutColIdx = -1,
+    exerciseColIdx = -1,
+    setsColIdx = -1,
+    repsColIdx = -1,
+    notesColIdx = -1;
+  for (let i = 0; i < Math.min(5, lines.length); i++) {
+    const cells = parseCSVLine(lines[i]);
+    const lowerCells = cells.map(c => c.toLowerCase());
+
+    // Check if this looks like a header row
+    if (lowerCells.some(c => c.includes('workout') || c.includes('day') || c.includes('exercise') || c.includes('vježba') || c.includes('sets') || c.includes('serije'))) {
+      headerRow = i;
+
+      // Find column indices
+      lowerCells.forEach((cell, idx) => {
+        if (cell.includes('workout') || cell.includes('day') || cell.includes('dan')) workoutColIdx = idx;
+        if (cell.includes('exercise') || cell.includes('vježba') || cell.includes('vjezba')) exerciseColIdx = idx;
+        if (cell.includes('sets') || cell.includes('serije')) setsColIdx = idx;
+        if (cell.includes('reps') || cell.includes('ponavljanja')) repsColIdx = idx;
+        if (cell.includes('notes') || cell.includes('napomena')) notesColIdx = idx;
+      });
+      break;
+    }
+  }
+
+  // If no clear headers, assume first row is header and guess columns
+  if (headerRow === null) {
+    headerRow = 0;
+    const firstDataRow = lines.length > 1 ? parseCSVLine(lines[1]) : [];
+
+    // Guess: Column 0 = workout/exercise, Column 1 = sets, Column 2 = reps
+    if (firstDataRow.length >= 3) {
+      exerciseColIdx = 0;
+      setsColIdx = 1;
+      repsColIdx = 2;
+      if (firstDataRow.length >= 4) notesColIdx = 3;
+    }
+  }
+
+  // Parse data rows
+  for (let i = headerRow + 1; i < lines.length; i++) {
+    const cells = parseCSVLine(lines[i]);
+    if (cells.length === 0 || cells.every(c => !c)) continue;
+
+    // Check if this row defines a new workout day
+    const workoutName = workoutColIdx >= 0 && cells[workoutColIdx] ? cells[workoutColIdx].trim() : '';
+    const exerciseName = exerciseColIdx >= 0 && cells[exerciseColIdx] ? cells[exerciseColIdx].trim() : cells[0]?.trim() || '';
+
+    // If workout column has value, start new workout
+    if (workoutName && workoutName !== currentWorkout?.name) {
+      if (currentWorkout && currentWorkout.exercises.length > 0) {
+        workouts.push(currentWorkout);
+      }
+      currentWorkout = {
+        id: Date.now() + workouts.length,
+        name: workoutName,
+        emoji: '🔥',
+        exercises: []
+      };
+    }
+
+    // Auto-create workout if no workout column exists
+    if (!currentWorkout) {
+      currentWorkout = {
+        id: Date.now(),
+        name: 'Imported Workout',
+        emoji: '🔥',
+        exercises: []
+      };
+    }
+
+    // Add exercise if we have a name
+    if (exerciseName && exerciseName.length >= 2) {
+      const sets = setsColIdx >= 0 && cells[setsColIdx] ? parseInt(cells[setsColIdx]) || 3 : 3;
+      const reps = repsColIdx >= 0 && cells[repsColIdx] ? cells[repsColIdx] : '10';
+      const notes = notesColIdx >= 0 && cells[notesColIdx] ? cells[notesColIdx] : '';
+      currentWorkout.exercises.push({
+        name: exerciseName,
+        sets: sets,
+        reps: reps,
+        notes: notes
+      });
+    }
+  }
+
+  // Save last workout
+  if (currentWorkout && currentWorkout.exercises.length > 0) {
+    workouts.push(currentWorkout);
+  }
+
+  // Auto-assign icons
+  const defaultIcons = ['🦵', '💪', '⚡', '🎯', '🔥'];
+  workouts.forEach((workout, idx) => {
+    if (workout.emoji === '🔥') {
+      workout.emoji = defaultIcons[idx % defaultIcons.length];
+    }
+  });
+
+  // Auto-assign muscle groups to all exercises
+  workouts.forEach(workout => {
+    workout.exercises.forEach(exercise => {
+      if (!exercise.muscleGroup) {
+        exercise.muscleGroup = getMuscleGroup(exercise.name);
+      }
+    });
+  });
+  return workouts;
+};
+
+// Sound system - generates subtle beeps using Web Audio API
+const soundSystem = {
+  audioContext: null,
+  init() {
+    if (!this.audioContext) {
+      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  },
+  playTone(frequency, duration, volume = 0.3) {
+    if (!this.audioContext) this.init();
+    const oscillator = this.audioContext.createOscillator();
+    const gainNode = this.audioContext.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(this.audioContext.destination);
+    oscillator.frequency.value = frequency;
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+    oscillator.start(this.audioContext.currentTime);
+    oscillator.stop(this.audioContext.currentTime + duration);
+  },
+  appLaunch() {
+    // Gentle ascending beep
+    this.playTone(440, 0.1, 0.2);
+    setTimeout(() => this.playTone(554, 0.15, 0.15), 80);
+  },
+  workoutStart() {
+    // Energetic double beep
+    this.playTone(523, 0.12, 0.25);
+    setTimeout(() => this.playTone(659, 0.15, 0.2), 100);
+  },
+  workoutComplete() {
+    // Satisfying success chord
+    this.playTone(523, 0.15, 0.2);
+    setTimeout(() => this.playTone(659, 0.15, 0.2), 100);
+    setTimeout(() => this.playTone(784, 0.25, 0.25), 200);
+  }
+};
+const WorkoutTracker = () => {
+  const [programs, setPrograms] = useState([]);
+  const [activeProgramId, setActiveProgramId] = useState(null);
+
+  // Flat workout-day list for the active program. Same name as the former
+  // useState so every downstream consumer keeps reading a flat array.
+  const activeProgram = programs.find(p => p.id === activeProgramId) || null;
+  const workouts = activeProgram ? activeProgram.workouts : [];
+  const [completedWorkouts, setCompletedWorkouts] = useState([]);
+  const [activeView, setActiveView] = useState('home');
+  const [currentLog, setCurrentLog] = useState(null);
+  const [editingWorkout, setEditingWorkout] = useState(null);
+  const [editingHistory, setEditingHistory] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [darkMode, setDarkMode] = useState(true);
+  const [showStats, setShowStats] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [showAddDay, setShowAddDay] = useState(false);
+  const [showDeleteHistory, setShowDeleteHistory] = useState(null);
+  const [draggedExerciseIndex, setDraggedExerciseIndex] = useState(null);
+  const [draggedExercisePosition, setDraggedExercisePosition] = useState({
+    x: 0,
+    y: 0
+  });
+  const [dragStartPosition, setDragStartPosition] = useState({
+    x: 0,
+    y: 0
+  });
+  const [isDraggingExercise, setIsDraggingExercise] = useState(false);
+  const [dropTargetIndex, setDropTargetIndex] = useState(null);
+  const [timelineRange, setTimelineRange] = useState('2weeks'); // '2weeks', '4weeks', '3months', '6months', 'all'
+  const [selectedTimelinePoint, setSelectedTimelinePoint] = useState(null);
+  const [showUpdateNotification, setShowUpdateNotification] = useState(false);
+  const [substituteDropdown, setSubstituteDropdown] = useState(null); // exerciseIndex or null
+  const [showProgressTimeline, setShowProgressTimeline] = useState(false); // collapsible Progress Timeline (default: hidden)
+  const [showMuscleGroupBreakdown, setShowMuscleGroupBreakdown] = useState(false); // collapsible Muscle Group Breakdown (default: hidden)
+  const [showPersonalRecords, setShowPersonalRecords] = useState(false); // collapsible Personal Records (default: hidden)
+  const [showStrengthStandards, setShowStrengthStandards] = useState(false); // collapsible Strength Standards (default: hidden)
+  const [expandedWorkouts, setExpandedWorkouts] = useState({}); // {workoutId: boolean} - track which workout previews are expanded
+  const [statsPeriod, setStatsPeriod] = useState('week'); // 'week', 'month', 'all' - period selector for stats
+  const [statsProgramFilter, setStatsProgramFilter] = useState('all'); // 'all' or programId — Detailed Stats scope
+
+  // History slice feeding the Detailed Stats view. Untagged (pre-feature)
+  // records and records of deleted programs only appear under 'all'.
+  // Guard against a filter pointing at a deleted/replaced program — fall
+  // back to 'all' so stats never strand on an empty selection.
+  const effectiveStatsFilter = statsProgramFilter === 'all' || programs.some(p => p.id === statsProgramFilter) ? statsProgramFilter : 'all';
+  const statsHistory = effectiveStatsFilter === 'all' ? completedWorkouts : completedWorkouts.filter(w => w.programId === effectiveStatsFilter);
+  const [bodyWeight, setBodyWeight] = useState(null); // Current body weight in kg
+  const [bodyWeightHistory, setBodyWeightHistory] = useState([]); // All BW entries (ascending by date) for nearest-date lookup
+  const [gender, setGender] = useState('male'); // 'male' or 'female'
+  const [showBodyWeightInput, setShowBodyWeightInput] = useState(false); // Show/hide body weight input field
+  const [showAllBWHistory, setShowAllBWHistory] = useState(false); // Expand full BW history list
+  const [show1RMModal, setShow1RMModal] = useState(null); // {exerciseName: string, data: array} or null
+  const [showResumePrompt, setShowResumePrompt] = useState(false); // Resume workout prompt
+  const [savedWorkoutData, setSavedWorkoutData] = useState(null); // Temporarily store saved workout data before user chooses to resume
+  const [elapsedSeconds, setElapsedSeconds] = useState(0); // Live workout timer
+  const [substituteInputValue, setSubstituteInputValue] = useState(''); // Temp state for exercise substitution input
+  const [showProgramDropdown, setShowProgramDropdown] = useState(false);
+  const [programManageMode, setProgramManageMode] = useState(false);
+  const [editingProgramName, setEditingProgramName] = useState(null); // {id, value} or null
+  const [newProgramName, setNewProgramName] = useState(null); // string = input open, null = hidden
+  const [showDeleteProgram, setShowDeleteProgram] = useState(null); // programId or null
+  const fileInputRef = React.useRef(null);
+  const restoreBackupInputRef = React.useRef(null);
+  const dragExerciseRef = React.useRef(null);
+  useEffect(() => {
+    loadData();
+
+    // Load theme preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      setDarkMode(savedTheme === 'dark');
+    }
+
+    // Check for saved in-progress workout
+    const savedWorkout = localStorage.getItem('currentWorkout');
+    if (savedWorkout) {
+      try {
+        const parsedWorkout = JSON.parse(savedWorkout);
+        // Store saved workout data in state to prevent auto-save from clearing it
+        setSavedWorkoutData(parsedWorkout);
+        // Show resume prompt
+        setShowResumePrompt(true);
+      } catch (error) {
+        console.error('Error parsing saved workout:', error);
+        localStorage.removeItem('currentWorkout');
+      }
+    }
+
+    // Play app launch sound after short delay
+    setTimeout(() => {
+      soundSystem.appLaunch();
+    }, 500);
+
+    // Listen for service worker updates
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data && event.data.type === 'SW_UPDATED') {
+          console.log('[App] New version available:', event.data.version);
+          setShowUpdateNotification(true);
+        }
+      });
+
+      // Check for waiting service worker on load
+      navigator.serviceWorker.ready.then(registration => {
+        if (registration.waiting) {
+          console.log('[App] Service worker is waiting');
+          setShowUpdateNotification(true);
+        }
+
+        // Listen for new service worker installing
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('[App] New service worker installed');
+              setShowUpdateNotification(true);
+            }
+          });
+        });
+      });
+    }
+  }, []);
+
+  // Auto-save current workout to localStorage whenever it changes
+  // Only clear localStorage if we've explicitly set currentLog to null (not initial load)
+  const [hasInitialized, setHasInitialized] = React.useState(false);
+  useEffect(() => {
+    if (currentLog) {
+      localStorage.setItem('currentWorkout', JSON.stringify(currentLog));
+      setHasInitialized(true);
+    } else if (hasInitialized) {
+      // Only clear saved workout if we've already initialized (prevents clearing on page load)
+      localStorage.removeItem('currentWorkout');
+    }
+  }, [currentLog, hasInitialized]);
+
+  // Live workout timer — ticks every second while a workout is active
+  useEffect(() => {
+    if (!currentLog) {
+      setElapsedSeconds(0);
+      return;
+    }
+    const start = new Date(currentLog.date).getTime();
+    const tick = () => setElapsedSeconds(Math.floor((Date.now() - start) / 1000));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [currentLog?.date]);
+  const handleUpdateApp = () => {
+    setShowUpdateNotification(false);
+    window.location.reload();
+  };
+
+  // Global drag event listeners
+  useEffect(() => {
+    const handleGlobalMouseMove = e => {
+      if (draggedExerciseIndex !== null) {
+        handleExerciseDragMove(e);
+      }
+    };
+    const handleGlobalMouseUp = e => {
+      if (draggedExerciseIndex !== null) {
+        handleExerciseDragEnd();
+      }
+    };
+    const handleGlobalTouchMove = e => {
+      if (draggedExerciseIndex !== null) {
+        handleExerciseDragMove(e);
+      }
+    };
+    const handleGlobalTouchEnd = e => {
+      if (draggedExerciseIndex !== null) {
+        handleExerciseDragEnd();
+      }
+    };
+    if (draggedExerciseIndex !== null) {
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+      document.addEventListener('touchmove', handleGlobalTouchMove, {
+        passive: false
+      });
+      document.addEventListener('touchend', handleGlobalTouchEnd);
+    }
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      document.removeEventListener('touchmove', handleGlobalTouchMove);
+      document.removeEventListener('touchend', handleGlobalTouchEnd);
+    };
+  }, [draggedExerciseIndex, dragStartPosition]);
+
+  // FUNC_ID: validateAndFixHistoryItem | Validates and repairs corrupted history entries
+  const validateAndFixHistoryItem = item => {
+    try {
+      // Ensure exercises exists and is an array
+      if (!item.exercises || !Array.isArray(item.exercises)) {
+        console.warn('Invalid history item - missing exercises array:', item);
+        return null;
+      }
+
+      // Fix each exercise
+      item.exercises = item.exercises.map(exercise => {
+        // If sets is a number (template structure), convert to history structure
+        if (typeof exercise.sets === 'number') {
+          const numSets = exercise.sets;
+          exercise.plannedSets = numSets;
+          exercise.plannedReps = exercise.reps || 10;
+          exercise.sets = Array(numSets).fill(null).map(() => ({
+            weight: '0',
+            reps: exercise.reps || 10
+          }));
+          console.log(`Migrated exercise "${exercise.name}" from template to history structure`);
+        }
+
+        // Ensure sets is an array
+        if (!Array.isArray(exercise.sets)) {
+          console.warn(`Exercise "${exercise.name}" has invalid sets, creating empty array`);
+          exercise.sets = [];
+        }
+
+        // Validate each set has weight and reps
+        exercise.sets = exercise.sets.map(set => ({
+          weight: set?.weight ?? '0',
+          reps: set?.reps ?? 0
+        }));
+
+        // Ensure plannedSets/plannedReps exist
+        exercise.plannedSets = exercise.plannedSets || exercise.sets.length || 3;
+        exercise.plannedReps = exercise.plannedReps || 10;
+        return exercise;
+      });
+
+      // Normalize required fields; preserve everything else (programId,
+      // energyLevel, finishedAt, bodyWeightSnapshot, future fields).
+      return {
+        ...item,
+        id: item.id || Date.now(),
+        workoutId: item.workoutId || 0,
+        workoutName: item.workoutName || 'Unknown',
+        workoutEmoji: item.workoutEmoji || '🔥',
+        date: item.date || new Date().toISOString(),
+        exercises: item.exercises,
+        difficulty: item.difficulty || null
+      };
+    } catch (error) {
+      console.error('Error validating history item:', error, item);
+      return null;
+    }
+  };
+
+  // FUNC_ID: cleanupCorruptedData | Validates and fixes corrupted history entries on startup
+  const cleanupCorruptedData = async () => {
+    try {
+      const history = await dbOperations.getHistory();
+      if (!history || history.length === 0) return;
+      console.log(`Checking ${history.length} history items for corruption...`);
+      const cleanedHistory = history.map(validateAndFixHistoryItem).filter(item => item !== null);
+      const corruptedCount = history.length - cleanedHistory.length;
+      if (corruptedCount > 0 || cleanedHistory.length !== history.length) {
+        console.log(`Found ${corruptedCount} corrupted entries, cleaning up...`);
+
+        // Clear and restore cleaned data
+        const db = await initDB();
+        const tx = db.transaction('history', 'readwrite');
+        const store = tx.objectStore('history');
+        await store.clear();
+        for (const item of cleanedHistory) {
+          await dbOperations.saveHistory(item);
+        }
+        console.log(`Cleanup complete. ${cleanedHistory.length} valid entries restored.`);
+        return cleanedHistory;
+      }
+      console.log('No corrupted data found.');
+      return history;
+    } catch (error) {
+      console.error('Error cleaning up data:', error);
+      return null;
+    }
+  };
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      await migrateWorkoutsToPrograms();
+      let savedPrograms = await dbOperations.getPrograms();
+      let savedHistory = await dbOperations.getHistory();
+      const latestBodyWeight = await dbOperations.getLatestBodyWeight();
+      const allBodyWeights = await dbOperations.getBodyWeightHistory();
+      // Sort ascending (oldest -> newest) for getBodyWeightAt nearest-date lookup
+      setBodyWeightHistory([...allBodyWeights].sort((a, b) => new Date(a.date) - new Date(b.date)));
+
+      // Programs fallback chain: IDB → localStorage mirror → seeded default
+      if (!savedPrograms || savedPrograms.length === 0) {
+        const mirror = localStorage.getItem('programs_backup');
+        if (mirror) {
+          try {
+            savedPrograms = JSON.parse(mirror);
+          } catch (e) {
+            savedPrograms = [];
+          }
+        }
+      }
+      if (!savedPrograms || savedPrograms.length === 0) {
+        savedPrograms = [wrapWorkoutsAsProgram(DEFAULT_WORKOUTS)];
+      }
+      await dbOperations.savePrograms(savedPrograms);
+      setPrograms(savedPrograms);
+      localStorage.setItem('programs_backup', JSON.stringify(savedPrograms));
+
+      // Active program: stored id if it still exists, else first program
+      const storedActiveId = Number(localStorage.getItem('active_program_id'));
+      const activeId = savedPrograms.some(p => p.id === storedActiveId) ? storedActiveId : savedPrograms[0].id;
+      setActiveProgramId(activeId);
+      localStorage.setItem('active_program_id', String(activeId));
+
+      // History: IDB → localStorage fallback (unchanged behaviour)
+      if ((!savedHistory || savedHistory.length === 0) && localStorage.getItem('history_backup')) {
+        const parsedHistory = JSON.parse(localStorage.getItem('history_backup'));
+        for (const item of parsedHistory) {
+          await dbOperations.saveHistory(item);
+        }
+        savedHistory = parsedHistory;
+      }
+      if (savedHistory && savedHistory.length > 0) {
+        setCompletedWorkouts(savedHistory);
+        localStorage.setItem('history_backup', JSON.stringify(savedHistory));
+      }
+
+      // Cleanup any corrupted data from history
+      const cleanedHistory = await cleanupCorruptedData();
+      if (cleanedHistory) {
+        setCompletedWorkouts(cleanedHistory);
+        localStorage.setItem('history_backup', JSON.stringify(cleanedHistory));
+      }
+
+      // Load body weight and gender (no backup needed - stored only in IndexedDB)
+      if (latestBodyWeight) {
+        setBodyWeight(latestBodyWeight.weight);
+        if (latestBodyWeight.gender) {
+          setGender(latestBodyWeight.gender);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const savePrograms = async newPrograms => {
+    try {
+      await dbOperations.savePrograms(newPrograms);
+      setPrograms(newPrograms);
+      // Auto-backup to localStorage
+      localStorage.setItem('programs_backup', JSON.stringify(newPrograms));
+    } catch (error) {
+      console.error('Error saving programs:', error);
+    }
+  };
+
+  // Replaces the active program's day list. Drop-in for the old saveWorkouts.
+  const updateActiveWorkouts = async newWorkouts => {
+    const newPrograms = programs.map(p => p.id === activeProgramId ? {
+      ...p,
+      workouts: newWorkouts
+    } : p);
+    await savePrograms(newPrograms);
+  };
+  const switchProgram = programId => {
+    setActiveProgramId(programId);
+    localStorage.setItem('active_program_id', String(programId));
+  };
+  const createProgram = async name => {
+    const trimmed = (name || '').trim();
+    if (!trimmed) return;
+    const newProgram = {
+      id: Date.now(),
+      name: trimmed,
+      workouts: []
+    };
+    await savePrograms([...programs, newProgram]);
+    switchProgram(newProgram.id);
+    setNewProgramName(null);
+    setShowProgramDropdown(false);
+    setProgramManageMode(false);
+  };
+  const renameProgram = async (programId, newName) => {
+    const trimmed = (newName || '').trim();
+    if (!trimmed) return;
+    await savePrograms(programs.map(p => p.id === programId ? {
+      ...p,
+      name: trimmed
+    } : p));
+    setEditingProgramName(null);
+  };
+  const deleteProgram = async programId => {
+    if (programs.length <= 1) return; // last program is undeletable
+    const remaining = programs.filter(p => p.id !== programId);
+    await savePrograms(remaining);
+    if (activeProgramId === programId) {
+      switchProgram(remaining[0].id);
+    }
+    setShowDeleteProgram(null);
+  };
+  const saveHistory = async newHistoryItem => {
+    try {
+      await dbOperations.saveHistory(newHistoryItem);
+      const allHistory = await dbOperations.getHistory();
+      setCompletedWorkouts(allHistory);
+      // Auto-backup to localStorage
+      localStorage.setItem('history_backup', JSON.stringify(allHistory));
+    } catch (error) {
+      console.error('Error saving history:', error);
+    }
+  };
+  const handleSaveBodyWeight = async weight => {
+    try {
+      await dbOperations.saveBodyWeight(weight, gender);
+      setBodyWeight(Number(weight));
+      setShowBodyWeightInput(false);
+      const allBodyWeights = await dbOperations.getBodyWeightHistory();
+      setBodyWeightHistory([...allBodyWeights].sort((a, b) => new Date(a.date) - new Date(b.date)));
+      soundSystem.saveSuccess();
+    } catch (error) {
+      console.error('Error saving body weight:', error);
+    }
+  };
+  const getLastWeight = exerciseName => {
+    for (let i = completedWorkouts.length - 1; i >= 0; i--) {
+      const workout = completedWorkouts[i];
+      const exercise = workout.exercises.find(ex => ex.name === exerciseName);
+      if (exercise && exercise.sets.length > 0) {
+        const lastSet = exercise.sets.find(s => s.weight);
+        if (lastSet) return lastSet.weight;
+      }
+    }
+    return '';
+  };
+  const calculateEstimated1RM = (weight, reps) => {
+    // Epley formula: 1RM = weight × (1 + reps / 30)
+    return weight * (1 + reps / 30);
+  };
+
+  // FUNC_ID: categorizeExercise | Maps exercise names to main lift categories
+  // Explicit exercise-to-category mapping for main compound lifts
+  // Prevents false positives (e.g., "Leg Press" → Overhead Press bug)
+  // Strict whitelist of competition-style barbell variants per main lift.
+  // Symmetric Strength standards are calibrated on these; assistance/machine/unilateral
+  // variants use different leverage/range/assistance and would distort the standard.
+  // Match rule: case-insensitive EXACT name match against this list (no substring).
+  // Exercises not listed still appear in getAll1RMs / Exercise Progress; they just
+  // don't roll up into Squat/Bench/Deadlift/OHP totals or Strength Standards.
+  const EXERCISE_CATEGORIES = {
+    'Bench Press': ['bench press', 'barbell bench press', 'flat bench press', 'competition bench press', 'pause bench press'],
+    'Squat': ['squat', 'back squat', 'front squat', 'box squat', 'pause squat', 'high bar squat', 'low bar squat', 'čučanj', 'cucanj'],
+    'Deadlift': ['deadlift', 'conventional deadlift', 'sumo deadlift', 'trap bar deadlift', 'hex bar deadlift', 'mrtvo dizanje', 'mrtvo'],
+    'Overhead Press': ['overhead press', 'ohp', 'standing overhead press', 'strict press', 'military press', 'barbell shoulder press', 'vojnički press', 'vojnicki']
+  };
+
+  // Categorize exercise name to main lift category (or null if not a main lift)
+  // Case-insensitive EXACT match (after stripping a trailing parenthetical) —
+  // variants like Leg Press, RDL, Dumbbell Bench, Bulgarian Split Squat, Hack Squat,
+  // Push Press are deliberately excluded.
+  // Trailing "(...)" stripped so names like "Overhead Press (OHP)", "Bench Press (Comp)",
+  // "Squat (Pause)" still match their base lift.
+  const categorizeExercise = exerciseName => {
+    const lowerName = String(exerciseName || '').toLowerCase().replace(/\s*\([^)]*\)\s*$/, '') // strip trailing parenthetical
+    .trim();
+    for (const [category, variations] of Object.entries(EXERCISE_CATEGORIES)) {
+      if (variations.some(variation => variation === lowerName)) {
+        return category;
+      }
+    }
+    return null; // Not a main lift
+  };
+
+  // FUNC_ID: getMuscleGroup | Auto-detect muscle group for an exercise
+  // Returns muscle group (chest, back, shoulders, legs, arms, core, other) or null
+  const getMuscleGroup = exerciseName => {
+    const normalizedName = exerciseName.toLowerCase().trim();
+
+    // Check popularExercises for exact or fuzzy match
+    for (const [group, exercises] of Object.entries(popularExercises)) {
+      if (exercises.some(ex => ex.toLowerCase() === normalizedName)) {
+        return group;
+      }
+    }
+
+    // Fallback: keyword-based categorization for custom exercises
+    const keywords = {
+      chest: ['bench', 'press', 'fly', 'chest', 'pec'],
+      back: ['row', 'pull', 'lat', 'deadlift', 'mrtvo', 'chin'],
+      shoulders: ['raise', 'shoulder', 'delt', 'overhead', 'military', 'arnold'],
+      legs: ['squat', 'lunge', 'leg', 'calf', 'čučanj', 'hip thrust', 'glute', 'wall sit', 'pistol', 'step-up'],
+      arms: ['curl', 'extension', 'tricep', 'bicep'],
+      core: ['plank', 'crunch', 'ab', 'core', 'pallof', 'rollout', 'bug', 'sit-up', 'leg raise', 'v-up', 'flutter']
+    };
+    for (const [group, words] of Object.entries(keywords)) {
+      if (words.some(word => normalizedName.includes(word))) {
+        return group;
+      }
+    }
+    return 'other'; // Default fallback
+  };
+
+  // ABOUTME: Resolves how an exercise is measured (reps/seconds/meters) and
+  // ABOUTME: per-unit display + stats rules. Override wins; else auto-detect by name.
+  // FUNC_ID: getExerciseUnit | Returns 'reps' | 'seconds' | 'meters'
+  const getExerciseUnit = exercise => {
+    const u = exercise && exercise.unit;
+    if (u === 'reps' || u === 'seconds' || u === 'meters') return u; // explicit override wins
+    const n = (exercise && exercise.name || '').toLowerCase();
+    if (/\b(farmer|carry|walk|sled|yoke)\b/.test(n)) return 'meters';
+    if (/\b(plank|hold|wall sit|dead hang|hang)\b/.test(n)) return 'seconds';
+    return 'reps';
+  };
+  const UNIT_CONFIG = {
+    reps: {
+      label: 'reps',
+      placeholder: 'reps',
+      hasWeight: true,
+      countsAsReps: true,
+      countsAsVolume: true
+    },
+    seconds: {
+      label: 'sec',
+      placeholder: 'sec',
+      hasWeight: true,
+      countsAsReps: false,
+      countsAsVolume: false
+    },
+    meters: {
+      label: 'm',
+      placeholder: 'm',
+      hasWeight: true,
+      countsAsReps: false,
+      countsAsVolume: false
+    }
+  };
+
+  // FUNC_ID: formatPlannedTarget | "{reps} {label}" but suppress the label when
+  // plannedReps already carries its own unit/words (free-text templates).
+  const formatPlannedTarget = (plannedReps, unitLabel) => {
+    const raw = (plannedReps == null ? '' : String(plannedReps)).trim();
+    // Append the label ONLY when plannedReps is a bare number or numeric range
+    // (e.g. "10", "8-10", "8–12", "10 - 12"). Anything else (already has a unit
+    // like "40 m" / "30–45 s", or words like "To failure") is shown as-is.
+    const isBareNumeric = /^\d+(\s*[-–—]\s*\d+)?$/.test(raw);
+    return isBareNumeric && unitLabel ? `${raw} ${unitLabel}` : raw;
+  };
+
+  // Calculate estimated 1RM for all exercises in history
+  const getAll1RMs = () => {
+    const exerciseMaxes = {}; // { exerciseName: best1RM }
+
+    statsHistory.forEach(workout => {
+      workout.exercises.forEach(exercise => {
+        const exerciseName = exercise.name;
+
+        // Skip core exercises (no weight)
+        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit({
+          name: exerciseName
+        })].countsAsVolume || getMuscleGroup(exerciseName) === 'core';
+        if (isCoreExercise) return;
+        exercise.sets.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          const reps = parseFloat(set.reps) || 0;
+
+          // Only use sets with weight and 12 or fewer reps (strength range)
+          if (weight > 0 && reps > 0 && reps <= 12) {
+            const estimated1RM = calculateEstimated1RM(weight, reps);
+
+            // Track the best 1RM for this exercise
+            if (!exerciseMaxes[exerciseName] || estimated1RM > exerciseMaxes[exerciseName]) {
+              exerciseMaxes[exerciseName] = estimated1RM;
+            }
+          }
+        });
+      });
+    });
+    return exerciseMaxes;
+  };
+
+  // Get 1RMs for main compound lifts only
+  const getMainLifts1RMs = () => {
+    const all1RMs = getAll1RMs();
+    const mainLifts = {
+      'Bench Press': null,
+      'Squat': null,
+      'Deadlift': null,
+      'Overhead Press': null
+    };
+
+    // Use explicit categorization to map exercises to main lift categories
+    Object.keys(all1RMs).forEach(exerciseName => {
+      const category = categorizeExercise(exerciseName);
+      if (category) {
+        // Track the best 1RM for this category
+        if (!mainLifts[category] || all1RMs[exerciseName] > mainLifts[category]) {
+          mainLifts[category] = all1RMs[exerciseName];
+        }
+      }
+    });
+
+    // Filter out null values
+    const result = {};
+    Object.keys(mainLifts).forEach(lift => {
+      if (mainLifts[lift] !== null) {
+        result[lift] = mainLifts[lift];
+      }
+    });
+    return result;
+  };
+
+  // Get 1RM progression history for a specific exercise or category
+  // For main lifts (Bench Press, Squat, Deadlift, Overhead Press), groups all variations together
+  const get1RMProgression = exerciseName => {
+    const progression = [];
+
+    // Check if this is a main lift category
+    const isMainLift = ['Bench Press', 'Squat', 'Deadlift', 'Overhead Press'].includes(exerciseName);
+    statsHistory.forEach(workout => {
+      let best1RMForWorkout = 0;
+
+      // Find matching exercises in this workout
+      const matchingExercises = workout.exercises.filter(ex => {
+        if (isMainLift) {
+          // For main lifts, match all variations via categorizeExercise
+          return categorizeExercise(ex.name) === exerciseName;
+        } else {
+          // For other exercises, use exact name match
+          return ex.name === exerciseName;
+        }
+      });
+      matchingExercises.forEach(exercise => {
+        exercise.sets.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          const reps = parseFloat(set.reps) || 0;
+          if (weight > 0 && reps > 0 && reps <= 12) {
+            const estimated1RM = calculateEstimated1RM(weight, reps);
+            if (estimated1RM > best1RMForWorkout) {
+              best1RMForWorkout = estimated1RM;
+            }
+          }
+        });
+      });
+      if (best1RMForWorkout > 0) {
+        progression.push({
+          date: workout.date,
+          estimated1RM: best1RMForWorkout
+        });
+      }
+    });
+
+    // Sort by date ascending and take last 20
+    progression.sort((a, b) => new Date(a.date) - new Date(b.date));
+    return progression.slice(-20);
+  };
+
+  // Get best actual set (weight × reps) for main lifts with 1RM
+  // Returns both best 1RM set and heaviest weight set
+  const getMainLiftsBestSets = () => {
+    const all1RMs = getAll1RMs();
+    const bestSets = {};
+    statsHistory.forEach(workout => {
+      workout.exercises.forEach(exercise => {
+        const exerciseName = exercise.name;
+
+        // Use explicit categorization
+        const category = categorizeExercise(exerciseName);
+        if (!category) return;
+        exercise.sets.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          const reps = parseFloat(set.reps) || 0;
+          if (weight > 0 && reps > 0 && reps <= 12) {
+            const estimated1RM = calculateEstimated1RM(weight, reps);
+            if (!bestSets[category]) {
+              bestSets[category] = {
+                best1RM: {
+                  weight: weight,
+                  reps: reps,
+                  estimated1RM: estimated1RM,
+                  exerciseName: exerciseName
+                },
+                heaviest: {
+                  weight: weight,
+                  reps: reps,
+                  estimated1RM: estimated1RM,
+                  exerciseName: exerciseName
+                }
+              };
+            } else {
+              // Update best 1RM if this set has higher estimated 1RM
+              if (estimated1RM > bestSets[category].best1RM.estimated1RM) {
+                bestSets[category].best1RM = {
+                  weight: weight,
+                  reps: reps,
+                  estimated1RM: estimated1RM,
+                  exerciseName: exerciseName
+                };
+              }
+
+              // Update heaviest if this set has higher weight
+              if (weight > bestSets[category].heaviest.weight) {
+                bestSets[category].heaviest = {
+                  weight: weight,
+                  reps: reps,
+                  estimated1RM: estimated1RM,
+                  exerciseName: exerciseName
+                };
+              }
+            }
+          }
+        });
+      });
+    });
+    return bestSets;
+  };
+
+  // Strength standards data (Symmetric Strength)
+  // Multipliers are relative to bodyweight
+  const STRENGTH_STANDARDS = {
+    male: {
+      'Squat': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.6, 1.0, 1.5, 2.0, 2.5]
+      },
+      'Bench Press': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.5, 0.75, 1.25, 1.75, 2.25]
+      },
+      'Deadlift': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.7, 1.25, 1.75, 2.25, 2.75]
+      },
+      'Overhead Press': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.35, 0.5, 0.85, 1.15, 1.5]
+      }
+    },
+    female: {
+      'Squat': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.4, 0.65, 1.0, 1.5, 1.9]
+      },
+      'Bench Press': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.3, 0.4, 0.65, 1.0, 1.3]
+      },
+      'Deadlift': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.5, 0.8, 1.25, 1.75, 2.15]
+      },
+      'Overhead Press': {
+        levels: ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'],
+        multipliers: [0.2, 0.3, 0.5, 0.75, 1.0]
+      }
+    }
+  };
+
+  // Weekly set benchmarks per muscle group (based on hypertrophy research)
+  // MEV = Minimum Effective Volume, MRV = Maximum Recoverable Volume
+  // Sets per week for optimal hypertrophy (intermediate lifters)
+  const WEEKLY_SET_BENCHMARKS = {
+    chest: {
+      mev: 8,
+      optimal: 12,
+      mrv: 20,
+      label: 'Chest'
+    },
+    back: {
+      mev: 10,
+      optimal: 14,
+      mrv: 25,
+      label: 'Back'
+    },
+    shoulders: {
+      mev: 6,
+      optimal: 12,
+      mrv: 20,
+      label: 'Shoulders'
+    },
+    legs: {
+      mev: 10,
+      optimal: 16,
+      mrv: 26,
+      label: 'Legs'
+    },
+    arms: {
+      mev: 6,
+      optimal: 10,
+      mrv: 18,
+      label: 'Arms'
+    },
+    core: {
+      mev: 0,
+      optimal: 6,
+      mrv: 12,
+      label: 'Core'
+    }
+  };
+
+  // Get benchmark status for a muscle group
+  const getBenchmarkStatus = (muscleGroup, weeklySets) => {
+    const benchmark = WEEKLY_SET_BENCHMARKS[muscleGroup];
+    if (!benchmark) return {
+      status: 'unknown',
+      label: 'N/A'
+    };
+    if (weeklySets < benchmark.mev) {
+      return {
+        status: 'low',
+        label: 'Below MEV',
+        color: 'red',
+        percentage: Math.round(weeklySets / benchmark.mev * 100)
+      };
+    } else if (weeklySets >= benchmark.mev && weeklySets < benchmark.optimal) {
+      return {
+        status: 'moderate',
+        label: 'At MEV',
+        color: 'yellow',
+        percentage: Math.round((weeklySets - benchmark.mev) / (benchmark.optimal - benchmark.mev) * 100)
+      };
+    } else if (weeklySets >= benchmark.optimal && weeklySets <= benchmark.mrv) {
+      return {
+        status: 'optimal',
+        label: 'Optimal',
+        color: 'green',
+        percentage: Math.round((weeklySets - benchmark.optimal) / (benchmark.mrv - benchmark.optimal) * 100)
+      };
+    } else {
+      return {
+        status: 'high',
+        label: 'Above MRV',
+        color: 'purple',
+        percentage: 100
+      };
+    }
+  };
+
+  // Calculate strength standard level for a given lift
+  const getStrengthStandard = (liftName, estimated1RM, bodyWeightKg, userGender = 'male') => {
+    if (!bodyWeightKg || bodyWeightKg <= 0 || !estimated1RM || estimated1RM <= 0) {
+      return null;
+    }
+    const genderStandards = STRENGTH_STANDARDS[userGender] || STRENGTH_STANDARDS.male;
+    const standard = genderStandards[liftName];
+    if (!standard) {
+      return null;
+    }
+    const ratio = estimated1RM / bodyWeightKg;
+    const multipliers = standard.multipliers;
+    const levels = standard.levels;
+
+    // Find which level the ratio falls into
+    let currentLevelIndex = 0;
+    for (let i = 0; i < multipliers.length; i++) {
+      if (ratio >= multipliers[i]) {
+        currentLevelIndex = i;
+      } else {
+        break;
+      }
+    }
+    const currentLevel = levels[currentLevelIndex];
+    const nextLevelIndex = Math.min(currentLevelIndex + 1, levels.length - 1);
+    const nextLevel = levels[nextLevelIndex];
+
+    // Calculate percentage progress to next level
+    let percentageThrough = 0;
+    let percentageRemaining = 100;
+    if (currentLevelIndex < levels.length - 1) {
+      const currentThreshold = multipliers[currentLevelIndex];
+      const nextThreshold = multipliers[nextLevelIndex];
+      const progress = ratio - currentThreshold;
+      const range = nextThreshold - currentThreshold;
+      percentageThrough = Math.min(100, Math.round(progress / range * 100));
+      percentageRemaining = 100 - percentageThrough;
+    } else {
+      // Already at max level
+      percentageThrough = 100;
+      percentageRemaining = 0;
+    }
+    return {
+      level: currentLevel,
+      levelIndex: currentLevelIndex,
+      nextLevel: nextLevel,
+      percentageToNext: percentageThrough,
+      // Keep for progress bar (0-100% through current level)
+      percentageRemaining: percentageRemaining,
+      // New: % remaining to reach next level
+      ratio: ratio.toFixed(2),
+      totalLevels: levels.length
+    };
+  };
+
+  // Top-level helper (mirrors the inline checks scattered across stats/UI sites).
+  // Kept separate from getExerciseUnit by deliberate design (see PROJECT_LEARNINGS 2026-05-18).
+  const isBodyweightExercise = name => {
+    const n = String(name || '').toLowerCase();
+    return n.includes('pull-up') || n.includes('push-up') || n.includes('chin-up') || n.includes('dip');
+  };
+
+  // FUNC_ID: getBodyWeightAt | Nearest-date BW lookup for any historical timestamp
+  // Returns the entry whose date is closest to dateISO (any direction), or null when store empty.
+  // bodyWeightHistory is kept sorted ascending by date in app state.
+  const getBodyWeightAt = dateISO => {
+    if (!bodyWeightHistory || bodyWeightHistory.length === 0) return null;
+    const target = new Date(dateISO).getTime();
+    let best = bodyWeightHistory[0];
+    let bestDelta = Math.abs(new Date(best.date).getTime() - target);
+    for (let i = 1; i < bodyWeightHistory.length; i++) {
+      const delta = Math.abs(new Date(bodyWeightHistory[i].date).getTime() - target);
+      if (delta < bestDelta) {
+        best = bodyWeightHistory[i];
+        bestDelta = delta;
+      }
+    }
+    return best;
+  };
+
+  // FUNC_ID: getExerciseHistory | Summarize the last up-to-5 workouts containing an exercise
+  // Returns oldest->newest array of { date, bestWeight, bestReps, bestE1RM, difficulty, topSetRepsHit, bodyWeight, isBodyweight }
+  // Only sets with reps <= 12 count toward bestE1RM (strength range, mirrors get1RMProgression);
+  // bestWeight falls back to the heaviest set when every set is high-rep.
+  // bodyWeight is the nearest-date BW snapshot for the workout, or null when no BW data exists.
+  const getExerciseHistory = (exerciseName, maxWorkouts = 5) => {
+    const history = [];
+    for (let i = completedWorkouts.length - 1; i >= 0 && history.length < maxWorkouts; i--) {
+      const workout = completedWorkouts[i];
+      const exercise = workout.exercises.find(ex => ex.name === exerciseName);
+      if (!exercise || !exercise.sets || exercise.sets.length === 0) continue;
+      let bestE1RM = 0;
+      let bestWeight = 0;
+      let bestReps = 0;
+      let topSetRepsHit = 0;
+      let totalVolume = 0;
+      let totalReps = 0;
+      let hasValidSet = false;
+      exercise.sets.forEach(set => {
+        const weight = parseFloat(set.weight) || 0;
+        const reps = parseFloat(set.reps) || 0;
+        if (reps <= 0) return;
+        hasValidSet = true;
+        if (reps > topSetRepsHit) topSetRepsHit = reps;
+        totalReps += reps;
+        if (weight > 0) totalVolume += weight * reps;
+
+        // Track heaviest set regardless of rep count (fallback for high-rep work)
+        if (weight > bestWeight) {
+          bestWeight = weight;
+          bestReps = reps;
+        }
+
+        // e1RM only meaningful in the strength range
+        if (weight > 0 && reps <= 12) {
+          const e1RM = calculateEstimated1RM(weight, reps);
+          if (e1RM > bestE1RM) bestE1RM = e1RM;
+        }
+      });
+      if (!hasValidSet) continue;
+
+      // Prefer the snapshot baked into the workout at finish time; fall back
+      // to nearest-date lookup for older sessions that predate the snapshot.
+      let bwForWorkout = null;
+      if (typeof workout.bodyWeightSnapshot === 'number') {
+        bwForWorkout = workout.bodyWeightSnapshot;
+      } else {
+        const bwEntry = getBodyWeightAt(workout.date);
+        bwForWorkout = bwEntry ? bwEntry.weight : null;
+      }
+      history.push({
+        date: workout.date,
+        bestWeight,
+        bestReps,
+        bestE1RM,
+        totalVolume,
+        totalReps,
+        difficulty: exercise.difficulty || null,
+        topSetRepsHit,
+        bodyWeight: bwForWorkout,
+        isBodyweight: isBodyweightExercise(exerciseName)
+      });
+    }
+    return history.reverse(); // oldest -> newest
+  };
+  const formatDuration = (startISO, endISO) => {
+    const secs = Math.floor((new Date(endISO) - new Date(startISO)) / 1000);
+    if (secs < 60) return `${secs}s`;
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor(secs % 3600 / 60);
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  };
+
+  // Round to nearest 0.5 kg (matches the .toFixed(1) display granularity)
+  const roundToHalf = n => Math.round(n * 2) / 2;
+  // Round to nearest 2.5 kg (plate-friendly deload target)
+  const roundToPlate = n => Math.round(n / 2.5) * 2.5;
+  // Parse the first integer out of planned reps like "8", "8-10", "8 to 12"
+  const parsePlannedReps = plannedReps => {
+    if (plannedReps == null) return null;
+    const m = String(plannedReps).match(/\d+/);
+    return m ? parseInt(m[0], 10) : null;
+  };
+
+  // FUNC_ID: getSmartWeightSuggestion | Proactive, multi-workout coaching recommendation
+  // Returns { weight, reps?, reason, type } or null. type in:
+  //   progress | hold | deload | swap | rep-up | info  (drives color/icon in the logging UI)
+  const getSmartWeightSuggestion = (exerciseName, plannedReps = null) => {
+    const history = getExerciseHistory(exerciseName, 5);
+
+    // 1. No usable history -> no suggestion (unchanged behavior)
+    if (history.length === 0) return null;
+
+    // Non-rep units (seconds/meters): weight/1RM/plateau math is meaningless.
+    // Compare across sessions using topSetRepsHit (raw seconds/meters), then fall back
+    // to difficulty for a simple progression nudge.
+    const unit = getExerciseUnit({
+      name: exerciseName
+    });
+    if (unit !== 'reps') {
+      const last = history[history.length - 1];
+      const lastVal = last.topSetRepsHit; // raw seconds or meters of best set
+      if (!lastVal) return null;
+      const cfg = UNIT_CONFIG[unit];
+      const diff = last.difficulty;
+      if (history.length >= 2) {
+        const prevBest = Math.max(...history.slice(0, -1).map(w => w.topSetRepsHit || 0));
+        if (lastVal > prevBest) {
+          return {
+            weight: '',
+            reps: String(lastVal),
+            reason: `${cfg.label} up — great progress, keep going`,
+            type: 'progress'
+          };
+        }
+        if (lastVal < prevBest) {
+          return {
+            weight: '',
+            reps: String(prevBest),
+            reason: `${prevBest} ${cfg.label} was your best — aim to match it`,
+            type: 'hold'
+          };
+        }
+      }
+      if (diff === 'easy') {
+        const bump = 5; // +5 sec or +5 m
+        return {
+          weight: '',
+          reps: String(lastVal + bump),
+          reason: `felt easy — try ${lastVal + bump} ${cfg.label}`,
+          type: 'progress'
+        };
+      }
+      return {
+        weight: '',
+        reps: String(lastVal),
+        reason: `last time ${lastVal} ${cfg.label} — match or beat it`,
+        type: 'info'
+      };
+    }
+    const latest = history[history.length - 1];
+    const lastWeight = latest.bestWeight;
+    const difficulty = latest.difficulty;
+    const plannedRepTarget = parsePlannedReps(plannedReps);
+
+    // Zero-weight exercises (push-ups, sit-ups, crunches, pull-ups without added weight):
+    // e1RM and weight are always 0, so use topSetRepsHit as the progression metric instead.
+    const isZeroWeight = history.every(w => w.bestWeight === 0);
+    if (isZeroWeight) {
+      const latestReps = latest.topSetRepsHit;
+      const diff = latest.difficulty;
+      if (history.length === 1) {
+        return {
+          weight: '',
+          reps: String(latestReps),
+          reason: 'based on last workout',
+          type: 'info'
+        };
+      }
+      const prevBest = Math.max(...history.slice(0, -1).map(w => w.topSetRepsHit || 0));
+      if (latestReps > prevBest) {
+        const dReps = latestReps - prevBest;
+        return {
+          weight: '',
+          reps: String(latestReps),
+          reason: `+${dReps} rep${dReps > 1 ? 's' : ''} — reps up, keep going`,
+          type: 'progress'
+        };
+      }
+      if (latestReps < prevBest) {
+        return {
+          weight: '',
+          reps: String(prevBest),
+          reason: `${prevBest} reps was your best — aim to match it`,
+          type: 'hold'
+        };
+      }
+      // Same reps as previous best
+      if (diff === 'easy') {
+        return {
+          weight: '',
+          reps: String(latestReps + 1),
+          reason: `felt easy — push for ${latestReps + 1} reps`,
+          type: 'progress'
+        };
+      }
+      if (diff === 'hard') {
+        return {
+          weight: '',
+          reps: String(latestReps),
+          reason: `felt hard — hold at ${latestReps} reps`,
+          type: 'hold'
+        };
+      }
+      return {
+        weight: '',
+        reps: String(latestReps),
+        reason: `match or beat ${latestReps} reps`,
+        type: 'info'
+      };
+    }
+
+    // Difficulty-only fallback (used for the single-history case and as the default tail)
+    const difficultyFallback = () => {
+      if (difficulty === 'easy') {
+        return {
+          weight: roundToHalf(lastWeight + 2.5).toFixed(1),
+          reason: 'felt easy last time (+2.5 kg)',
+          type: 'progress'
+        };
+      } else if (difficulty === 'medium') {
+        return {
+          weight: lastWeight.toFixed(1),
+          reason: 'good weight (same as last time)',
+          type: 'hold'
+        };
+      } else if (difficulty === 'hard') {
+        return {
+          weight: lastWeight.toFixed(1),
+          reason: 'felt hard last time (repeat weight)',
+          type: 'hold'
+        };
+      }
+      return {
+        weight: lastWeight.toFixed(1),
+        reason: 'based on last workout',
+        type: 'info'
+      };
+    };
+
+    // 2. Only one prior workout -> not enough trend data, use difficulty logic
+    if (history.length === 1) return difficultyFallback();
+
+    // Trend window: compare the most recent workout against the best of the
+    // window up to (but not including) the last 3, using e1RM where available.
+    const window = history.slice(-3);
+    const useE1RM = window.every(w => w.bestE1RM > 0);
+    const metric = w => useE1RM ? w.bestE1RM : w.bestWeight;
+    const earlierBest = Math.max(...history.slice(0, -1).map(metric));
+    const currentMetric = metric(latest);
+    // Flat/declining = current not exceeding earlier best by >1%
+    const isPlateau = history.length >= 3 && currentMetric <= earlierBest * 1.01;
+
+    // Volume/rep-progress override: even if e1RM/weight didn't move, more total
+    // volume or reps vs the earliest session in the window means real progress.
+    // Compare against the WORST prior session (not just prev) so holding a volume
+    // gain isn't misread as a plateau.
+    if (isPlateau && history.length >= 2) {
+      const priorSessions = history.slice(0, -1);
+      const earliestVolume = Math.min(...priorSessions.map(w => w.totalVolume || 0));
+      const earliestReps = Math.min(...priorSessions.map(w => w.totalReps || 0));
+      const volumeUp = latest.totalVolume > earliestVolume * 1.01;
+      const repsUp = !volumeUp && latest.totalReps > earliestReps;
+      if (volumeUp) {
+        const delta = Math.round(latest.totalVolume - earliestVolume);
+        return {
+          weight: lastWeight.toFixed(1),
+          reason: `+${delta} kg total volume vs your baseline — solid progress, push for more weight`,
+          type: 'progress'
+        };
+      }
+      if (repsUp) {
+        const delta = latest.totalReps - earliestReps;
+        return {
+          weight: lastWeight.toFixed(1),
+          reason: `+${delta} total rep${delta > 1 ? 's' : ''} vs your baseline — keep climbing`,
+          type: 'rep-up'
+        };
+      }
+    }
+    const allHard = window.length >= 3 && window.every(w => w.difficulty === 'hard');
+
+    // 3. BW-relative override: raw metric plateaued but relative strength improved.
+    //    Weighted: bestE1RM/bodyWeight grew >1% (lifter got lighter, same lift).
+    //    Bodyweight exercise: reps held/grew AND bodyWeight dropped >1% (same work, lighter loader).
+    if (isPlateau) {
+      const earlierBestEntry = history.slice(0, -1).reduce((best, w) => metric(w) > metric(best) ? w : best, history[0]);
+      const latestBW = latest.bodyWeight;
+      const earlierBW = earlierBestEntry.bodyWeight;
+      if (latestBW && earlierBW) {
+        if (latest.isBodyweight) {
+          // Same reps at lower BW = strength gain
+          if (latest.topSetRepsHit >= earlierBestEntry.topSetRepsHit && latestBW < earlierBW * 0.99) {
+            const dKg = (earlierBW - latestBW).toFixed(1);
+            return {
+              weight: '',
+              reps: String(latest.topSetRepsHit),
+              reason: `Same reps at ${dKg} kg lighter bodyweight — that's a strength gain`,
+              type: 'progress'
+            };
+          }
+        } else if (latest.bestE1RM > 0 && earlierBestEntry.bestE1RM > 0) {
+          const latestRel = latest.bestE1RM / latestBW;
+          const earlierRel = earlierBestEntry.bestE1RM / earlierBW;
+          if (latestRel > earlierRel * 1.01) {
+            const dKg = (earlierBW - latestBW).toFixed(1);
+            return {
+              weight: lastWeight.toFixed(1),
+              reason: `Same lift, you're ${dKg} kg lighter — relative strength up, keep going`,
+              type: 'progress'
+            };
+          }
+        }
+      }
+    }
+
+    // 4. Deload: stalled AND consistently grinding (3x hard, no progress)
+    if (isPlateau && allHard) {
+      const target = roundToPlate(lastWeight * 0.9);
+      return {
+        weight: target.toFixed(1),
+        reason: 'Stalled & fatigued 3x — deload week: drop ~10%, then rebuild',
+        type: 'deload'
+      };
+    }
+
+    // 4. Plateau -> suggest swapping to a same-muscle alternative
+    if (isPlateau) {
+      const alts = getMuscleGroupSuggestions(exerciseName);
+      const alt = alts.find(a => a.toLowerCase() !== exerciseName.toLowerCase());
+      if (alt) {
+        return {
+          weight: lastWeight.toFixed(1),
+          reason: `No progress in 3 workouts — try ${alt} for a few weeks`,
+          type: 'swap'
+        };
+      }
+      // 5. Plateau but no alternative available (custom exercise)
+      return {
+        weight: lastWeight.toFixed(1),
+        reason: 'Plateau — same weight, push for +1 rep or take a lighter week',
+        type: 'hold'
+      };
+    }
+
+    // 6. Rep-up below target: added a rep at same-or-heavier load but didn't hit the planned target yet.
+    //    Praise + keep climbing.
+    if (plannedRepTarget && history.length >= 2) {
+      const prev = history[history.length - 2];
+      if (prev && prev.bestWeight > 0 && prev.topSetRepsHit > 0 && latest.bestWeight >= prev.bestWeight && latest.topSetRepsHit > prev.topSetRepsHit && latest.topSetRepsHit < plannedRepTarget) {
+        const dReps = latest.topSetRepsHit - prev.topSetRepsHit;
+        return {
+          weight: lastWeight.toFixed(1),
+          reason: `+${dReps} rep last time — push for one more to hit ${plannedRepTarget}`,
+          type: 'rep-up'
+        };
+      }
+    }
+
+    // 7. Rep-range progression: hit the planned reps on the top set last time
+    if (plannedRepTarget && latest.topSetRepsHit >= plannedRepTarget) {
+      if (difficulty === 'easy' || !difficulty) {
+        return {
+          weight: roundToHalf(lastWeight + 2.5).toFixed(1),
+          reason: 'Hit your target reps easily — add 2.5 kg',
+          type: 'progress'
+        };
+      }
+      if (difficulty === 'medium') {
+        return {
+          weight: lastWeight.toFixed(1),
+          reason: 'Solid — try +1 rep this time before adding weight',
+          type: 'rep-up'
+        };
+      }
+    }
+
+    // 7. Default: difficulty-based progression
+    return difficultyFallback();
+  };
+  const startWorkout = workout => {
+    soundSystem.workoutStart(); // Play sound
+
+    const log = {
+      workoutId: workout.id,
+      workoutName: workout.name,
+      workoutEmoji: workout.emoji,
+      date: new Date().toISOString(),
+      energyLevel: null,
+      exercises: workout.exercises.map(ex => {
+        const prefillUnit = getExerciseUnit(ex);
+        const lastWeight = prefillUnit === 'reps' ? getLastWeight(ex.name) : '';
+        return {
+          name: ex.name,
+          plannedSets: ex.sets,
+          plannedReps: ex.reps,
+          muscleGroup: ex.muscleGroup || getMuscleGroup(ex.name),
+          // Auto-assign if missing
+          unit: ex.unit,
+          // explicit override only; undefined => history reader auto-detects
+          difficulty: null,
+          // User can optionally rate difficulty
+          sets: Array(ex.sets).fill(null).map(() => ({
+            weight: lastWeight,
+            reps: ex.reps
+          }))
+        };
+      })
+    };
+    setCurrentLog(log);
+    setActiveView('logging');
+  };
+  const updateSet = (exerciseIndex, setIndex, field, value) => {
+    const updated = {
+      ...currentLog
+    };
+
+    // If updating weight, replace comma with dot for decimal support
+    if (field === 'weight' && value) {
+      value = value.replace(',', '.');
+    }
+    updated.exercises[exerciseIndex].sets[setIndex][field] = value;
+    setCurrentLog(updated);
+  };
+  const updateEnergyLevel = level => {
+    setCurrentLog(prev => ({
+      ...prev,
+      energyLevel: prev.energyLevel === level ? null : level
+    }));
+  };
+  const updateExerciseName = (exerciseIndex, newName) => {
+    const updated = {
+      ...currentLog
+    };
+    updated.exercises[exerciseIndex].name = newName;
+    setCurrentLog(updated);
+  };
+  const resumeSavedWorkout = () => {
+    if (savedWorkoutData) {
+      setCurrentLog(savedWorkoutData);
+      setActiveView('logging');
+      setShowResumePrompt(false);
+      setSavedWorkoutData(null); // Clear temp data
+    } else {
+      // Fallback: try reading from localStorage if savedWorkoutData is somehow null
+      const savedWorkout = localStorage.getItem('currentWorkout');
+      if (savedWorkout) {
+        try {
+          const parsedWorkout = JSON.parse(savedWorkout);
+          setCurrentLog(parsedWorkout);
+          setActiveView('logging');
+          setShowResumePrompt(false);
+        } catch (error) {
+          console.error('Error resuming workout:', error);
+          localStorage.removeItem('currentWorkout');
+          setShowResumePrompt(false);
+        }
+      }
+    }
+  };
+  const discardSavedWorkout = () => {
+    localStorage.removeItem('currentWorkout');
+    setSavedWorkoutData(null);
+    setShowResumePrompt(false);
+  };
+  const cancelWorkout = () => {
+    if (confirm('Are you sure you want to cancel this workout? All progress will be lost.')) {
+      setCurrentLog(null);
+      localStorage.removeItem('currentWorkout');
+      setActiveView('home');
+    }
+  };
+  const finishWorkout = async () => {
+    soundSystem.workoutComplete(); // Play sound
+    // Snapshot the user's current bodyweight into the log so future BW-relative
+    // recommendations have an accurate per-workout reference (the global BW store
+    // is only weighed in occasionally; nearest-date lookup over a sparse store
+    // would otherwise snap every old workout to the same recent value).
+    const completed = {
+      ...(bodyWeight ? {
+        ...currentLog,
+        bodyWeightSnapshot: bodyWeight
+      } : currentLog),
+      finishedAt: new Date().toISOString(),
+      programId: activeProgramId
+    };
+    await saveHistory(completed);
+    setCurrentLog(null);
+    localStorage.removeItem('currentWorkout');
+    setActiveView('home');
+  };
+  const exportToCSV = () => {
+    if (completedWorkouts.length === 0) {
+      alert('No workout data to export yet!');
+      return;
+    }
+    const headers = ['Date', 'Workout', 'Exercise', 'Set', 'Weight', 'Reps'];
+    const rows = [headers];
+    completedWorkouts.forEach(workout => {
+      workout.exercises.forEach(exercise => {
+        exercise.sets.forEach((set, idx) => {
+          rows.push([new Date(workout.date).toLocaleDateString('hr-HR'), workout.workoutName, exercise.name, idx + 1, set.weight || '', set.reps || '']);
+        });
+      });
+    });
+    const csv = rows.map(row => row.join(',')).join('\n');
+    const blob = new Blob([csv], {
+      type: 'text/csv;charset=utf-8;'
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `workout-data-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+  const exportProgram = () => {
+    if (!activeProgram || workouts.length === 0) {
+      alert('No workout program to export!');
+      return;
+    }
+
+    // Generate markdown format
+    let markdown = `<!-- program: ${activeProgram.name} -->\n`;
+    markdown += `# ${activeProgram.name}\n\n`;
+    markdown += `Exported: ${new Date().toLocaleDateString('hr-HR')}\n\n`;
+    markdown += '---\n\n';
+    workouts.forEach(workout => {
+      markdown += `# ${workout.name} ${workout.emoji}\n\n`;
+      workout.exercises.forEach(exercise => {
+        markdown += `## ${exercise.name}\n`;
+        markdown += `Sets: ${exercise.sets}\n`;
+        markdown += `Reps: ${exercise.reps}\n`;
+        if (exercise.notes) {
+          markdown += `Notes: ${exercise.notes}\n`;
+        }
+        markdown += '\n';
+      });
+      markdown += '---\n\n';
+    });
+    const blob = new Blob([markdown], {
+      type: 'text/markdown;charset=utf-8;'
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `workout-program-${activeProgram.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+  const startEditWorkout = workout => {
+    setEditingWorkout(JSON.parse(JSON.stringify(workout)));
+    setActiveView('edit');
+  };
+  const updateExercise = (index, field, value) => {
+    setEditingWorkout(prev => ({
+      ...prev,
+      exercises: prev.exercises.map((ex, idx) => idx === index ? {
+        ...ex,
+        [field]: value
+      } : ex)
+    }));
+  };
+  const addExercise = () => {
+    const updated = {
+      ...editingWorkout
+    };
+    updated.exercises.push({
+      name: '',
+      sets: 3,
+      reps: 10,
+      notes: '',
+      muscleGroup: 'other'
+    });
+    setEditingWorkout(updated);
+  };
+  const deleteExercise = index => {
+    const updated = {
+      ...editingWorkout
+    };
+    updated.exercises.splice(index, 1);
+    setEditingWorkout(updated);
+  };
+  const moveExerciseUp = index => {
+    if (index === 0) return; // Already at the top
+    const updated = {
+      ...editingWorkout
+    };
+    const temp = updated.exercises[index];
+    updated.exercises[index] = updated.exercises[index - 1];
+    updated.exercises[index - 1] = temp;
+    setEditingWorkout(updated);
+  };
+  const moveExerciseDown = index => {
+    const updated = {
+      ...editingWorkout
+    };
+    if (index >= updated.exercises.length - 1) return; // Already at the bottom
+    const temp = updated.exercises[index];
+    updated.exercises[index] = updated.exercises[index + 1];
+    updated.exercises[index + 1] = temp;
+    setEditingWorkout(updated);
+  };
+  const reorderExercise = (fromIndex, toIndex) => {
+    if (fromIndex === toIndex) return;
+    const updated = {
+      ...editingWorkout
+    };
+    const exercises = [...updated.exercises];
+    const [movedExercise] = exercises.splice(fromIndex, 1);
+    exercises.splice(toIndex, 0, movedExercise);
+    updated.exercises = exercises;
+    setEditingWorkout(updated);
+  };
+  const handleExerciseDragStart = (e, index) => {
+    // Prevent default and stop propagation for touch events
+    if (e.type === 'touchstart') {
+      e.preventDefault();
+    }
+    e.stopPropagation();
+    const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+    setDraggedExerciseIndex(index);
+    setDragStartPosition({
+      x: clientX,
+      y: clientY
+    });
+    setDraggedExercisePosition({
+      x: clientX,
+      y: clientY
+    });
+    setIsDraggingExercise(false); // Not dragging until moved a bit
+    soundSystem.buttonPress();
+  };
+  const handleExerciseDragMove = e => {
+    if (draggedExerciseIndex === null) return;
+    e.preventDefault();
+    const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+
+    // Start dragging if moved more than 5px
+    const distance = Math.sqrt(Math.pow(clientX - dragStartPosition.x, 2) + Math.pow(clientY - dragStartPosition.y, 2));
+    if (distance > 5) {
+      setIsDraggingExercise(true);
+    }
+    setDraggedExercisePosition({
+      x: clientX,
+      y: clientY
+    });
+
+    // Find which exercise we're hovering over
+    const exerciseElements = document.querySelectorAll('[data-exercise-index]');
+    let foundTarget = null;
+    exerciseElements.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      const elIndex = parseInt(el.dataset.exerciseIndex);
+      if (elIndex !== draggedExerciseIndex && clientY >= rect.top && clientY <= rect.bottom) {
+        foundTarget = elIndex;
+      }
+    });
+    setDropTargetIndex(foundTarget);
+  };
+  const handleExerciseDragEnd = () => {
+    if (draggedExerciseIndex !== null && dropTargetIndex !== null && isDraggingExercise) {
+      reorderExercise(draggedExerciseIndex, dropTargetIndex);
+      soundSystem.setComplete();
+    }
+    setDraggedExerciseIndex(null);
+    setIsDraggingExercise(false);
+    setDropTargetIndex(null);
+    setDraggedExercisePosition({
+      x: 0,
+      y: 0
+    });
+  };
+  const saveEditedWorkout = async () => {
+    const updatedWorkouts = workouts.map(w => w.id === editingWorkout.id ? editingWorkout : w);
+    await updateActiveWorkouts(updatedWorkouts);
+    setEditingWorkout(null);
+    setActiveView('home');
+  };
+  const saveEditedHistory = async () => {
+    const updatedHistory = completedWorkouts.map(w => w.id === editingHistory.id ? editingHistory : w);
+    setCompletedWorkouts(updatedHistory);
+    await dbOperations.saveHistory(editingHistory);
+    setEditingHistory(null);
+    setActiveView('history');
+  };
+  const updateHistoryEnergyLevel = level => {
+    setEditingHistory(prev => ({
+      ...prev,
+      energyLevel: level
+    }));
+  };
+  const updateHistoryExerciseName = (exIdx, newName) => {
+    const updated = {
+      ...editingHistory
+    };
+    updated.exercises[exIdx] = {
+      ...updated.exercises[exIdx],
+      name: newName
+    };
+    setEditingHistory(updated);
+  };
+  const updateHistorySet = (exIdx, setIdx, field, value) => {
+    const updated = {
+      ...editingHistory
+    };
+    updated.exercises[exIdx].sets[setIdx][field] = value;
+    setEditingHistory(updated);
+  };
+  const toggleTheme = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    localStorage.setItem('theme', newMode ? 'dark' : 'light');
+  };
+  const deleteWorkoutDay = async workoutId => {
+    const updatedWorkouts = workouts.filter(w => w.id !== workoutId);
+    await updateActiveWorkouts(updatedWorkouts);
+    setShowDeleteConfirm(null);
+  };
+  const addNewWorkoutDay = async () => {
+    const newId = Math.max(...workouts.map(w => w.id), 0) + 1;
+    const newWorkout = {
+      id: newId,
+      name: `Dan ${newId}: New Workout`,
+      emoji: "🔥",
+      exercises: [{
+        name: "New Exercise",
+        sets: 3,
+        reps: 10,
+        notes: ""
+      }]
+    };
+    const updatedWorkouts = [...workouts, newWorkout];
+    await updateActiveWorkouts(updatedWorkouts);
+    setShowAddDay(false);
+    startEditWorkout(newWorkout);
+  };
+  const triggerFileUpload = () => {
+    // Mobile-friendly file input trigger
+    if (fileInputRef.current) {
+      // Reset the input first to allow re-uploading the same file
+      fileInputRef.current.value = '';
+
+      // Use setTimeout to ensure the click happens in a fresh event loop
+      // This helps with iOS Safari compatibility
+      setTimeout(() => {
+        fileInputRef.current?.click();
+      }, 100);
+    }
+  };
+  const handleFileChange = async e => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+    console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
+    const fileName = file.name.toLowerCase();
+    const isMarkdown = fileName.endsWith('.md');
+    const isCSV = fileName.endsWith('.csv');
+    const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
+    if (!isMarkdown && !isCSV && !isExcel) {
+      alert('Please upload a markdown (.md), CSV (.csv), or Excel (.xlsx/.xls) file');
+      e.target.value = '';
+      return;
+    }
+    try {
+      let parsed = [];
+      let programName = null;
+      if (isMarkdown) {
+        let text = await file.text();
+        console.log('Markdown text length:', text.length);
+        console.log('First 200 chars:', text.substring(0, 200));
+        const nameMatch = text.match(/^<!--\s*program:\s*(.+?)\s*-->\s*\n?/);
+        let strict = false;
+        if (nameMatch) {
+          programName = nameMatch[1];
+          strict = true;
+          text = text.slice(nameMatch[0].length);
+          // Drop the program-title heading so it is not parsed as a phantom day
+          text = text.replace(/^#\s[^\n]*\n/, '');
+        }
+        parsed = parseMarkdownWorkout(text, {
+          strict
+        });
+        console.log('Parsed workouts:', parsed.length, parsed);
+      } else if (isCSV) {
+        const text = await file.text();
+        console.log('CSV text length:', text.length);
+        parsed = parseCSVWorkout(text);
+        console.log('Parsed workouts:', parsed.length, parsed);
+      } else if (isExcel) {
+        alert('Excel files (.xlsx/.xls) support coming soon! For now, please export to CSV and upload that file.');
+        e.target.value = '';
+        return;
+      }
+      if (parsed && parsed.length > 0) {
+        const fallbackName = file.name.replace(/\.(md|csv|xlsx|xls)$/i, '').replace(/^workout-program-/i, '').replace(/-\d{4}-\d{2}-\d{2}$/, '').trim();
+        await importAsProgram(parsed, programName || fallbackName || 'Imported Program');
+      } else {
+        alert(`No valid workouts found in the file. Please check the format.\n\nFile: ${file.name}\nSize: ${file.size} bytes`);
+      }
+    } catch (error) {
+      console.error('Error parsing file:', error);
+      alert(`Failed to parse file: ${error.message}\n\nFile: ${file.name}\nPlease check the console for details.`);
+    }
+
+    // Reset input
+    e.target.value = '';
+  };
+
+  // One-click import: every file becomes a NEW program, activated immediately.
+  const importAsProgram = async (parsedDays, programName) => {
+    const programId = Date.now();
+    const withIds = parsedDays.map((w, idx) => ({
+      ...w,
+      id: programId + idx + 1
+    }));
+    const newProgram = {
+      id: programId,
+      name: programName,
+      workouts: withIds
+    };
+    await savePrograms([...programs, newProgram]);
+    switchProgram(programId);
+  };
+  const deleteHistoryEntry = async entryId => {
+    try {
+      const db = await initDB();
+      const tx = db.transaction('history', 'readwrite');
+      const store = tx.objectStore('history');
+      await store.delete(entryId);
+      await new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+
+      // Reload history
+      const allHistory = await dbOperations.getHistory();
+      setCompletedWorkouts(allHistory);
+      setShowDeleteHistory(null);
+    } catch (error) {
+      console.error('Error deleting history entry:', error);
+    }
+  };
+  const getMuscleGroupSuggestions = exerciseName => {
+    const normalizedName = exerciseName.toLowerCase().trim();
+
+    // Find muscle group for current exercise
+    let muscleGroup = null;
+    for (const [group, exercises] of Object.entries(popularExercises)) {
+      if (exercises.some(ex => ex.toLowerCase() === normalizedName)) {
+        muscleGroup = group;
+        break;
+      }
+    }
+
+    // If not found in popular exercises, return empty array
+    if (!muscleGroup) {
+      return [];
+    }
+
+    // Return suggestions from same muscle group, excluding current exercise
+    return popularExercises[muscleGroup].filter(ex => ex.toLowerCase() !== normalizedName).slice(0, 7); // Limit to 7 suggestions
+  };
+  const substituteExercise = (exerciseIndex, newExerciseName) => {
+    const updated = {
+      ...currentLog
+    };
+    updated.exercises[exerciseIndex].name = newExerciseName;
+    // Auto-update muscle group based on new exercise
+    updated.exercises[exerciseIndex].muscleGroup = getMuscleGroup(newExerciseName);
+    setCurrentLog(updated);
+    setSubstituteDropdown(null); // Close dropdown after selection
+  };
+  const exportBackupToFile = async () => {
+    const allBWHistory = await dbOperations.getBodyWeightHistory();
+    const latestBodyWeight = allBWHistory.length > 0 ? allBWHistory[0] : null;
+    const backupData = {
+      programs: programs,
+      activeProgramId: activeProgramId,
+      history: completedWorkouts,
+      bodyWeight: latestBodyWeight ? {
+        weight: latestBodyWeight.weight,
+        gender: latestBodyWeight.gender || 'male',
+        date: latestBodyWeight.date,
+        unit: latestBodyWeight.unit || 'kg'
+      } : null,
+      bodyWeightHistory: allBWHistory,
+      exportDate: new Date().toISOString(),
+      version: '1.3'
+    };
+    const blob = new Blob([JSON.stringify(backupData, null, 2)], {
+      type: 'application/json'
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `workout-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+  const restoreBackupFromFile = file => {
+    const reader = new FileReader();
+    reader.onload = async e => {
+      try {
+        const backupData = JSON.parse(e.target.result);
+        if (!backupData.workouts && !backupData.programs || !backupData.history) {
+          alert('Invalid backup file format');
+          return;
+        }
+
+        // Programs: v1.3 carries them directly; pre-1.3 backups carry a flat
+        // workouts array which gets wrapped into a single default program.
+        const restoredPrograms = backupData.programs && backupData.programs.length > 0 ? backupData.programs : [wrapWorkoutsAsProgram(backupData.workouts)];
+        await savePrograms(restoredPrograms);
+        const restoredActiveId = backupData.activeProgramId && restoredPrograms.some(p => p.id === backupData.activeProgramId) ? backupData.activeProgramId : restoredPrograms[0].id;
+        switchProgram(restoredActiveId);
+        localStorage.removeItem('workouts_backup'); // legacy mirror, superseded by programs_backup
+
+        // Validate and fix history items before restoring
+        console.log(`Validating ${backupData.history.length} history items...`);
+        const validHistory = backupData.history.map(validateAndFixHistoryItem).filter(item => item !== null); // Remove invalid items
+
+        console.log(`${validHistory.length} valid history items after validation`);
+
+        // Clear existing history first to prevent duplicates
+        const db = await initDB();
+        const tx = db.transaction('history', 'readwrite');
+        const store = tx.objectStore('history');
+        await store.clear();
+
+        // Restore validated history
+        for (const item of validHistory) {
+          await dbOperations.saveHistory(item);
+        }
+        setCompletedWorkouts(validHistory);
+        localStorage.setItem('history_backup', JSON.stringify(validHistory));
+
+        // Restore body weight history
+        const bwEntries = backupData.bodyWeightHistory || (backupData.bodyWeight ? [backupData.bodyWeight] : []);
+        if (bwEntries.length > 0) {
+          const bwDb = await initDB();
+          const bwTx = bwDb.transaction('bodyWeight', 'readwrite');
+          await bwTx.objectStore('bodyWeight').clear();
+          await new Promise((res, rej) => {
+            bwTx.oncomplete = res;
+            bwTx.onerror = () => rej(bwTx.error);
+          });
+          for (const entry of bwEntries) {
+            await dbOperations.saveBodyWeight(entry.weight, entry.gender || 'male');
+          }
+          const restoredHistory = await dbOperations.getBodyWeightHistory();
+          const sorted = [...restoredHistory].sort((a, b) => new Date(a.date) - new Date(b.date));
+          setBodyWeightHistory(sorted);
+          const latest = restoredHistory[0];
+          if (latest) {
+            setBodyWeight(latest.weight);
+            setGender(latest.gender || 'male');
+          }
+        }
+        const invalidCount = backupData.history.length - validHistory.length;
+        if (invalidCount > 0) {
+          alert(`Backup restored! ${invalidCount} corrupted entries were fixed/skipped.`);
+        } else {
+          alert('Backup restored successfully!');
+        }
+      } catch (error) {
+        console.error('Error restoring backup:', error);
+        alert('Failed to restore backup. Please check the file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+  const getWeekStats = () => {
+    // Get start of current calendar week (Monday)
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday = 6 days from Monday
+    const thisWeekStart = new Date(now);
+    thisWeekStart.setDate(now.getDate() - daysFromMonday);
+    thisWeekStart.setHours(0, 0, 0, 0); // Start of Monday
+    const recentWorkouts = completedWorkouts.filter(w => new Date(w.date) >= thisWeekStart);
+    let totalVolume = 0;
+    let totalReps = 0;
+    let coreSets = 0;
+    let totalSets = 0;
+    recentWorkouts.forEach(workout => {
+      workout.exercises.forEach(exercise => {
+        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsReps || getMuscleGroup(exercise.name) === 'core';
+        const isBodyweightExercise = exercise.name.toLowerCase().includes('pull-up') || exercise.name.toLowerCase().includes('dip') || exercise.name.toLowerCase().includes('chin-up') || exercise.name.toLowerCase().includes('push-up');
+        exercise.sets.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          const reps = parseFloat(set.reps) || 0;
+
+          // Skip sets with no data (skipped exercises)
+          if (reps === 0) return;
+          if (isCoreExercise && reps > 0) {
+            // Core exercises count separately
+            coreSets += 1;
+          } else if (reps > 0) {
+            // Count all exercises with reps (weighted or bodyweight)
+            if (weight > 0) {
+              totalVolume += weight * reps;
+            }
+            totalReps += reps;
+            totalSets += 1;
+          }
+        });
+      });
+    });
+    return {
+      count: recentWorkouts.length,
+      totalSets: totalSets,
+      coreSets: coreSets,
+      totalVolume: Math.round(totalVolume),
+      totalReps: totalReps
+    };
+  };
+
+  // Helper: Format relative date
+  const getRelativeDate = dateString => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'today';
+    if (diffDays === 1) return 'yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return date.toLocaleDateString('hr-HR');
+  };
+  const getDetailedStats = () => {
+    const now = new Date();
+
+    // Get start of current calendar week (Monday)
+    const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday = 6 days from Monday
+    const thisWeekStart = new Date(now);
+    thisWeekStart.setDate(now.getDate() - daysFromMonday);
+    thisWeekStart.setHours(0, 0, 0, 0); // Start of Monday
+
+    // Get start of last calendar week (previous Monday)
+    const lastWeekStart = new Date(thisWeekStart);
+    lastWeekStart.setDate(thisWeekStart.getDate() - 7);
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const calculatePeriodStats = workouts => {
+      let volume = 0;
+      let reps = 0;
+      let sets = 0;
+      let coreSets = 0;
+      workouts.forEach(workout => {
+        workout.exercises.forEach(exercise => {
+          const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsReps || getMuscleGroup(exercise.name) === 'core';
+          const isBodyweightExercise = exercise.name.toLowerCase().includes('pull-up') || exercise.name.toLowerCase().includes('dip') || exercise.name.toLowerCase().includes('chin-up') || exercise.name.toLowerCase().includes('push-up');
+          exercise.sets.forEach(set => {
+            const weight = parseFloat(set.weight) || 0;
+            const rep = parseFloat(set.reps) || 0;
+
+            // Skip sets with no reps (skipped exercises)
+            if (rep === 0) return;
+            if (isCoreExercise && rep > 0) {
+              // Core exercises counted separately
+              coreSets += 1;
+            } else if (rep > 0) {
+              // Count all exercises with reps (weighted or bodyweight)
+              if (weight > 0) {
+                volume += weight * rep;
+              }
+              reps += rep;
+              sets += 1;
+            }
+          });
+        });
+      });
+      return {
+        volume: Math.round(volume),
+        reps,
+        sets,
+        coreSets,
+        workouts: workouts.length
+      };
+    };
+    const thisWeekWorkouts = statsHistory.filter(w => new Date(w.date) >= thisWeekStart);
+    const lastWeekWorkouts = statsHistory.filter(w => new Date(w.date) >= lastWeekStart && new Date(w.date) < thisWeekStart);
+    const thisMonthWorkouts = statsHistory.filter(w => new Date(w.date) >= thisMonthStart);
+    const lastMonthWorkouts = statsHistory.filter(w => new Date(w.date) >= lastMonthStart && new Date(w.date) < thisMonthStart);
+    const thisWeek = calculatePeriodStats(thisWeekWorkouts);
+    const lastWeek = calculatePeriodStats(lastWeekWorkouts);
+    const thisMonth = calculatePeriodStats(thisMonthWorkouts);
+    const lastMonth = calculatePeriodStats(lastMonthWorkouts);
+    const volumeChange = lastWeek.volume > 0 ? Math.round((thisWeek.volume - lastWeek.volume) / lastWeek.volume * 100) : 0;
+    const monthVolumeChange = lastMonth.volume > 0 ? Math.round((thisMonth.volume - lastMonth.volume) / lastMonth.volume * 100) : 0;
+
+    // Personal records - track max weight per category using explicit categorization
+    const categoryMaxes = {
+      'Bench Press': {
+        weight: null,
+        exerciseName: null
+      },
+      'Squat': {
+        weight: null,
+        exerciseName: null
+      },
+      'Deadlift': {
+        weight: null,
+        exerciseName: null
+      },
+      'Overhead Press': {
+        weight: null,
+        exerciseName: null
+      }
+    };
+    statsHistory.forEach(workout => {
+      workout.exercises.forEach(exercise => {
+        const category = categorizeExercise(exercise.name);
+        if (!category) return; // Skip non-main lifts
+
+        exercise.sets.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          if (weight > 0) {
+            if (!categoryMaxes[category].weight || weight > categoryMaxes[category].weight) {
+              categoryMaxes[category].weight = weight;
+              categoryMaxes[category].exerciseName = exercise.name;
+            }
+          }
+        });
+      });
+    });
+
+    // Convert to display format (use actual exercise name, not category)
+    const exerciseMaxes = {};
+    Object.entries(categoryMaxes).forEach(([category, data]) => {
+      if (data.weight !== null) {
+        exerciseMaxes[data.exerciseName] = data.weight;
+      }
+    });
+
+    // Average per workout
+    const avgVolumePerWorkout = thisWeek.workouts > 0 ? Math.round(thisWeek.volume / thisWeek.workouts) : 0;
+
+    // Calculate all-time stats
+    let allTimeVolume = 0;
+    let allTimeReps = 0;
+    let allTimeCoreSets = 0;
+    statsHistory.forEach(workout => {
+      workout.exercises.forEach(exercise => {
+        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsVolume || getMuscleGroup(exercise.name) === 'core';
+        exercise.sets.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          const rep = parseFloat(set.reps) || 0;
+          if (!isCoreExercise && weight > 0 && rep > 0) {
+            allTimeVolume += weight * rep;
+            allTimeReps += rep;
+          }
+          if (isCoreExercise && rep > 0) {
+            allTimeCoreSets++;
+          }
+        });
+      });
+    });
+
+    // Calculate average workouts per week (from first workout to today)
+    let avgWorkoutsPerWeek = 0;
+    if (statsHistory.length > 0) {
+      // Sort workouts by date to find the earliest one
+      const sortedWorkouts = [...statsHistory].sort((a, b) => new Date(a.date) - new Date(b.date));
+      const firstWorkoutDate = new Date(sortedWorkouts[0].date);
+      firstWorkoutDate.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      const daysSinceFirst = (today - firstWorkoutDate) / (1000 * 60 * 60 * 24);
+      const weeksSinceFirst = daysSinceFirst / 7;
+
+      // If less than a week of data, show workouts this week
+      if (weeksSinceFirst < 1) {
+        avgWorkoutsPerWeek = statsHistory.length;
+      } else {
+        avgWorkoutsPerWeek = Math.round(statsHistory.length / weeksSinceFirst * 10) / 10;
+      }
+    }
+
+    // Helper function to calculate muscle group stats for any period
+    const calculateMuscleGroupStats = workouts => {
+      const stats = {};
+      workouts.forEach(workout => {
+        workout.exercises.forEach(exercise => {
+          const muscleGroup = exercise.muscleGroup || getMuscleGroup(exercise.name);
+          if (!stats[muscleGroup]) {
+            stats[muscleGroup] = {
+              volume: 0,
+              reps: 0,
+              sets: 0
+            };
+          }
+          exercise.sets.forEach(set => {
+            const weight = parseFloat(set.weight) || 0;
+            const rep = parseFloat(set.reps) || 0;
+            if (rep > 0) {
+              stats[muscleGroup].reps += rep;
+              stats[muscleGroup].sets += 1;
+              if (weight > 0) {
+                stats[muscleGroup].volume += weight * rep;
+              }
+            }
+          });
+        });
+      });
+      return stats;
+    };
+
+    // Calculate muscle group stats for each period
+    const muscleGroupStatsWeek = calculateMuscleGroupStats(thisWeekWorkouts);
+    const muscleGroupStatsMonth = calculateMuscleGroupStats(thisMonthWorkouts);
+    const muscleGroupStatsAll = calculateMuscleGroupStats(statsHistory);
+    return {
+      thisWeek,
+      lastWeek,
+      thisMonth,
+      lastMonth,
+      volumeChange,
+      monthVolumeChange,
+      exerciseMaxes,
+      avgVolumePerWorkout,
+      totalWorkouts: statsHistory.length,
+      allTimeVolume: Math.round(allTimeVolume),
+      allTimeReps,
+      allTimeCoreSets,
+      avgWorkoutsPerWeek,
+      muscleGroupStatsWeek,
+      muscleGroupStatsMonth,
+      muscleGroupStatsAll
+    };
+  };
+  const getEnergyVolumeStats = () => {
+    const rated = statsHistory.filter(w => w.energyLevel);
+    if (rated.length < 3) return null;
+    const getWorkoutVolume = workout => workout.exercises.reduce((total, exercise) => {
+      if (!UNIT_CONFIG[getExerciseUnit(exercise)].countsAsVolume) return total;
+      return total + exercise.sets.reduce((s, set) => {
+        const w = parseFloat(set.weight) || 0;
+        const r = parseFloat(set.reps) || 0;
+        return s + (w > 0 ? w * r : 0);
+      }, 0);
+    }, 0);
+    const groups = {
+      low: [],
+      medium: [],
+      high: []
+    };
+    rated.forEach(w => groups[w.energyLevel].push(getWorkoutVolume(w)));
+    const mean = arr => arr.length === 0 ? null : arr.reduce((a, b) => a + b, 0) / arr.length;
+    const meanLow = mean(groups.low);
+    const meanMedium = mean(groups.medium);
+    const meanHigh = mean(groups.high);
+    const baseline = meanMedium ?? meanLow ?? meanHigh ?? 1;
+    const pct = val => val === null ? null : Math.round((val - baseline) / baseline * 100);
+    return {
+      total: rated.length,
+      rows: [{
+        level: 'high',
+        label: 'High',
+        mean: meanHigh,
+        delta: pct(meanHigh)
+      }, {
+        level: 'medium',
+        label: 'Medium',
+        mean: meanMedium,
+        delta: pct(meanMedium)
+      }, {
+        level: 'low',
+        label: 'Low',
+        mean: meanLow,
+        delta: pct(meanLow)
+      }].filter(r => r.mean !== null),
+      maxMean: Math.max(meanLow ?? 0, meanMedium ?? 0, meanHigh ?? 0)
+    };
+  };
+  const getTimelineData = () => {
+    if (statsHistory.length === 0) return [];
+    const now = new Date();
+    let startDate;
+
+    // Determine date range based on timelineRange (always use daily grouping)
+    switch (timelineRange) {
+      case '2weeks':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 14);
+        break;
+      case '4weeks':
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 28);
+        break;
+      case '3months':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 3);
+        break;
+      case '6months':
+        startDate = new Date(now);
+        startDate.setMonth(now.getMonth() - 6);
+        break;
+      case 'all':
+        const sortedWorkouts = [...statsHistory].sort((a, b) => new Date(a.date) - new Date(b.date));
+        startDate = new Date(sortedWorkouts[0].date);
+        break;
+    }
+
+    // Group workouts by day (always daily)
+    const grouped = {};
+    statsHistory.forEach(workout => {
+      const workoutDate = new Date(workout.date);
+      if (workoutDate < startDate) return;
+
+      // Always group by day
+      const dayStart = new Date(workoutDate);
+      dayStart.setHours(0, 0, 0, 0);
+      const key = dayStart.toISOString().split('T')[0];
+      if (!grouped[key]) {
+        grouped[key] = {
+          date: key,
+          workouts: [],
+          volume: 0,
+          reps: 0,
+          energyLevel: null,
+          mainLifts: {
+            deadlift: [],
+            squat: [],
+            bench: [],
+            ohp: []
+          }
+        };
+      }
+      grouped[key].workouts.push(workout);
+      // Use the energy level of the first rated workout that day
+      if (!grouped[key].energyLevel && workout.energyLevel) {
+        grouped[key].energyLevel = workout.energyLevel;
+      }
+
+      // Calculate volume, reps, and track main lifts
+      workout.exercises.forEach(exercise => {
+        const isCoreExercise = !UNIT_CONFIG[getExerciseUnit(exercise)].countsAsVolume || getMuscleGroup(exercise.name) === 'core';
+        const isBodyweightExercise = exercise.name.toLowerCase().includes('pull-up') || exercise.name.toLowerCase().includes('dip') || exercise.name.toLowerCase().includes('chin-up') || exercise.name.toLowerCase().includes('push-up');
+        exercise.sets.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          const reps = parseFloat(set.reps) || 0;
+          if (reps === 0) return; // Skip empty sets
+
+          // Count reps for all exercises (core, bodyweight, weighted)
+          grouped[key].reps += reps;
+
+          // Count volume only for weighted exercises
+          if (!isCoreExercise && weight > 0 && reps > 0) {
+            grouped[key].volume += weight * reps;
+          }
+
+          // Track main lifts — use explicit categorization (same whitelist as 1RM/Strength Standards)
+          // to prevent false positives like Bulgarian Split Squat → squat, Leg Press → squat, etc.
+          if (weight > 0) {
+            const timelineCategory = categorizeExercise(exercise.name);
+            if (timelineCategory === 'Deadlift') {
+              grouped[key].mainLifts.deadlift.push(weight);
+            } else if (timelineCategory === 'Squat') {
+              grouped[key].mainLifts.squat.push(weight);
+            } else if (timelineCategory === 'Bench Press') {
+              grouped[key].mainLifts.bench.push(weight);
+            } else if (timelineCategory === 'Overhead Press') {
+              grouped[key].mainLifts.ohp.push(weight);
+            }
+          }
+        });
+      });
+    });
+
+    // Get max weight for each main lift (after processing all workouts)
+    Object.keys(grouped).forEach(key => {
+      Object.keys(grouped[key].mainLifts).forEach(lift => {
+        if (grouped[key].mainLifts[lift].length > 0) {
+          grouped[key].mainLifts[lift] = Math.max(...grouped[key].mainLifts[lift]);
+        } else {
+          grouped[key].mainLifts[lift] = null;
+        }
+      });
+    });
+
+    // Convert to array and sort by date
+    const timelineData = Object.values(grouped).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Round volume
+    timelineData.forEach(point => {
+      point.volume = Math.round(point.volume);
+    });
+    return timelineData;
+  };
+  if (loading) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: `min-h-screen ${darkMode ? 'bg-gray-950' : 'bg-gray-100'} flex items-center justify-center`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex flex-col items-center gap-6"
+    }, /*#__PURE__*/React.createElement(Dumbbell, {
+      size: 120,
+      className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} animate-pulse`
+    }), /*#__PURE__*/React.createElement("div", {
+      className: `text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+    }, "Workout Pro")));
+  }
+  const stats = getWeekStats();
+  let detailedStats;
+  try {
+    detailedStats = getDetailedStats();
+  } catch (error) {
+    console.error('Error calculating detailed stats:', error);
+    detailedStats = {
+      thisWeek: {
+        volume: 0,
+        reps: 0,
+        sets: 0,
+        coreSets: 0,
+        workouts: 0
+      },
+      lastWeek: {
+        volume: 0,
+        reps: 0,
+        sets: 0,
+        coreSets: 0,
+        workouts: 0
+      },
+      thisMonth: {
+        volume: 0,
+        reps: 0,
+        sets: 0,
+        coreSets: 0,
+        workouts: 0
+      },
+      lastMonth: {
+        volume: 0,
+        reps: 0,
+        sets: 0,
+        coreSets: 0,
+        workouts: 0
+      },
+      volumeChange: 0,
+      monthVolumeChange: 0,
+      exerciseMaxes: {},
+      avgVolumePerWorkout: 0,
+      totalWorkouts: 0,
+      allTimeVolume: 0,
+      allTimeReps: 0,
+      allTimeCoreSets: 0,
+      avgWorkoutsPerWeek: 0,
+      muscleGroupStatsWeek: {},
+      muscleGroupStatsMonth: {},
+      muscleGroupStatsAll: {}
+    };
+  }
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: `min-h-screen ${darkMode ? 'bg-gray-950' : 'bg-gray-100'} pb-24`
+  }, showUpdateNotification && /*#__PURE__*/React.createElement("div", {
+    className: "fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 shadow-lg"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "max-w-6xl mx-auto flex items-center justify-between gap-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("svg", {
+    className: "w-5 h-5 animate-pulse",
+    fill: "none",
+    stroke: "currentColor",
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("path", {
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    strokeWidth: 2,
+    d: "M13 10V3L4 14h7v7l9-11h-7z"
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "font-semibold text-sm"
+  }, "New version available!")), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowUpdateNotification(false),
+    className: "px-3 py-1 text-sm bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+  }, "Later"), /*#__PURE__*/React.createElement("button", {
+    onClick: handleUpdateApp,
+    className: "px-3 py-1 text-sm bg-white text-blue-600 hover:bg-blue-50 rounded-lg font-semibold transition-colors"
+  }, "Update Now")))), /*#__PURE__*/React.createElement("div", {
+    className: `sticky ${showUpdateNotification ? 'top-[52px]' : 'top-0'} z-10 ${darkMode ? 'bg-gray-900/95' : 'bg-white/95'} ${darkMode ? 'border-gray-800' : 'border-gray-200'} border-b transform-gpu transition-all duration-300`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "max-w-6xl mx-auto px-4 py-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-baseline gap-3"
+  }, /*#__PURE__*/React.createElement(Dumbbell, {
+    className: darkMode ? 'text-gray-400' : 'text-gray-600',
+    size: 28,
+    style: {
+      alignSelf: 'center'
+    }
+  }), /*#__PURE__*/React.createElement("h1", {
+    className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, "Workout Pro"), activeView === 'logging' && currentLog && /*#__PURE__*/React.createElement("span", {
+    className: "font-mono text-lg font-bold",
+    style: {
+      color: darkMode ? '#4ade80' : '#16a34a'
+    }
+  }, String(Math.floor(elapsedSeconds / 3600)).padStart(2, '0'), ":", String(Math.floor(elapsedSeconds % 3600 / 60)).padStart(2, '0'), ":", String(elapsedSeconds % 60).padStart(2, '0'))), /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: toggleTheme,
+    className: `p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg transition-colors`
+  }, darkMode ? /*#__PURE__*/React.createElement(Sun, {
+    size: 20,
+    className: "text-gray-300"
+  }) : /*#__PURE__*/React.createElement(Moon, {
+    size: 20,
+    className: "text-gray-700"
+  })), activeView === 'history' && /*#__PURE__*/React.createElement("button", {
+    onClick: exportToCSV,
+    disabled: completedWorkouts.length === 0,
+    className: `p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg disabled:opacity-50`
+  }, /*#__PURE__*/React.createElement(Download, {
+    size: 20,
+    className: darkMode ? 'text-gray-300' : 'text-gray-700'
+  })))))), /*#__PURE__*/React.createElement("div", {
+    className: "max-w-6xl mx-auto px-4 py-6"
+  }, activeView === 'home' && /*#__PURE__*/React.createElement("div", {
+    className: "space-y-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'} rounded-2xl p-4 shadow-md border transform-gpu`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 mb-2"
+  }, /*#__PURE__*/React.createElement(TrendingUp, {
+    size: 20,
+    className: darkMode ? 'text-gray-400' : 'text-gray-600'
+  }), /*#__PURE__*/React.createElement("span", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium`
+  }, "This Week")), /*#__PURE__*/React.createElement("div", {
+    className: `text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, stats.count), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`
+  }, "Workouts")), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'} rounded-2xl p-4 shadow-md border transform-gpu`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 mb-2"
+  }, /*#__PURE__*/React.createElement(Zap, {
+    size: 20,
+    className: darkMode ? 'text-gray-400' : 'text-gray-600'
+  }), /*#__PURE__*/React.createElement("span", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium`
+  }, "Volume")), /*#__PURE__*/React.createElement("div", {
+    className: `text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, (stats.totalVolume / 1000).toFixed(1), "k"), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`
+  }, "kg lifted")), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'} rounded-2xl p-4 shadow-md border transform-gpu`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 mb-2"
+  }, /*#__PURE__*/React.createElement(Dumbbell, {
+    size: 20,
+    className: darkMode ? 'text-gray-400' : 'text-gray-600'
+  }), /*#__PURE__*/React.createElement("span", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium`
+  }, "Total Reps")), /*#__PURE__*/React.createElement("div", {
+    className: `text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, stats.totalReps), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`
+  }, stats.totalSets, " sets")), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'} rounded-2xl p-4 shadow-md border transform-gpu`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 mb-2"
+  }, /*#__PURE__*/React.createElement(Target, {
+    size: 20,
+    className: darkMode ? 'text-gray-400' : 'text-gray-600'
+  }), /*#__PURE__*/React.createElement("span", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm font-medium`
+  }, "Core Work")), /*#__PURE__*/React.createElement("div", {
+    className: `text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, stats.coreSets), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`
+  }, "sets completed"))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setActiveView('stats'),
+    className: `w-full ${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 flex items-center justify-between hover:scale-[1.02] transition-all`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement(BarChart3, {
+    size: 24,
+    className: darkMode ? 'text-gray-400' : 'text-gray-600'
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "text-left"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, "Detailed Statistics"), /*#__PURE__*/React.createElement("div", {
+    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+  }, "Progress tracking & PRs"))), /*#__PURE__*/React.createElement(ChevronRight, {
+    size: 20,
+    className: darkMode ? 'text-gray-500' : 'text-gray-400'
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "relative mb-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, "Your Program"), /*#__PURE__*/React.createElement("button", {
+    "data-testid": "program-dropdown-trigger",
+    onClick: () => {
+      setShowProgramDropdown(!showProgramDropdown);
+      setProgramManageMode(false);
+      setNewProgramName(null);
+      setEditingProgramName(null);
+    },
+    className: `${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold text-sm transition-colors`,
+    style: {
+      padding: '0.375rem 0.75rem'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "truncate",
+    style: {
+      maxWidth: '9rem',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    }
+  }, activeProgram ? activeProgram.name : '—'), /*#__PURE__*/React.createElement(ChevronDown, {
+    size: 16
+  }))), showProgramDropdown && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0",
+    style: {
+      zIndex: 40
+    },
+    onClick: () => {
+      setShowProgramDropdown(false);
+      setProgramManageMode(false);
+      setNewProgramName(null);
+      setEditingProgramName(null);
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: `absolute right-0 ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-xl shadow-lg p-2`,
+    style: {
+      top: '2.75rem',
+      zIndex: 50,
+      minWidth: '14rem'
+    }
+  }, programs.map(program => /*#__PURE__*/React.createElement("div", {
+    key: program.id,
+    className: "flex items-center gap-1"
+  }, editingProgramName && editingProgramName.id === program.id ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("input", {
+    "data-testid": "rename-program-input",
+    type: "text",
+    value: editingProgramName.value,
+    onChange: e => setEditingProgramName({
+      id: program.id,
+      value: e.target.value
+    }),
+    className: `flex-1 px-2 py-1 rounded-lg text-sm ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`,
+    style: {
+      paddingLeft: '0.5rem',
+      paddingRight: '0.5rem'
+    },
+    autoFocus: true
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: () => renameProgram(program.id, editingProgramName.value),
+    className: "px-2 py-1 bg-blue-600 text-white rounded-lg text-sm font-semibold",
+    style: {
+      paddingLeft: '0.5rem',
+      paddingRight: '0.5rem'
+    }
+  }, "Save")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      switchProgram(program.id);
+      setShowProgramDropdown(false);
+      setProgramManageMode(false);
+      setEditingProgramName(null);
+    },
+    className: `flex-1 text-left px-3 py-2 rounded-lg text-sm font-semibold ${darkMode ? 'text-white hover:bg-gray-700' : 'text-gray-900 hover:bg-gray-100'}`
+  }, program.id === activeProgramId ? '✓ ' : '', program.name, /*#__PURE__*/React.createElement("span", {
+    className: `ml-1 text-xs font-normal ${darkMode ? 'text-gray-400' : 'text-gray-500'}`
+  }, "(", program.workouts.length, ")")), programManageMode && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    "data-testid": `rename-program-${program.id}`,
+    onClick: () => setEditingProgramName({
+      id: program.id,
+      value: program.name
+    }),
+    className: `p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'}`
+  }, /*#__PURE__*/React.createElement(Edit2, {
+    size: 14
+  })), /*#__PURE__*/React.createElement("button", {
+    "data-testid": `delete-program-${program.id}`,
+    disabled: programs.length <= 1,
+    onClick: () => setShowDeleteProgram(program.id),
+    className: `p-2 rounded-lg ${programs.length <= 1 ? 'opacity-30' : darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`,
+    style: {
+      color: '#ef4444'
+    }
+  }, /*#__PURE__*/React.createElement(Trash2, {
+    size: 14
+  })))))), /*#__PURE__*/React.createElement("div", {
+    className: `my-2 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`,
+    style: {
+      marginTop: '0.5rem',
+      marginBottom: '0.5rem'
+    }
+  }), newProgramName !== null ? /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-1"
+  }, /*#__PURE__*/React.createElement("input", {
+    "data-testid": "new-program-input",
+    type: "text",
+    value: newProgramName,
+    onChange: e => setNewProgramName(e.target.value),
+    placeholder: "Program name",
+    className: `flex-1 px-2 py-1 rounded-lg text-sm ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`,
+    style: {
+      paddingLeft: '0.5rem',
+      paddingRight: '0.5rem'
+    },
+    autoFocus: true
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: () => createProgram(newProgramName),
+    className: "px-2 py-1 bg-blue-600 text-white rounded-lg text-sm font-semibold",
+    style: {
+      paddingLeft: '0.5rem',
+      paddingRight: '0.5rem'
+    }
+  }, "Create")) : /*#__PURE__*/React.createElement("button", {
+    onClick: () => setNewProgramName(''),
+    className: `w-full text-left px-3 py-2 rounded-lg text-sm font-semibold ${darkMode ? 'text-blue-400 hover:bg-gray-700' : 'text-blue-600 hover:bg-gray-100'}`
+  }, "+ New program"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setProgramManageMode(!programManageMode),
+    className: `w-full text-left px-3 py-2 rounded-lg text-sm font-semibold ${darkMode ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-500 hover:bg-gray-100'}`
+  }, programManageMode ? 'Done' : 'Manage…')))), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 mb-4 overflow-x-auto pb-2"
+  }, /*#__PURE__*/React.createElement("label", {
+    htmlFor: "workout-file-input",
+    className: `px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold transition-colors cursor-pointer active:scale-95 touch-manipulation whitespace-nowrap`
+  }, /*#__PURE__*/React.createElement(Download, {
+    size: 18
+  }), "Import"), /*#__PURE__*/React.createElement("button", {
+    onClick: exportProgram,
+    className: `px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold transition-colors active:scale-95 touch-manipulation whitespace-nowrap`
+  }, /*#__PURE__*/React.createElement(Upload, {
+    size: 18
+  }), "Export"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowAddDay(true),
+    className: `px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center gap-2 font-semibold transition-colors whitespace-nowrap`
+  }, /*#__PURE__*/React.createElement(PlusCircle, {
+    size: 18
+  }), "Add Day")), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800/30 border-gray-700' : 'bg-blue-50 border-blue-200'} border rounded-xl p-4 mt-4`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `flex items-center gap-2 mb-3`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `text-sm font-semibold ${darkMode ? 'text-blue-400' : 'text-blue-700'}`
+  }, "Data Protection")), /*#__PURE__*/React.createElement("div", {
+    className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`
+  }, "Your data is auto-backed up to browser storage. Download a backup file for extra safety."), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: exportBackupToFile,
+    className: `flex-1 px-3 py-2 ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-lg flex items-center justify-center gap-2 font-semibold transition-colors text-sm`
+  }, /*#__PURE__*/React.createElement(Download, {
+    size: 16
+  }), "Backup to File"), /*#__PURE__*/React.createElement("label", {
+    htmlFor: "restore-backup-input",
+    className: `flex-1 px-3 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-300 hover:bg-gray-400'} text-white rounded-lg flex items-center justify-center gap-2 font-semibold transition-colors cursor-pointer text-sm`
+  }, /*#__PURE__*/React.createElement(Upload, {
+    size: 16
+  }), "Restore"))), /*#__PURE__*/React.createElement("input", {
+    id: "workout-file-input",
+    ref: fileInputRef,
+    type: "file",
+    accept: "*/*",
+    onChange: handleFileChange,
+    style: {
+      display: 'none'
+    }
+  }), /*#__PURE__*/React.createElement("input", {
+    id: "restore-backup-input",
+    ref: restoreBackupInputRef,
+    type: "file",
+    accept: ".json,application/json",
+    onChange: e => {
+      if (e.target.files && e.target.files[0]) {
+        restoreBackupFromFile(e.target.files[0]);
+      }
+      e.target.value = ''; // Reset input
+    },
+    style: {
+      display: 'none'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "grid gap-4"
+  }, workouts.map(workout => /*#__PURE__*/React.createElement("div", {
+    key: workout.id,
+    className: `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5 shadow-lg transform-gpu`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-start justify-between mb-4"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setExpandedWorkouts(prev => ({
+      ...prev,
+      [workout.id]: !prev[workout.id]
+    })),
+    className: "flex items-center gap-3 flex-1 text-left"
+  }, /*#__PURE__*/React.createElement(WorkoutIcon, {
+    emoji: workout.emoji,
+    className: darkMode ? 'text-gray-300' : 'text-gray-700'
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: `text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, workout.name), /*#__PURE__*/React.createElement("div", {
+    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+  }, workout.exercises.length, " exercises")), expandedWorkouts[workout.id] ? /*#__PURE__*/React.createElement(ChevronUp, {
+    size: 20,
+    className: darkMode ? 'text-gray-400' : 'text-gray-600'
+  }) : /*#__PURE__*/React.createElement(ChevronDown, {
+    size: 20,
+    className: darkMode ? 'text-gray-400' : 'text-gray-600'
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 ml-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => startEditWorkout(workout),
+    className: `p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg transition-colors`
+  }, /*#__PURE__*/React.createElement(Edit2, {
+    size: 16,
+    className: darkMode ? 'text-gray-300' : 'text-gray-700'
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowDeleteConfirm(workout.id),
+    className: "p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+  }, /*#__PURE__*/React.createElement(Trash2, {
+    size: 16,
+    className: "text-white"
+  })))), expandedWorkouts[workout.id] && /*#__PURE__*/React.createElement("div", {
+    className: `mb-4 space-y-2 ${darkMode ? 'bg-gray-900/50' : 'bg-gray-50'} rounded-xl p-4`
+  }, workout.exercises.map((exercise, idx) => /*#__PURE__*/React.createElement("div", {
+    key: idx,
+    className: `flex items-center justify-between py-2 ${idx !== workout.exercises.length - 1 ? 'border-b ' + (darkMode ? 'border-gray-700' : 'border-gray-200') : ''}`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+  }, exercise.name), /*#__PURE__*/React.createElement("div", {
+    className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
+  }, exercise.sets, " \xD7 ", exercise.reps)))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => startWorkout(workout),
+    className: `w-full ${darkMode ? 'bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500' : 'bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600'} text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg`
+  }, "Start Workout", /*#__PURE__*/React.createElement(ChevronRight, {
+    size: 20
+  }))))))), activeView === 'stats' && /*#__PURE__*/React.createElement("div", {
+    className: "space-y-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between mb-4"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center gap-2`
+  }, /*#__PURE__*/React.createElement(BarChart3, {
+    size: 24
+  }), "Statistics"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setActiveView('home'),
+    className: `p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg`
+  }, /*#__PURE__*/React.createElement(X, {
+    size: 20,
+    className: darkMode ? 'text-gray-300' : 'text-gray-700'
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between mb-3"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: `font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, "Body Weight"), bodyWeight && !showBodyWeightInput && /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowBodyWeightInput(true),
+    className: `px-3 py-1 rounded-lg text-sm font-medium ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`
+  }, "Update")), bodyWeight && !showBodyWeightInput ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: `text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-1`
+  }, bodyWeight, " kg"), /*#__PURE__*/React.createElement("div", {
+    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`
+  }, gender === 'male' ? '♂ Male' : '♀ Female', " \xB7 Last updated ", bodyWeightHistory.length > 0 ? getRelativeDate([...bodyWeightHistory].sort((a, b) => new Date(b.date) - new Date(a.date))[0].date) : getRelativeDate(new Date().toISOString())), bodyWeightHistory.length > 1 && (() => {
+    const sorted = [...bodyWeightHistory].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const visible = showAllBWHistory ? sorted : sorted.slice(0, 3);
+    return /*#__PURE__*/React.createElement("div", {
+      className: "space-y-1"
+    }, visible.map((entry, i) => /*#__PURE__*/React.createElement("div", {
+      key: entry.id ?? i,
+      className: `flex justify-between text-sm py-1 border-b ${darkMode ? 'border-gray-700 text-gray-300' : 'border-gray-100 text-gray-700'}`
+    }, /*#__PURE__*/React.createElement("span", null, new Date(entry.date).toLocaleDateString()), /*#__PURE__*/React.createElement("span", {
+      className: "font-medium"
+    }, entry.weight, " kg"))), sorted.length > 3 && /*#__PURE__*/React.createElement("button", {
+      onClick: () => setShowAllBWHistory(v => !v),
+      className: `text-xs mt-1 ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-500 hover:text-blue-600'}`
+    }, showAllBWHistory ? 'Show less' : `··· ${sorted.length - 3} more`));
+  })()) : /*#__PURE__*/React.createElement("div", null, !bodyWeight && /*#__PURE__*/React.createElement("p", {
+    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`
+  }, "Add your body weight and gender to see strength standards and track progress"), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    step: "0.1",
+    placeholder: "Enter weight (kg)",
+    defaultValue: bodyWeight || '',
+    className: `flex-1 px-3 py-2 rounded-lg ${darkMode ? 'bg-gray-700 text-white placeholder-gray-400' : 'bg-gray-100 text-gray-900 placeholder-gray-500'}`,
+    onKeyDown: e => {
+      if (e.key === 'Enter') {
+        const value = e.target.value;
+        if (value && Number(value) > 0) {
+          handleSaveBodyWeight(value);
+        }
+      }
+    },
+    id: "bodyWeightInput"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setGender('male'),
+    className: `flex-1 px-3 py-2 rounded-lg font-medium transition-colors ${gender === 'male' ? darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white' : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`
+  }, "\u2642 Male"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setGender('female'),
+    className: `flex-1 px-3 py-2 rounded-lg font-medium transition-colors ${gender === 'female' ? darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white' : darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`
+  }, "\u2640 Female")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      const input = document.getElementById('bodyWeightInput');
+      if (input && input.value && Number(input.value) > 0) {
+        handleSaveBodyWeight(input.value);
+      }
+    },
+    className: `w-full px-4 py-2 rounded-lg font-medium ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`
+  }, "Save"), bodyWeight && /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowBodyWeightInput(false),
+    className: `px-4 py-2 rounded-lg font-medium ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`
+  }, "Cancel")))), programs.length > 1 && /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 overflow-x-auto pb-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    "data-testid": "stats-program-chip-all",
+    onClick: () => setStatsProgramFilter('all'),
+    style: {
+      paddingTop: '0.375rem',
+      paddingBottom: '0.375rem'
+    },
+    className: `px-3 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${effectiveStatsFilter === 'all' ? 'bg-blue-600 text-white' : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`
+  }, "All"), programs.map(program => /*#__PURE__*/React.createElement("button", {
+    key: program.id,
+    "data-testid": `stats-program-chip-${program.id}`,
+    onClick: () => setStatsProgramFilter(program.id),
+    style: {
+      paddingTop: '0.375rem',
+      paddingBottom: '0.375rem'
+    },
+    className: `px-3 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors ${effectiveStatsFilter === program.id ? 'bg-blue-600 text-white' : darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'}`
+  }, program.name))), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: `font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`
+  }, "Performance Overview"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 mb-6 overflow-x-auto pb-2"
+  }, [{
+    value: 'week',
+    label: 'This Week'
+  }, {
+    value: 'month',
+    label: 'This Month'
+  }, {
+    value: 'all',
+    label: 'All Time'
+  }].map(period => /*#__PURE__*/React.createElement("button", {
+    key: period.value,
+    onClick: () => setStatsPeriod(period.value),
+    className: `px-4 py-2 rounded-lg whitespace-nowrap font-medium transition-all touch-manipulation ${statsPeriod === period.value ? darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white' : darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`
+  }, period.label))), (() => {
+    const periodData = statsPeriod === 'week' ? detailedStats.thisWeek : statsPeriod === 'month' ? detailedStats.thisMonth : {
+      volume: detailedStats.allTimeVolume,
+      workouts: detailedStats.totalWorkouts,
+      reps: detailedStats.allTimeReps,
+      sets: 0,
+      coreSets: detailedStats.allTimeCoreSets
+    };
+    const volumeChange = statsPeriod === 'week' ? detailedStats.volumeChange : statsPeriod === 'month' ? detailedStats.monthVolumeChange : 0;
+    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      className: "grid grid-cols-2 gap-4 mb-4"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+    }, statsPeriod === 'all' ? 'Total Workouts' : 'Workouts'), /*#__PURE__*/React.createElement("div", {
+      className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+    }, periodData.workouts || detailedStats.thisWeek.count), statsPeriod === 'all' && /*#__PURE__*/React.createElement("div", {
+      className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+    }, detailedStats.avgWorkoutsPerWeek, " avg/week")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+    }, "Volume"), /*#__PURE__*/React.createElement("div", {
+      className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+    }, (periodData.volume / 1000).toFixed(1), "k kg"), statsPeriod === 'week' && /*#__PURE__*/React.createElement("div", {
+      className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
+    }, (detailedStats.avgVolumePerWorkout / 1000).toFixed(1), "k avg/workout"), volumeChange !== 0 && statsPeriod !== 'all' && statsPeriod !== 'week' && /*#__PURE__*/React.createElement("div", {
+      className: `text-sm ${volumeChange > 0 ? 'text-green-500' : 'text-red-500'}`
+    }, volumeChange > 0 ? '↑' : '↓', " ", Math.abs(volumeChange), "% vs last ", statsPeriod))), /*#__PURE__*/React.createElement("div", {
+      className: "grid grid-cols-2 gap-4"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: `${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-3`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+    }, "Total Reps"), /*#__PURE__*/React.createElement("div", {
+      className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+    }, periodData.reps), statsPeriod !== 'all' && /*#__PURE__*/React.createElement("div", {
+      className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
+    }, periodData.sets, " weighted sets")), /*#__PURE__*/React.createElement("div", {
+      className: `${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-3`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+    }, "Core Sets"), /*#__PURE__*/React.createElement("div", {
+      className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+    }, periodData.coreSets))));
+  })()), (() => {
+    const stats = getEnergyVolumeStats();
+    if (!stats) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      className: `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5 shadow-sm`
+    }, /*#__PURE__*/React.createElement("h3", {
+      className: `text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`
+    }, "\u26A1 Energy vs Volume"), /*#__PURE__*/React.createElement("div", {
+      className: "space-y-3"
+    }, stats.rows.map(row => /*#__PURE__*/React.createElement("div", {
+      key: row.level,
+      className: "flex items-center gap-3"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "w-20 text-sm flex items-center gap-1"
+    }, row.level === 'high' ? /*#__PURE__*/React.createElement(FaceLaugh, {
+      size: 14,
+      className: darkMode ? 'text-green-400' : 'text-green-600'
+    }) : row.level === 'medium' ? /*#__PURE__*/React.createElement(FaceSmile, {
+      size: 14,
+      className: darkMode ? 'text-amber-400' : 'text-amber-600'
+    }) : /*#__PURE__*/React.createElement(FaceMeh, {
+      size: 14,
+      className: darkMode ? 'text-red-400' : 'text-red-600'
+    }), /*#__PURE__*/React.createElement("span", {
+      className: darkMode ? 'text-gray-300' : 'text-gray-700'
+    }, row.label)), /*#__PURE__*/React.createElement("div", {
+      className: `flex-1 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full h-4 overflow-hidden`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: `h-full rounded-full transition-all ${row.level === 'high' ? 'bg-green-500' : row.level === 'medium' ? 'bg-yellow-500' : 'bg-red-500'}`,
+      style: {
+        width: `${Math.round(row.mean / stats.maxMean * 100)}%`
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      className: `w-12 text-right text-sm font-medium ${row.delta === null || row.delta === 0 ? darkMode ? 'text-gray-400' : 'text-gray-500' : row.delta > 0 ? 'text-green-500' : 'text-red-500'}`
+    }, row.delta === null || row.delta === 0 ? 'avg' : `${row.delta > 0 ? '+' : ''}${row.delta}%`)))), /*#__PURE__*/React.createElement("div", {
+      className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'} mt-3`
+    }, "Based on ", stats.total, " rated workouts \xB7 vs your average volume"));
+  })(), (() => {
+    const bestSets = getMainLiftsBestSets();
+    const hasLifts = Object.keys(bestSets).length > 0;
+    return /*#__PURE__*/React.createElement("div", {
+      className: `${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => setShowPersonalRecords(!showPersonalRecords),
+      className: "w-full flex items-center justify-between mb-4"
+    }, /*#__PURE__*/React.createElement("h3", {
+      className: `font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center gap-2`
+    }, /*#__PURE__*/React.createElement(Award, {
+      size: 20
+    }), "Personal Records (Main Lifts)"), showPersonalRecords ? /*#__PURE__*/React.createElement(ChevronUp, {
+      size: 20,
+      className: darkMode ? 'text-gray-400' : 'text-gray-600'
+    }) : /*#__PURE__*/React.createElement(ChevronDown, {
+      size: 20,
+      className: darkMode ? 'text-gray-400' : 'text-gray-600'
+    })), showPersonalRecords && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`
+    }, "Your best lifts and estimated 1RM (Epley formula). Tap to view progression."), !hasLifts ? /*#__PURE__*/React.createElement("div", {
+      className: `text-center py-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+    }, "No records yet. Complete workouts to see your PRs!") : /*#__PURE__*/React.createElement("div", {
+      className: "space-y-2"
+    }, Object.keys(bestSets).map(liftName => {
+      const liftData = bestSets[liftName];
+      const showBothMetrics = liftData.best1RM.weight !== liftData.heaviest.weight || liftData.best1RM.reps !== liftData.heaviest.reps;
+      return /*#__PURE__*/React.createElement("button", {
+        key: liftName,
+        onClick: () => {
+          const progression = get1RMProgression(liftData.best1RM.exerciseName);
+          if (progression.length > 0) {
+            setShow1RMModal({
+              exerciseName: liftName,
+              data: progression
+            });
+          }
+        },
+        className: `w-full flex flex-col p-3 ${darkMode ? 'bg-gray-900 hover:bg-gray-800' : 'bg-gray-50 hover:bg-gray-100'} rounded-lg transition-colors text-left`
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "flex justify-between items-center mb-2"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: `text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`
+      }, liftName), /*#__PURE__*/React.createElement(ChevronRight, {
+        size: 16,
+        className: darkMode ? 'text-gray-500' : 'text-gray-400'
+      })), /*#__PURE__*/React.createElement("div", {
+        className: "flex justify-between items-baseline mb-1"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-600'}`
+      }, "Best 1RM:"), /*#__PURE__*/React.createElement("div", {
+        className: "flex items-baseline gap-2"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: `text-base font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+      }, liftData.best1RM.weight, " kg \xD7 ", liftData.best1RM.reps), /*#__PURE__*/React.createElement("div", {
+        className: `text-sm ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
+      }, "~", liftData.best1RM.estimated1RM.toFixed(1), " kg"))), showBothMetrics && /*#__PURE__*/React.createElement("div", {
+        className: "flex justify-between items-baseline"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-600'}`
+      }, "Heaviest:"), /*#__PURE__*/React.createElement("div", {
+        className: "flex items-baseline gap-2"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: `text-base font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+      }, liftData.heaviest.weight, " kg \xD7 ", liftData.heaviest.reps), /*#__PURE__*/React.createElement("div", {
+        className: `text-sm ${darkMode ? 'text-purple-400' : 'text-purple-600'}`
+      }, "~", liftData.heaviest.estimated1RM.toFixed(1), " kg"))));
+    }))));
+  })(), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowMuscleGroupBreakdown(!showMuscleGroupBreakdown),
+    className: "w-full flex items-center justify-between mb-4"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: `font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center gap-2`
+  }, /*#__PURE__*/React.createElement(Target, {
+    size: 20
+  }), "Muscle Group Breakdown"), showMuscleGroupBreakdown ? /*#__PURE__*/React.createElement(ChevronUp, {
+    size: 20,
+    className: darkMode ? 'text-gray-400' : 'text-gray-600'
+  }) : /*#__PURE__*/React.createElement(ChevronDown, {
+    size: 20,
+    className: darkMode ? 'text-gray-400' : 'text-gray-600'
+  })), showMuscleGroupBreakdown && (() => {
+    // Get muscle group stats based on selected period
+    const muscleGroupData = statsPeriod === 'week' ? detailedStats.muscleGroupStatsWeek : statsPeriod === 'month' ? detailedStats.muscleGroupStatsMonth : detailedStats.muscleGroupStatsAll;
+    const periodLabel = statsPeriod === 'week' ? 'This Week' : statsPeriod === 'month' ? 'This Month' : 'All Time';
+    const showBenchmarks = statsPeriod === 'week'; // Only show benchmarks for weekly view
+
+    // For non-weekly views, show "no data" message if empty
+    if (!showBenchmarks && (!muscleGroupData || Object.keys(muscleGroupData).length === 0)) {
+      return /*#__PURE__*/React.createElement("div", {
+        className: `text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+      }, "No muscle group data for ", periodLabel.toLowerCase());
+    }
+
+    // For weekly view, show all muscle groups (even those with 0 sets)
+    const allMuscleGroups = showBenchmarks ? Object.keys(WEEKLY_SET_BENCHMARKS).map(group => {
+      const existing = muscleGroupData ? muscleGroupData[group] : null;
+      return [group, existing || {
+        sets: 0,
+        reps: 0,
+        volume: 0
+      }];
+    }) : Object.entries(muscleGroupData);
+    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`
+    }, showBenchmarks ? 'Weekly sets vs hypertrophy benchmarks (MEV = Minimum Effective Volume)' : `Training volume distribution (${periodLabel})`), /*#__PURE__*/React.createElement("div", {
+      className: "space-y-3"
+    }, allMuscleGroups.sort((a, b) => {
+      // Sort by benchmark order for consistency
+      const order = ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'other'];
+      return order.indexOf(a[0]) - order.indexOf(b[0]);
+    }).filter(([group]) => group !== 'other') // Hide 'other' category
+    .map(([group, stats]) => {
+      const benchmark = WEEKLY_SET_BENCHMARKS[group];
+      const benchmarkStatus = showBenchmarks && benchmark ? getBenchmarkStatus(group, stats.sets) : null;
+
+      // Calculate bar width (percentage of MRV)
+      const barPercentage = showBenchmarks && benchmark ? Math.min(100, stats.sets / benchmark.mrv * 100) : 0;
+
+      // Determine bar color based on status
+      const getBarColor = () => {
+        if (!benchmarkStatus) return darkMode ? 'bg-blue-500' : 'bg-blue-600';
+        switch (benchmarkStatus.status) {
+          case 'low':
+            return 'bg-red-500';
+          case 'moderate':
+            return 'bg-yellow-500';
+          case 'optimal':
+            return 'bg-green-500';
+          case 'high':
+            return 'bg-purple-500';
+          default:
+            return darkMode ? 'bg-blue-500' : 'bg-blue-600';
+        }
+      };
+      const getStatusTextColor = () => {
+        if (!benchmarkStatus) return darkMode ? 'text-gray-400' : 'text-gray-600';
+        switch (benchmarkStatus.status) {
+          case 'low':
+            return 'text-red-500';
+          case 'moderate':
+            return 'text-yellow-500';
+          case 'optimal':
+            return 'text-green-500';
+          case 'high':
+            return 'text-purple-500';
+          default:
+            return darkMode ? 'text-gray-400' : 'text-gray-600';
+        }
+      };
+      return /*#__PURE__*/React.createElement("div", {
+        key: group,
+        className: `${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-xl p-3`
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "flex items-center justify-between mb-2"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "flex items-center gap-2"
+      }, /*#__PURE__*/React.createElement(Dumbbell, {
+        size: 16,
+        className: darkMode ? 'text-gray-400' : 'text-gray-600'
+      }), /*#__PURE__*/React.createElement("span", {
+        className: `text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} capitalize`
+      }, group)), showBenchmarks && benchmarkStatus && /*#__PURE__*/React.createElement("span", {
+        className: `text-xs font-medium ${getStatusTextColor()}`
+      }, benchmarkStatus.label)), showBenchmarks && benchmark ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+        className: "relative mb-2"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: `h-3 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full overflow-hidden`
+      }, /*#__PURE__*/React.createElement("div", {
+        className: `h-full ${getBarColor()} rounded-full transition-all duration-300`,
+        style: {
+          width: `${barPercentage}%`
+        }
+      })), /*#__PURE__*/React.createElement("div", {
+        className: "absolute top-0 h-3 w-0.5 bg-yellow-400",
+        style: {
+          left: `${benchmark.mev / benchmark.mrv * 100}%`
+        },
+        title: `MEV: ${benchmark.mev} sets`
+      }), /*#__PURE__*/React.createElement("div", {
+        className: "absolute top-0 h-3 w-0.5 bg-green-400",
+        style: {
+          left: `${benchmark.optimal / benchmark.mrv * 100}%`
+        },
+        title: `Optimal: ${benchmark.optimal} sets`
+      })), /*#__PURE__*/React.createElement("div", {
+        className: "flex justify-between items-baseline"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: `text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+      }, stats.sets, " ", /*#__PURE__*/React.createElement("span", {
+        className: `text-sm font-normal ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+      }, "sets")), /*#__PURE__*/React.createElement("div", {
+        className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
+      }, benchmark.mev, "-", benchmark.optimal, "-", benchmark.mrv)), /*#__PURE__*/React.createElement("div", {
+        className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
+      }, stats.reps, " reps \xB7 ", Math.round(stats.volume), " kg volume")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+        className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+      }, Math.round(stats.volume), " kg"), /*#__PURE__*/React.createElement("div", {
+        className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+      }, stats.sets, " sets \xB7 ", stats.reps, " reps")));
+    })), showBenchmarks && /*#__PURE__*/React.createElement("div", {
+      className: `mt-4 text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-4 flex-wrap"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "flex items-center gap-1"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "w-2 h-2 bg-yellow-400 rounded-full inline-block"
+    }), " MEV"), /*#__PURE__*/React.createElement("span", {
+      className: "flex items-center gap-1"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "w-2 h-2 bg-green-400 rounded-full inline-block"
+    }), " Optimal"), /*#__PURE__*/React.createElement("span", {
+      className: "flex items-center gap-1"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "w-2 h-2 bg-red-500 rounded-full inline-block"
+    }), " Low"), /*#__PURE__*/React.createElement("span", {
+      className: "flex items-center gap-1"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "w-2 h-2 bg-green-500 rounded-full inline-block"
+    }), " Good"), /*#__PURE__*/React.createElement("span", {
+      className: "flex items-center gap-1"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "w-2 h-2 bg-purple-500 rounded-full inline-block"
+    }), " High"))));
+  })()), (() => {
+    const mainLifts1RMs = getMainLifts1RMs();
+    const hasLifts = Object.keys(mainLifts1RMs).length > 0;
+    const hasBodyWeight = bodyWeight && bodyWeight > 0;
+    if (!hasBodyWeight || !hasLifts) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      className: `${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => setShowStrengthStandards(!showStrengthStandards),
+      className: "w-full flex items-center justify-between mb-4"
+    }, /*#__PURE__*/React.createElement("h3", {
+      className: `font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center gap-2`
+    }, /*#__PURE__*/React.createElement(Target, {
+      size: 20
+    }), "Strength Standards"), showStrengthStandards ? /*#__PURE__*/React.createElement(ChevronUp, {
+      size: 20,
+      className: darkMode ? 'text-gray-400' : 'text-gray-600'
+    }) : /*#__PURE__*/React.createElement(ChevronDown, {
+      size: 20,
+      className: darkMode ? 'text-gray-400' : 'text-gray-600'
+    })), showStrengthStandards && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`
+    }, "Your strength level based on estimated 1RM relative to your ", bodyWeight, " kg bodyweight"), /*#__PURE__*/React.createElement("div", {
+      className: "space-y-5"
+    }, Object.keys(mainLifts1RMs).map(liftName => {
+      const estimated1RM = mainLifts1RMs[liftName];
+      const standard = getStrengthStandard(liftName, estimated1RM, bodyWeight, gender);
+      if (!standard) return null;
+      return /*#__PURE__*/React.createElement("div", {
+        key: liftName
+      }, /*#__PURE__*/React.createElement("div", {
+        className: "flex justify-between items-baseline mb-1"
+      }, /*#__PURE__*/React.createElement("div", {
+        className: `text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`
+      }, liftName), /*#__PURE__*/React.createElement("div", {
+        className: `text-sm font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`
+      }, estimated1RM.toFixed(1), " kg (est. 1RM)")), /*#__PURE__*/React.createElement("div", {
+        className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`
+      }, /*#__PURE__*/React.createElement("span", {
+        className: `font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`
+      }, standard.level), " level", standard.levelIndex < standard.totalLevels - 1 && ` • ${standard.percentageRemaining}% to ${standard.nextLevel}`, ' • ', standard.ratio, "x bodyweight"), /*#__PURE__*/React.createElement("div", {
+        className: `h-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} rounded-full overflow-hidden flex mb-1`
+      }, Array.from({
+        length: standard.totalLevels
+      }).map((_, idx) => {
+        const isCompleted = idx < standard.levelIndex;
+        const isCurrent = idx === standard.levelIndex;
+        const percentage = isCurrent ? standard.percentageToNext : 0;
+        return /*#__PURE__*/React.createElement("div", {
+          key: idx,
+          className: "flex-1 relative",
+          style: {
+            borderRight: idx < standard.totalLevels - 1 ? `1px solid ${darkMode ? '#374151' : '#e5e7eb'}` : 'none'
+          }
+        }, isCompleted && /*#__PURE__*/React.createElement("div", {
+          className: `h-full ${darkMode ? 'bg-gray-500' : 'bg-gray-400'}`
+        }), isCurrent && /*#__PURE__*/React.createElement("div", {
+          className: `h-full ${darkMode ? 'bg-blue-600' : 'bg-blue-500'}`,
+          style: {
+            width: `${percentage}%`
+          }
+        }));
+      })), /*#__PURE__*/React.createElement("div", {
+        className: "flex justify-between text-[9px] mt-1"
+      }, ['Untrained', 'Novice', 'Intermediate', 'Advanced', 'Elite'].map((levelName, idx) => /*#__PURE__*/React.createElement("div", {
+        key: idx,
+        className: `flex-1 text-center ${idx === standard.levelIndex ? darkMode ? 'text-blue-400 font-semibold' : 'text-blue-600 font-semibold' : darkMode ? 'text-gray-500' : 'text-gray-400'}`
+      }, levelName))));
+    }))));
+  })(), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowProgressTimeline(!showProgressTimeline),
+    className: "w-full flex items-center justify-between mb-4"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: `font-bold text-lg ${darkMode ? 'text-white' : 'text-gray-900'} flex items-center gap-2`
+  }, /*#__PURE__*/React.createElement(TrendingUp, {
+    size: 20
+  }), "Progress Timeline"), showProgressTimeline ? /*#__PURE__*/React.createElement(ChevronUp, {
+    size: 20,
+    className: darkMode ? 'text-gray-400' : 'text-gray-600'
+  }) : /*#__PURE__*/React.createElement(ChevronDown, {
+    size: 20,
+    className: darkMode ? 'text-gray-400' : 'text-gray-600'
+  })), showProgressTimeline && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 mb-6 overflow-x-auto pb-2"
+  }, [{
+    value: '2weeks',
+    label: '2 Weeks'
+  }, {
+    value: '4weeks',
+    label: '4 Weeks'
+  }, {
+    value: '3months',
+    label: '3 Months'
+  }, {
+    value: '6months',
+    label: '6 Months'
+  }, {
+    value: 'all',
+    label: 'All Time'
+  }].map(range => /*#__PURE__*/React.createElement("button", {
+    key: range.value,
+    onClick: () => {
+      setTimelineRange(range.value);
+      setSelectedTimelinePoint(null);
+    },
+    className: `px-4 py-2 rounded-lg whitespace-nowrap font-medium transition-all touch-manipulation ${timelineRange === range.value ? darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white' : darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`
+  }, range.label))), (() => {
+    const timelineData = getTimelineData();
+    if (timelineData.length === 0) {
+      return /*#__PURE__*/React.createElement("div", {
+        className: `text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+      }, "No workout data available for this time range.");
+    }
+    return /*#__PURE__*/React.createElement("div", {
+      className: "space-y-6"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: `text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`
+    }, "Total Volume (kg)"), /*#__PURE__*/React.createElement("div", {
+      className: "flex justify-center"
+    }, /*#__PURE__*/React.createElement(LineChart, {
+      data: timelineData,
+      metric: "volume",
+      darkMode: darkMode,
+      onPointClick: setSelectedTimelinePoint,
+      selectedPoint: selectedTimelinePoint
+    }))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: `text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`
+    }, "Total Reps (per day)"), /*#__PURE__*/React.createElement("div", {
+      className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'} mb-2 italic`
+    }, "Includes all reps (weighted, bodyweight, and core exercises). Stats above only count weighted reps."), /*#__PURE__*/React.createElement("div", {
+      className: "flex justify-center"
+    }, /*#__PURE__*/React.createElement(LineChart, {
+      data: timelineData,
+      metric: "reps",
+      darkMode: darkMode,
+      onPointClick: setSelectedTimelinePoint,
+      selectedPoint: selectedTimelinePoint
+    }))));
+  })()))), activeView === 'logging' && currentLog && /*#__PURE__*/React.createElement("div", {
+    className: "space-y-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gradient-to-br from-gray-800 to-gray-700 border-gray-700' : 'bg-gradient-to-br from-gray-100 to-gray-50 border-gray-200'} rounded-2xl p-6 shadow-md border transform-gpu`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-3 mb-2"
+  }, /*#__PURE__*/React.createElement(WorkoutIcon, {
+    emoji: currentLog.workoutEmoji,
+    className: darkMode ? 'text-gray-300' : 'text-gray-700'
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
+    className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, currentLog.workoutName), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm flex items-center gap-3`
+  }, /*#__PURE__*/React.createElement("span", null, new Date(currentLog.date).toLocaleString('hr-HR', {
+    day: 'numeric',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit'
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "font-mono font-semibold",
+    style: {
+      color: darkMode ? '#4ade80' : '#16a34a'
+    }
+  }, String(Math.floor(elapsedSeconds / 3600)).padStart(2, '0'), ":", String(Math.floor(elapsedSeconds % 3600 / 60)).padStart(2, '0'), ":", String(elapsedSeconds % 60).padStart(2, '0')))))), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 shadow-sm`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-3`
+  }, "Energy level"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2"
+  }, [{
+    value: 'low',
+    Icon: FaceMeh,
+    label: 'Low'
+  }, {
+    value: 'medium',
+    Icon: FaceSmile,
+    label: 'Medium'
+  }, {
+    value: 'high',
+    Icon: FaceLaugh,
+    label: 'High'
+  }].map(option => /*#__PURE__*/React.createElement("button", {
+    key: option.value,
+    onClick: () => updateEnergyLevel(option.value),
+    className: `flex-1 flex flex-col items-center py-2 px-1 rounded-lg text-sm font-medium transition-all ${currentLog.energyLevel === option.value ? darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white' : darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`
+  }, /*#__PURE__*/React.createElement(option.Icon, {
+    size: 18,
+    className: "mb-0.5"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs leading-tight"
+  }, option.label))))), currentLog.exercises.map((exercise, exIdx) => /*#__PURE__*/React.createElement("div", {
+    key: exIdx,
+    className: `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5 shadow-sm transform-gpu relative`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 mb-2"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: exercise.name,
+    onChange: e => updateExerciseName(exIdx, e.target.value),
+    className: `font-bold text-lg ${darkMode ? 'text-white bg-gray-900 border-gray-700' : 'text-gray-900 bg-gray-50 border-gray-300'} border rounded-lg px-3 py-2 flex-1 focus:border-gray-500 focus:outline-none`,
+    placeholder: "Exercise name"
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setSubstituteDropdown(substituteDropdown === exIdx ? null : exIdx);
+      setSubstituteInputValue(''); // Reset input when opening
+    },
+    className: `p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg transition-colors flex-shrink-0`,
+    title: "Swap exercise"
+  }, /*#__PURE__*/React.createElement(RepeatIcon, {
+    size: 18,
+    className: darkMode ? 'text-gray-300' : 'text-gray-700'
+  }))), substituteDropdown === exIdx && (() => {
+    const sameMuscleGroupSuggestions = getMuscleGroupSuggestions(exercise.name);
+    const isSearching = substituteInputValue.length > 0;
+    return /*#__PURE__*/React.createElement("div", {
+      className: `absolute left-5 right-5 mt-1 ${darkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-xl z-50 p-3 max-h-96 overflow-y-auto`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: `text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`
+    }, "Replace with:"), /*#__PURE__*/React.createElement("input", {
+      type: "text",
+      value: substituteInputValue,
+      onChange: e => setSubstituteInputValue(e.target.value),
+      placeholder: "Search all exercises...",
+      className: `w-full px-3 py-2 mb-3 ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg focus:border-gray-500 focus:outline-none`
+    }), !isSearching && sameMuscleGroupSuggestions.length > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+      className: `text-xs font-semibold ${darkMode ? 'text-gray-500' : 'text-gray-500'} mb-2`
+    }, "Same muscle group:"), /*#__PURE__*/React.createElement("div", {
+      className: "space-y-1 mb-3"
+    }, sameMuscleGroupSuggestions.map((suggestion, idx) => /*#__PURE__*/React.createElement("button", {
+      key: idx,
+      onClick: () => {
+        substituteExercise(exIdx, suggestion);
+        setSubstituteInputValue('');
+      },
+      className: `w-full text-left px-3 py-2 ${darkMode ? 'bg-gray-800 hover:bg-gray-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'} rounded-lg transition-colors text-sm`
+    }, suggestion)))), isSearching && (() => {
+      const filtered = allExercises.filter(ex => ex.toLowerCase().includes(substituteInputValue.toLowerCase())).slice(0, 8);
+      return filtered.length > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+        className: `text-xs font-semibold ${darkMode ? 'text-gray-500' : 'text-gray-500'} mb-2`
+      }, "All exercises:"), /*#__PURE__*/React.createElement("div", {
+        className: "space-y-1 mb-3"
+      }, filtered.map((ex, idx) => /*#__PURE__*/React.createElement("button", {
+        key: idx,
+        onClick: () => {
+          substituteExercise(exIdx, ex);
+          setSubstituteInputValue('');
+        },
+        className: `w-full text-left px-3 py-2 ${darkMode ? 'bg-gray-800 hover:bg-gray-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'} rounded-lg transition-colors text-sm`
+      }, ex)))) : /*#__PURE__*/React.createElement("div", {
+        className: `text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'} text-center py-2 mb-3`
+      }, "No exercises found");
+    })(), /*#__PURE__*/React.createElement("button", {
+      onClick: () => {
+        setSubstituteDropdown(null);
+        setSubstituteInputValue('');
+      },
+      className: `w-full px-3 py-1.5 text-xs ${darkMode ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'} rounded transition-colors`
+    }, "Cancel"));
+  })(), /*#__PURE__*/React.createElement("div", {
+    className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`
+  }, "Target: ", exercise.plannedSets, " \xD7 ", formatPlannedTarget(exercise.plannedReps, UNIT_CONFIG[getExerciseUnit(exercise)].label)), (() => {
+    const suggestion = getSmartWeightSuggestion(exercise.name, exercise.plannedReps);
+    if (!suggestion) return null;
+
+    // Color the suggestion line by recommendation type
+    const typeColors = {
+      progress: darkMode ? 'text-green-400' : 'text-green-600',
+      hold: darkMode ? 'text-blue-400' : 'text-blue-600',
+      info: darkMode ? 'text-blue-400' : 'text-blue-600',
+      'rep-up': darkMode ? 'text-blue-400' : 'text-blue-600',
+      deload: darkMode ? 'text-amber-400' : 'text-amber-600',
+      swap: darkMode ? 'text-purple-400' : 'text-purple-600'
+    };
+    const colorClass = typeColors[suggestion.type] || typeColors.info;
+    const unit = getExerciseUnit(exercise);
+    const suggestionText = unit !== 'reps' ? `${suggestion.reps} ${UNIT_CONFIG[unit].label} — ${suggestion.reason}` : suggestion.weight ? `${suggestion.weight} kg — ${suggestion.reason}` : suggestion.reason;
+    return /*#__PURE__*/React.createElement("div", {
+      className: `text-xs ${colorClass} mb-4 flex items-center gap-1`
+    }, /*#__PURE__*/React.createElement(Zap, {
+      size: 14
+    }), /*#__PURE__*/React.createElement("span", null, "Suggestion: ", suggestionText));
+  })(), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3"
+  }, exercise.sets.map((set, setIdx) => /*#__PURE__*/React.createElement("div", {
+    key: setIdx,
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-12 text-center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+  }, "Set"), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'text-white' : 'text-gray-900'} font-bold`
+  }, setIdx + 1)), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    inputMode: "decimal",
+    placeholder: "kg",
+    value: set.weight,
+    onChange: e => updateSet(exIdx, setIdx, 'weight', e.target.value),
+    className: `w-20 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg text-center font-semibold focus:border-gray-500 focus:outline-none`,
+    disabled: !UNIT_CONFIG[getExerciseUnit(exercise)].hasWeight
+  }), /*#__PURE__*/React.createElement("span", {
+    className: `${darkMode ? 'text-gray-500' : 'text-gray-400'} font-bold`
+  }, "\xD7"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    placeholder: UNIT_CONFIG[getExerciseUnit(exercise)].placeholder,
+    value: set.reps,
+    onChange: e => updateSet(exIdx, setIdx, 'reps', e.target.value),
+    className: `w-20 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg text-center font-semibold focus:border-gray-500 focus:outline-none`
+  }), exercise.sets.length > 1 && /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      const updatedLog = {
+        ...currentLog
+      };
+      updatedLog.exercises[exIdx].sets.splice(setIdx, 1);
+      setCurrentLog(updatedLog);
+      soundSystem.buttonPress();
+    },
+    className: `p-2 ${darkMode ? 'bg-red-900/30 hover:bg-red-900/50 text-red-400' : 'bg-red-100 hover:bg-red-200 text-red-600'} rounded-lg transition-colors flex-shrink-0`,
+    title: "Remove set"
+  }, /*#__PURE__*/React.createElement(Trash2, {
+    size: 16
+  })))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      const updatedLog = {
+        ...currentLog
+      };
+      const lastSet = exercise.sets[exercise.sets.length - 1];
+      updatedLog.exercises[exIdx].sets.push({
+        weight: lastSet?.weight || '',
+        reps: lastSet?.reps || exercise.plannedReps
+      });
+      setCurrentLog(updatedLog);
+      soundSystem.buttonPress();
+    },
+    className: `w-full mt-2 px-4 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-lg flex items-center justify-center gap-2 transition-colors text-sm font-medium touch-manipulation`
+  }, /*#__PURE__*/React.createElement(Plus, {
+    size: 16
+  }), "Add Set"), /*#__PURE__*/React.createElement("div", {
+    className: `mt-4 pt-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`
+  }, "How was it? (optional)"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2"
+  }, [{
+    value: 'easy',
+    label: 'Easy'
+  }, {
+    value: 'medium',
+    label: 'Medium'
+  }, {
+    value: 'hard',
+    label: 'Hard'
+  }].map(option => /*#__PURE__*/React.createElement("button", {
+    key: option.value,
+    onClick: () => {
+      const updated = {
+        ...currentLog
+      };
+      updated.exercises[exIdx].difficulty = exercise.difficulty === option.value ? null : option.value;
+      setCurrentLog(updated);
+    },
+    className: `flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${exercise.difficulty === option.value ? darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white' : darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`
+  }, option.label))))))), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-3 sticky bottom-4"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: cancelWorkout,
+    className: `px-6 py-4 ${darkMode ? 'bg-gray-800 hover:bg-gray-700 border-gray-700' : 'bg-white hover:bg-gray-50 border-gray-300'} border text-${darkMode ? 'white' : 'gray-900'} rounded-xl font-semibold transition-all`
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    onClick: finishWorkout,
+    className: "flex-1 px-6 py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-colors transform-gpu"
+  }, "Finish Workout"))), activeView === 'history' && /*#__PURE__*/React.createElement("div", {
+    className: "space-y-4"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-4 flex items-center gap-2`
+  }, /*#__PURE__*/React.createElement(Calendar, {
+    size: 24
+  }), "History"), completedWorkouts.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-12 text-center`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-4 flex justify-center"
+  }, /*#__PURE__*/React.createElement(BarChart3, {
+    size: 64,
+    className: darkMode ? 'text-gray-600' : 'text-gray-400'
+  })), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} text-lg`
+  }, "No workouts yet"), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'text-gray-500' : 'text-gray-500'} text-sm mt-2`
+  }, "Start your first workout to see it here!")) : completedWorkouts.slice().reverse().map(workout => /*#__PURE__*/React.createElement("div", {
+    key: workout.id,
+    className: `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5 shadow-lg`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-start gap-3 mb-4"
+  }, /*#__PURE__*/React.createElement(WorkoutIcon, {
+    emoji: workout.workoutEmoji,
+    size: 32,
+    className: darkMode ? 'text-gray-300' : 'text-gray-700'
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "flex-1"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: `text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, workout.workoutName), /*#__PURE__*/React.createElement("p", {
+    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+  }, new Date(workout.date).toLocaleString('hr-HR', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit'
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-wrap items-center gap-2 mt-1"
+  }, workout.finishedAt && /*#__PURE__*/React.createElement("span", {
+    className: `inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`
+  }, /*#__PURE__*/React.createElement(Clock, {
+    size: 11
+  }), " ", formatDuration(workout.date, workout.finishedAt)), workout.energyLevel && (() => {
+    const cfg = {
+      low: {
+        Icon: FaceMeh,
+        label: 'Low energy',
+        bg: darkMode ? 'bg-red-950' : 'bg-red-100',
+        text: darkMode ? 'text-red-400' : 'text-red-700'
+      },
+      medium: {
+        Icon: FaceSmile,
+        label: 'Medium energy',
+        bg: darkMode ? 'bg-amber-950' : 'bg-amber-100',
+        text: darkMode ? 'text-amber-400' : 'text-amber-700'
+      },
+      high: {
+        Icon: FaceLaugh,
+        label: 'High energy',
+        bg: darkMode ? 'bg-green-950' : 'bg-green-100',
+        text: darkMode ? 'text-green-400' : 'text-green-700'
+      }
+    }[workout.energyLevel];
+    return /*#__PURE__*/React.createElement("span", {
+      className: `inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.text}`
+    }, /*#__PURE__*/React.createElement(cfg.Icon, {
+      size: 12
+    }), " ", cfg.label);
+  })())), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setEditingHistory(JSON.parse(JSON.stringify(workout)));
+      setActiveView('edit-history');
+    },
+    className: `p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg transition-colors`
+  }, /*#__PURE__*/React.createElement(Edit2, {
+    size: 16,
+    className: darkMode ? 'text-gray-300' : 'text-gray-700'
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowDeleteHistory(workout.id),
+    className: "p-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+  }, /*#__PURE__*/React.createElement(Trash2, {
+    size: 16,
+    className: "text-white"
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3"
+  }, workout.exercises.map((ex, exIdx) => {
+    // Filter out skipped sets
+    const completedSets = ex.sets.filter(set => {
+      const weight = parseFloat(set.weight) || 0;
+      const reps = parseFloat(set.reps) || 0;
+
+      // Zero/no weight logged (core, bodyweight, unweighted exercises): only check reps
+      if (weight === 0) return reps > 0;
+      // Weight logged: require both weight and reps
+      return weight > 0 && reps > 0;
+    });
+
+    // Don't render exercise if all sets were skipped
+    if (completedSets.length === 0) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      key: exIdx,
+      className: `border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'} pt-3`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: `font-medium text-sm ${darkMode ? 'text-white' : 'text-gray-900'} mb-2`
+    }, ex.name), /*#__PURE__*/React.createElement("div", {
+      className: "flex flex-wrap gap-2"
+    }, completedSets.map((set, setIdx) => /*#__PURE__*/React.createElement("div", {
+      key: setIdx,
+      className: `${darkMode ? 'bg-gray-900' : 'bg-gray-100'} px-3 py-1 rounded-lg text-sm`
+    }, set.weight && parseFloat(set.weight) > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+      className: `${darkMode ? 'text-gray-300' : 'text-gray-700'} font-semibold`
+    }, set.weight, "kg"), /*#__PURE__*/React.createElement("span", {
+      className: `${darkMode ? 'text-gray-500' : 'text-gray-400'} mx-1`
+    }, "\xD7")) : null, /*#__PURE__*/React.createElement("span", {
+      className: darkMode ? 'text-gray-400' : 'text-gray-600'
+    }, set.reps)))));
+  }))))), activeView === 'edit' && editingWorkout && /*#__PURE__*/React.createElement("div", {
+    className: "space-y-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-5`
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`
+  }, "Edit Workout"), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: editingWorkout.name,
+    onChange: e => setEditingWorkout({
+      ...editingWorkout,
+      name: e.target.value
+    }),
+    className: `w-full px-4 py-3 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg text-lg focus:border-gray-500 focus:outline-none`,
+    placeholder: "Workout name"
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("label", {
+    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-2 block`
+  }, "Select Icon:"), /*#__PURE__*/React.createElement(IconPicker, {
+    selectedEmoji: editingWorkout.emoji || '💪',
+    onSelect: emoji => setEditingWorkout({
+      ...editingWorkout,
+      emoji
+    }),
+    darkMode: darkMode
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3"
+  }, editingWorkout.exercises.map((ex, idx) => /*#__PURE__*/React.createElement("div", {
+    key: `exercise-${idx}`,
+    className: `${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 overflow-visible ${draggedExerciseIndex === idx && isDraggingExercise ? 'opacity-30' : ''} ${dropTargetIndex === idx && draggedExerciseIndex !== idx ? 'ring-2 ring-blue-500' : ''}`,
+    "data-exercise-index": idx
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 mb-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-1"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => moveExerciseUp(idx),
+    disabled: idx === 0,
+    className: `p-1 rounded ${idx === 0 ? 'opacity-30 cursor-not-allowed' : darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} transition-colors`
+  }, /*#__PURE__*/React.createElement(ChevronUp, {
+    size: 16,
+    className: darkMode ? 'text-gray-300' : 'text-gray-700'
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: () => moveExerciseDown(idx),
+    disabled: idx === editingWorkout.exercises.length - 1,
+    className: `p-1 rounded ${idx === editingWorkout.exercises.length - 1 ? 'opacity-30 cursor-not-allowed' : darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} transition-colors`
+  }, /*#__PURE__*/React.createElement(ChevronDown, {
+    size: 16,
+    className: darkMode ? 'text-gray-300' : 'text-gray-700'
+  }))), /*#__PURE__*/React.createElement(ExerciseInput, {
+    value: ex.name,
+    onChange: value => updateExercise(idx, 'name', value),
+    darkMode: darkMode,
+    placeholder: "Exercise name"
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: () => deleteExercise(idx),
+    className: "p-2 bg-red-600 hover:bg-red-700 active:bg-red-800 rounded-lg transition-colors touch-manipulation"
+  }, /*#__PURE__*/React.createElement(Trash2, {
+    size: 20,
+    className: "text-white"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 pl-7 mb-2"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: ex.muscleGroup || getMuscleGroup(ex.name),
+    onChange: e => updateExercise(idx, 'muscleGroup', e.target.value),
+    className: `flex-1 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg focus:border-gray-500 focus:outline-none text-sm`
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "chest"
+  }, "Chest"), /*#__PURE__*/React.createElement("option", {
+    value: "back"
+  }, "Back"), /*#__PURE__*/React.createElement("option", {
+    value: "shoulders"
+  }, "Shoulders"), /*#__PURE__*/React.createElement("option", {
+    value: "legs"
+  }, "Legs"), /*#__PURE__*/React.createElement("option", {
+    value: "arms"
+  }, "Arms"), /*#__PURE__*/React.createElement("option", {
+    value: "core"
+  }, "Core"), /*#__PURE__*/React.createElement("option", {
+    value: "other"
+  }, "Other"))), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 pl-7 mb-2"
+  }, /*#__PURE__*/React.createElement("select", {
+    value: ex.unit || 'auto',
+    onChange: e => updateExercise(idx, 'unit', e.target.value === 'auto' ? undefined : e.target.value),
+    className: `flex-1 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg focus:border-gray-500 focus:outline-none text-sm`
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "auto"
+  }, "Unit: Auto (detected: ", UNIT_CONFIG[getExerciseUnit(ex)].label, ")"), /*#__PURE__*/React.createElement("option", {
+    value: "reps"
+  }, "Unit: Reps"), /*#__PURE__*/React.createElement("option", {
+    value: "seconds"
+  }, "Unit: Seconds"), /*#__PURE__*/React.createElement("option", {
+    value: "meters"
+  }, "Unit: Meters"))), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 pl-7"
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    value: ex.sets,
+    onChange: e => updateExercise(idx, 'sets', parseInt(e.target.value)),
+    className: `w-20 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg text-center focus:border-gray-500 focus:outline-none`,
+    placeholder: "Sets"
+  }), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    value: ex.reps,
+    onChange: e => updateExercise(idx, 'reps', e.target.value),
+    className: `w-24 px-3 py-2 ${darkMode ? 'bg-gray-900 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'} border rounded-lg text-center focus:border-gray-500 focus:outline-none`,
+    placeholder: "Reps"
+  }))))), /*#__PURE__*/React.createElement("button", {
+    onClick: addExercise,
+    className: `w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} text-${darkMode ? 'white' : 'gray-900'} rounded-xl flex items-center justify-center gap-2 transition-colors font-semibold`
+  }, /*#__PURE__*/React.createElement(Plus, {
+    size: 20
+  }), "Add Exercise"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-3"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setEditingWorkout(null);
+      setActiveView('home');
+    },
+    className: `px-6 py-3 ${darkMode ? 'bg-gray-800 hover:bg-gray-700 border-gray-700' : 'bg-white hover:bg-gray-50 border-gray-300'} border text-${darkMode ? 'white' : 'gray-900'} rounded-xl font-semibold transition-colors`
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    onClick: saveEditedWorkout,
+    className: `flex-1 px-6 py-3 ${darkMode ? 'bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500' : 'bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600'} text-white rounded-xl font-semibold transition-all`
+  }, "Save Changes"))), activeView === 'edit-history' && editingHistory && /*#__PURE__*/React.createElement("div", {
+    className: "space-y-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} backdrop-blur border rounded-2xl p-5`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between mb-4"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
+    className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, "Edit Workout"), /*#__PURE__*/React.createElement("p", {
+    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+  }, new Date(editingHistory.date).toLocaleString('hr-HR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-xl p-4 mb-4`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `text-xs font-semibold uppercase tracking-wide ${darkMode ? 'text-gray-400' : 'text-gray-500'} mb-3`
+  }, "Energy level"), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2"
+  }, [{
+    value: 'low',
+    Icon: FaceMeh,
+    label: 'Low'
+  }, {
+    value: 'medium',
+    Icon: FaceSmile,
+    label: 'Medium'
+  }, {
+    value: 'high',
+    Icon: FaceLaugh,
+    label: 'High'
+  }].map(({
+    value,
+    Icon,
+    label
+  }) => /*#__PURE__*/React.createElement("button", {
+    key: value,
+    onClick: () => updateHistoryEnergyLevel(editingHistory.energyLevel === value ? null : value),
+    className: `flex-1 flex flex-col items-center gap-1 py-2 rounded-xl border-2 transition-all text-sm font-semibold
+                        ${editingHistory.energyLevel === value ? value === 'low' ? 'border-red-500 bg-red-500/20 text-red-400' : value === 'medium' ? 'border-amber-500 bg-amber-500/20 text-amber-400' : 'border-green-500 bg-green-500/20 text-green-400' : darkMode ? 'border-gray-700 text-gray-500 hover:border-gray-500' : 'border-gray-200 text-gray-400 hover:border-gray-400'}`
+  }, /*#__PURE__*/React.createElement(Icon, {
+    size: 20
+  }), /*#__PURE__*/React.createElement("span", null, label))))), editingHistory.exercises.map((exercise, exIdx) => /*#__PURE__*/React.createElement("div", {
+    key: exIdx,
+    className: `${darkMode ? 'bg-gray-900/50 border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-xl p-4 mb-4`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-3"
+  }, /*#__PURE__*/React.createElement(ExerciseInput, {
+    value: exercise.name,
+    onChange: v => updateHistoryExerciseName(exIdx, v),
+    darkMode: darkMode,
+    placeholder: "Exercise name"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3"
+  }, exercise.sets.map((set, setIdx) => /*#__PURE__*/React.createElement("div", {
+    key: setIdx,
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-12 text-center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+  }, "Set"), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'text-white' : 'text-gray-900'} font-bold`
+  }, setIdx + 1)), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    inputMode: "decimal",
+    placeholder: "kg",
+    value: set.weight,
+    onChange: e => updateHistorySet(exIdx, setIdx, 'weight', e.target.value),
+    className: `w-20 px-3 py-2 ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded-lg text-center font-semibold focus:border-gray-500 focus:outline-none`
+  }), /*#__PURE__*/React.createElement("span", {
+    className: `${darkMode ? 'text-gray-500' : 'text-gray-400'} font-bold`
+  }, "\xD7"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    placeholder: "reps",
+    value: set.reps,
+    onChange: e => updateHistorySet(exIdx, setIdx, 'reps', e.target.value),
+    className: `w-20 px-3 py-2 ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded-lg text-center font-semibold focus:border-gray-500 focus:outline-none`
+  })))))), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-3 mt-6"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setEditingHistory(null);
+      setActiveView('history');
+    },
+    className: `px-6 py-3 ${darkMode ? 'bg-gray-800 hover:bg-gray-700 border-gray-700' : 'bg-white hover:bg-gray-50 border-gray-300'} border rounded-xl font-semibold transition-colors ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    onClick: saveEditedHistory,
+    className: `flex-1 px-6 py-3 ${darkMode ? 'bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500' : 'bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600'} text-white rounded-xl font-semibold transition-all`
+  }, "Save Changes"))))), isDraggingExercise && draggedExerciseIndex !== null && editingWorkout && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'fixed',
+      left: draggedExercisePosition.x,
+      top: draggedExercisePosition.y,
+      transform: 'translate(-50%, -50%)',
+      pointerEvents: 'none',
+      zIndex: 10000,
+      width: '90%',
+      maxWidth: '400px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-4 shadow-2xl opacity-90`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 mb-2"
+  }, /*#__PURE__*/React.createElement(GripVertical, {
+    size: 20,
+    className: darkMode ? 'text-gray-500' : 'text-gray-400'
+  }), /*#__PURE__*/React.createElement("div", {
+    className: `flex-1 font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, editingWorkout.exercises[draggedExerciseIndex].name || 'Exercise')), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2 pl-7"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+  }, editingWorkout.exercises[draggedExerciseIndex].sets, " sets \xD7", ' ', editingWorkout.exercises[draggedExerciseIndex].reps, " reps")))), showDeleteConfirm && /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-md w-full shadow-2xl`
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-2`
+  }, "Delete Workout Day?"), /*#__PURE__*/React.createElement("p", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-6`
+  }, "Are you sure you want to delete this workout day? This action cannot be undone."), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-3"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowDeleteConfirm(null),
+    className: `flex-1 px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-xl font-semibold transition-colors`
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => deleteWorkoutDay(showDeleteConfirm),
+    className: "flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors"
+  }, "Delete")))), showDeleteProgram !== null && /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 bg-black/50 flex items-center justify-center p-4",
+    style: {
+      zIndex: 9999
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl p-6 max-w-md w-full`
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: `text-lg font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, "Delete program?"), /*#__PURE__*/React.createElement("p", {
+    className: `text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+  }, "Delete \"", (programs.find(p => p.id === showDeleteProgram) || {}).name, "\" and its ", ((programs.find(p => p.id === showDeleteProgram) || {}).workouts || []).length, " workout day(s)? Logged history is kept."), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowDeleteProgram(null),
+    className: `flex-1 px-4 py-2 rounded-lg font-semibold ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-900'}`
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => deleteProgram(showDeleteProgram),
+    className: "flex-1 px-4 py-2 rounded-lg font-semibold bg-red-600 text-white"
+  }, "Delete")))), showAddDay && /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-md w-full shadow-2xl`
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-2`
+  }, "Add New Workout Day"), /*#__PURE__*/React.createElement("p", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-6`
+  }, "This will create a new workout day that you can customize with your exercises."), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-3"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowAddDay(false),
+    className: `flex-1 px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-xl font-semibold transition-colors`
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    onClick: addNewWorkoutDay,
+    className: `flex-1 px-4 py-3 ${darkMode ? 'bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500' : 'bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600'} text-white rounded-xl font-semibold transition-colors`
+  }, "Add Day")))), showDeleteHistory && /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-md w-full shadow-2xl`
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-2`
+  }, "Delete Workout Entry?"), /*#__PURE__*/React.createElement("p", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-6`
+  }, "Are you sure you want to delete this workout from your history? This will affect your statistics and cannot be undone."), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-3"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShowDeleteHistory(null),
+    className: `flex-1 px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-xl font-semibold transition-colors`
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => deleteHistoryEntry(showDeleteHistory),
+    className: "flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-colors"
+  }, "Delete")))), show1RMModal && /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4",
+    onClick: () => setShow1RMModal(null)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto`,
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between mb-6"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, show1RMModal.exerciseName, " - 1RM Progression"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setShow1RMModal(null),
+    className: `p-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg transition-colors`
+  }, /*#__PURE__*/React.createElement(X, {
+    size: 20,
+    className: darkMode ? 'text-gray-300' : 'text-gray-700'
+  }))), show1RMModal.data.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: `text-center py-12 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+  }, "No 1RM data available") : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "space-y-2 mb-6"
+  }, show1RMModal.data.map((entry, idx) => /*#__PURE__*/React.createElement("div", {
+    key: idx,
+    className: `flex justify-between items-center p-3 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+  }, new Date(entry.date).toLocaleDateString('hr-HR')), /*#__PURE__*/React.createElement("div", {
+    className: `font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, entry.estimated1RM.toFixed(1), " kg")))), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-4`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+  }, "Progress"), /*#__PURE__*/React.createElement("div", {
+    className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, show1RMModal.data.length > 1 ? `+${(show1RMModal.data[show1RMModal.data.length - 1].estimated1RM - show1RMModal.data[0].estimated1RM).toFixed(1)} kg` : '--'), show1RMModal.data.length > 1 && /*#__PURE__*/React.createElement("div", {
+    className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'} mt-1`
+  }, "from ", show1RMModal.data.length, " workouts"))))), selectedTimelinePoint && /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 overflow-y-auto",
+    onClick: e => {
+      if (e.target === e.currentTarget) {
+        setSelectedTimelinePoint(null);
+      }
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-md w-full shadow-2xl my-8`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between mb-4"
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, "Week of ", new Date(selectedTimelinePoint.date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setSelectedTimelinePoint(null),
+    className: `p-2 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} rounded-lg transition-colors`
+  }, /*#__PURE__*/React.createElement(X, {
+    size: 20,
+    className: darkMode ? 'text-gray-400' : 'text-gray-600'
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-2 gap-3 mb-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-4`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+  }, "Total Volume"), /*#__PURE__*/React.createElement("div", {
+    className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, (selectedTimelinePoint.volume / 1000).toFixed(1), "k"), /*#__PURE__*/React.createElement("div", {
+    className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
+  }, "kg")), /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-4`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-1`
+  }, "Total Reps"), /*#__PURE__*/React.createElement("div", {
+    className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, selectedTimelinePoint.reps), /*#__PURE__*/React.createElement("div", {
+    className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
+  }, "reps"))), (selectedTimelinePoint.mainLifts.deadlift || selectedTimelinePoint.mainLifts.squat || selectedTimelinePoint.mainLifts.bench || selectedTimelinePoint.mainLifts.ohp) && /*#__PURE__*/React.createElement("div", {
+    className: "mb-6"
+  }, /*#__PURE__*/React.createElement("h4", {
+    className: `text-sm font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`
+  }, "Main Lifts (Max Weight)"), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-2"
+  }, selectedTimelinePoint.mainLifts.deadlift && /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-between items-center"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+  }, "Deadlift"), /*#__PURE__*/React.createElement("span", {
+    className: `text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, selectedTimelinePoint.mainLifts.deadlift, " kg")), selectedTimelinePoint.mainLifts.squat && /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-between items-center"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+  }, "Squat"), /*#__PURE__*/React.createElement("span", {
+    className: `text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, selectedTimelinePoint.mainLifts.squat, " kg")), selectedTimelinePoint.mainLifts.bench && /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-between items-center"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+  }, "Bench Press"), /*#__PURE__*/React.createElement("span", {
+    className: `text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, selectedTimelinePoint.mainLifts.bench, " kg")), selectedTimelinePoint.mainLifts.ohp && /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-between items-center"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+  }, "Overhead Press"), /*#__PURE__*/React.createElement("span", {
+    className: `text-sm font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`
+  }, selectedTimelinePoint.mainLifts.ohp, " kg")))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h4", {
+    className: `text-sm font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`
+  }, "Workouts Completed (", selectedTimelinePoint.workouts.length, ")"), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-2 max-h-48 overflow-y-auto"
+  }, selectedTimelinePoint.workouts.map((workout, idx) => /*#__PURE__*/React.createElement("div", {
+    key: idx,
+    className: `${darkMode ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-3 flex items-center justify-between`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2"
+  }, /*#__PURE__*/React.createElement(WorkoutIcon, {
+    emoji: workout.workoutEmoji,
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'}`,
+    size: 16
+  }), /*#__PURE__*/React.createElement("span", {
+    className: `text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+  }, workout.workoutName)), /*#__PURE__*/React.createElement("span", {
+    className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`
+  }, new Date(workout.date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric'
+  })))))), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setSelectedTimelinePoint(null),
+    className: `w-full mt-6 px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-xl font-semibold transition-colors touch-manipulation`
+  }, "Close")))), showResumePrompt && /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-2xl p-6 max-w-md w-full shadow-2xl`
+  }, /*#__PURE__*/React.createElement("h3", {
+    className: `text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'} mb-2`
+  }, "Resume Workout?"), /*#__PURE__*/React.createElement("p", {
+    className: `${darkMode ? 'text-gray-400' : 'text-gray-600'} mb-6`
+  }, "You have an unfinished workout. Would you like to continue where you left off?"), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-3"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: resumeSavedWorkout,
+    className: `w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors touch-manipulation`
+  }, "Resume Workout"), /*#__PURE__*/React.createElement("button", {
+    onClick: discardSavedWorkout,
+    className: `w-full px-4 py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-900'} rounded-xl font-semibold transition-colors touch-manipulation`
+  }, "Start Fresh")))), currentLog && activeView !== 'logging' && /*#__PURE__*/React.createElement("div", {
+    onClick: () => setActiveView('logging'),
+    className: "fixed-bottom-nav-banner flex items-center justify-between px-4 py-2 bg-green-600 hover:bg-green-700 cursor-pointer transition-colors",
+    style: {
+      bottom: '72px',
+      left: 0,
+      right: 0,
+      position: 'fixed',
+      zIndex: 9997
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "text-white text-sm font-semibold"
+  }, "\u23F1 Workout in progress \u2014 tap to return"), /*#__PURE__*/React.createElement("span", {
+    className: "text-green-200 text-xs"
+  }, "Resume \u2192")), /*#__PURE__*/React.createElement("div", {
+    className: `fixed-bottom-nav ${darkMode ? 'bg-gray-900' : 'bg-white'} border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'} px-4 py-3`
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "max-w-6xl mx-auto flex justify-around"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setActiveView('home'),
+    className: `flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${activeView === 'home' || activeView === 'edit' || activeView === 'logging' ? darkMode ? 'text-gray-300' : 'text-gray-900' : darkMode ? 'text-gray-600' : 'text-gray-400'}`
+  }, /*#__PURE__*/React.createElement(Dumbbell, {
+    size: 24
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs font-medium"
+  }, "Workouts")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setActiveView('stats'),
+    className: `flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${activeView === 'stats' ? darkMode ? 'text-gray-300' : 'text-gray-900' : darkMode ? 'text-gray-600' : 'text-gray-400'}`
+  }, /*#__PURE__*/React.createElement(BarChart3, {
+    size: 24
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs font-medium"
+  }, "Stats")), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setActiveView('history'),
+    className: `flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${activeView === 'history' ? darkMode ? 'text-gray-300' : 'text-gray-900' : darkMode ? 'text-gray-600' : 'text-gray-400'}`
+  }, /*#__PURE__*/React.createElement(Calendar, {
+    size: 24
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "text-xs font-medium"
+  }, "History")))));
+};
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(/*#__PURE__*/React.createElement(WorkoutTracker, null));
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
