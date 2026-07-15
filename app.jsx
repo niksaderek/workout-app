@@ -117,6 +117,7 @@
         'Goblet Squat',
         'Bodyweight Squat',
         'Leg Press',
+        'Machine Squat',
         'Hack Squat',
         'Bulgarian Split Squat',
         'Lunges',
