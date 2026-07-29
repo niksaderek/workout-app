@@ -2203,16 +2203,19 @@ const WorkoutTracker = () => {
       console.error('Error saving body weight:', error);
     }
   };
-  const getLastWeight = exerciseName => {
+
+  // FUNC_ID: getLastSessionSets | The sets array from the most recent session of an exercise
+  // Used to prefill each set box with what you actually lifted for THAT set last
+  // time (ramping/drop sets differ per set), instead of one value repeated.
+  const getLastSessionSets = exerciseName => {
     for (let i = completedWorkouts.length - 1; i >= 0; i--) {
       const workout = completedWorkouts[i];
       const exercise = workout.exercises.find(ex => ex.name === exerciseName);
-      if (exercise && exercise.sets.length > 0) {
-        const lastSet = exercise.sets.find(s => s.weight);
-        if (lastSet) return lastSet.weight;
+      if (exercise && exercise.sets && exercise.sets.some(s => s.weight || s.reps)) {
+        return exercise.sets;
       }
     }
-    return '';
+    return null;
   };
   const calculateEstimated1RM = (weight, reps) => {
     // Epley formula: 1RM = weight × (1 + reps / 30)
@@ -2264,18 +2267,54 @@ const WorkoutTracker = () => {
       }
     }
 
-    // Fallback: keyword-based categorization for custom exercises
-    const keywords = {
-      chest: ['bench', 'press', 'fly', 'chest', 'pec'],
-      back: ['row', 'pull', 'lat', 'deadlift', 'mrtvo', 'chin'],
-      shoulders: ['raise', 'shoulder', 'delt', 'overhead', 'military', 'arnold'],
-      legs: ['squat', 'lunge', 'leg', 'calf', 'čučanj', 'hip thrust', 'glute', 'wall sit', 'pistol', 'step-up'],
-      arms: ['curl', 'extension', 'tricep', 'bicep'],
-      core: ['plank', 'crunch', 'ab', 'core', 'pallof', 'rollout', 'bug', 'sit-up', 'leg raise', 'v-up', 'flutter']
-    };
-    for (const [group, words] of Object.entries(keywords)) {
-      if (words.some(word => normalizedName.includes(word))) {
-        return group;
+    // Fallback for custom exercises: ordered rules, most specific phrase first.
+    // Order is the logic — "leg press" must beat the generic "press", "lateral
+    // raise" must beat "lat", "leg raise" must beat "raise". Generic single-word
+    // keywords live at the bottom and only fire when nothing specific matched.
+    const RULES = [
+    // Specific multi-word movements
+    {
+      group: 'core',
+      words: ['leg raise', 'knee raise', 'pallof', 'ab wheel', 'sit-up', 'situp', 'v-up', 'dead bug', 'flutter', 'russian twist', 'hollow']
+    }, {
+      group: 'shoulders',
+      words: ['lateral raise', 'front raise', 'rear delt', 'shoulder press', 'overhead press', 'military press', 'arnold press', 'face pull', 'upright row', 'shrug']
+    }, {
+      group: 'arms',
+      words: ['triceps extension', 'tricep extension', 'overhead triceps', 'skull crusher', 'pushdown', 'preacher']
+    }, {
+      group: 'legs',
+      words: ['leg press', 'leg curl', 'leg extension', 'leg push', 'calf raise', 'hip thrust', 'wall sit', 'step-up', 'split squat', 'hack squat', 'goblet squat']
+    }, {
+      group: 'back',
+      words: ['back extension', 'hyperextension', 'lat pulldown', 'pull-up', 'pullup', 'chin-up', 'chinup', 'pullover']
+    }, {
+      group: 'chest',
+      words: ['bench press', 'chest press', 'chest fly', 'pec deck', 'push-up', 'pushup']
+    },
+    // Generic single-word keywords
+    {
+      group: 'core',
+      words: ['plank', 'crunch', 'core', 'rollout', 'oblique']
+    }, {
+      group: 'legs',
+      words: ['squat', 'lunge', 'calf', 'čučanj', 'glute', 'hamstring', 'quad', 'pistol', 'leg']
+    }, {
+      group: 'back',
+      words: ['deadlift', 'mrtvo', 'row', 'lat', 'pulldown', 'chin', 'pull']
+    }, {
+      group: 'arms',
+      words: ['curl', 'tricep', 'bicep', 'extension', 'dip']
+    }, {
+      group: 'shoulders',
+      words: ['shoulder', 'delt', 'overhead', 'military', 'arnold', 'raise']
+    }, {
+      group: 'chest',
+      words: ['bench', 'chest', 'pec', 'fly', 'press']
+    }];
+    for (const rule of RULES) {
+      if (rule.words.some(word => normalizedName.includes(word))) {
+        return rule.group;
       }
     }
     return 'other'; // Default fallback
@@ -2784,6 +2823,39 @@ const WorkoutTracker = () => {
   // Returns { weight, reps?, reason, type } or null. type in:
   //   progress | hold | deload | swap | rep-up | info  (drives color/icon in the logging UI)
   const getSmartWeightSuggestion = (exerciseName, plannedReps = null) => {
+    const result = computeWeightSuggestion(exerciseName, plannedReps);
+    if (!result) return result;
+    return {
+      ...result,
+      lastSummary: getLastSessionSummary(exerciseName)
+    };
+  };
+
+  // FUNC_ID: getLastSessionSummary | One-line recap of the most recent session for an exercise
+  // Returns e.g. "60 kg × 8 top set · 3 sets · 1440 kg volume", or null when no history.
+  const getLastSessionSummary = exerciseName => {
+    const history = getExerciseHistory(exerciseName, 1);
+    if (history.length === 0) return null;
+    const last = history[0];
+    const unit = getExerciseUnit({
+      name: exerciseName
+    });
+    const label = UNIT_CONFIG[unit].label;
+    if (unit !== 'reps') {
+      if (!last.topSetRepsHit) return null;
+      return last.bestWeight > 0 ? `Last time: ${last.bestWeight.toFixed(1)} kg × ${last.topSetRepsHit} ${label} best set` : `Last time: ${last.topSetRepsHit} ${label} best set`;
+    }
+    const parts = [];
+    if (last.bestWeight > 0) {
+      parts.push(`${last.bestWeight.toFixed(1)} kg × ${last.topSetRepsHit} top set`);
+    } else {
+      parts.push(`${last.topSetRepsHit} ${label} top set`);
+    }
+    if (last.totalReps > 0) parts.push(`${last.totalReps} total ${label}`);
+    if (last.totalVolume > 0) parts.push(`${Math.round(last.totalVolume)} kg volume`);
+    return `Last time: ${parts.join(' · ')}`;
+  };
+  const computeWeightSuggestion = (exerciseName, plannedReps = null) => {
     const history = getExerciseHistory(exerciseName, 5);
 
     // 1. No usable history -> no suggestion (unchanged behavior)
@@ -2801,21 +2873,26 @@ const WorkoutTracker = () => {
       if (!lastVal) return null;
       const cfg = UNIT_CONFIG[unit];
       const diff = last.difficulty;
+      // Loaded carries (farmer's walk, weighted plank) record a weight too — carry it
+      // through so the suggestion says what to load, not just the distance/time.
+      const carryWeight = cfg.hasWeight && last.bestWeight > 0 ? last.bestWeight.toFixed(1) : '';
       if (history.length >= 2) {
-        const prevBest = Math.max(...history.slice(0, -1).map(w => w.topSetRepsHit || 0));
-        if (lastVal > prevBest) {
+        const prev = history[history.length - 2];
+        const prevVal = prev.topSetRepsHit || 0;
+        if (lastVal > prevVal) {
+          const d = lastVal - prevVal;
           return {
-            weight: '',
+            weight: carryWeight,
             reps: String(lastVal),
-            reason: `${cfg.label} up — great progress, keep going`,
+            reason: `+${d} ${cfg.label} vs last time — great progress, keep going`,
             type: 'progress'
           };
         }
-        if (lastVal < prevBest) {
+        if (lastVal < prevVal) {
           return {
-            weight: '',
-            reps: String(prevBest),
-            reason: `${prevBest} ${cfg.label} was your best — aim to match it`,
+            weight: carryWeight,
+            reps: String(prevVal),
+            reason: `${prevVal} ${cfg.label} last time — aim to match it`,
             type: 'hold'
           };
         }
@@ -2823,14 +2900,14 @@ const WorkoutTracker = () => {
       if (diff === 'easy') {
         const bump = 5; // +5 sec or +5 m
         return {
-          weight: '',
+          weight: carryWeight,
           reps: String(lastVal + bump),
           reason: `felt easy — try ${lastVal + bump} ${cfg.label}`,
           type: 'progress'
         };
       }
       return {
-        weight: '',
+        weight: carryWeight,
         reps: String(lastVal),
         reason: `last time ${lastVal} ${cfg.label} — match or beat it`,
         type: 'info'
@@ -2855,25 +2932,26 @@ const WorkoutTracker = () => {
           type: 'info'
         };
       }
-      const prevBest = Math.max(...history.slice(0, -1).map(w => w.topSetRepsHit || 0));
-      if (latestReps > prevBest) {
-        const dReps = latestReps - prevBest;
+      const prevReps = history[history.length - 2].topSetRepsHit || 0;
+      const bestEver = Math.max(...history.slice(0, -1).map(w => w.topSetRepsHit || 0));
+      if (latestReps > prevReps) {
+        const dReps = latestReps - prevReps;
         return {
           weight: '',
-          reps: String(latestReps),
-          reason: `+${dReps} rep${dReps > 1 ? 's' : ''} — reps up, keep going`,
+          reps: String(latestReps + 1),
+          reason: `+${dReps} rep${dReps > 1 ? 's' : ''} vs last time — reps up, keep going`,
           type: 'progress'
         };
       }
-      if (latestReps < prevBest) {
+      if (latestReps < prevReps) {
         return {
           weight: '',
-          reps: String(prevBest),
-          reason: `${prevBest} reps was your best — aim to match it`,
+          reps: String(bestEver),
+          reason: `${bestEver} reps was your best — aim to match it`,
           type: 'hold'
         };
       }
-      // Same reps as previous best
+      // Same reps as last session
       if (diff === 'easy') {
         return {
           weight: '',
@@ -2939,30 +3017,41 @@ const WorkoutTracker = () => {
     // Flat/declining = current not exceeding earlier best by >1%
     const isPlateau = history.length >= 3 && currentMetric <= earlierBest * 1.01;
 
-    // Volume/rep-progress override: even if e1RM/weight didn't move, more total
-    // volume or reps vs the earliest session in the window means real progress.
-    // Compare against the WORST prior session (not just prev) so holding a volume
-    // gain isn't misread as a plateau.
-    if (isPlateau && history.length >= 2) {
-      const priorSessions = history.slice(0, -1);
-      const earliestVolume = Math.min(...priorSessions.map(w => w.totalVolume || 0));
-      const earliestReps = Math.min(...priorSessions.map(w => w.totalReps || 0));
-      const volumeUp = latest.totalVolume > earliestVolume * 1.01;
-      const repsUp = !volumeUp && latest.totalReps > earliestReps;
-      if (volumeUp) {
-        const delta = Math.round(latest.totalVolume - earliestVolume);
+    // Progress check vs the PREVIOUS session (session-to-session read).
+    // Progress is any of: heavier top set, more reps on the top set, or more total
+    // volume. Runs before the plateau branches so a real gain is never reported as
+    // a stall, and it does not require a plateau to have been detected first.
+    if (history.length >= 2) {
+      const prevSession = history[history.length - 2];
+      const weightUp = latest.bestWeight > prevSession.bestWeight;
+      const topRepsUp = latest.bestWeight >= prevSession.bestWeight && latest.topSetRepsHit > prevSession.topSetRepsHit;
+      const volumeUp = latest.totalVolume > prevSession.totalVolume * 1.01;
+      if (weightUp) {
+        const dKg = roundToHalf(latest.bestWeight - prevSession.bestWeight).toFixed(1);
+        // Recovering toward an earlier heavier session reads differently than a new high
+        const bestPrior = Math.max(...history.slice(0, -1).map(w => w.bestWeight));
+        const tail = latest.bestWeight < bestPrior ? ` — your best is ${bestPrior.toFixed(1)} kg, climb back to it` : ' — keep building';
         return {
-          weight: lastWeight.toFixed(1),
-          reason: `+${delta} kg total volume vs your baseline — solid progress, push for more weight`,
+          weight: roundToHalf(lastWeight + (difficulty === 'easy' ? 2.5 : 0)).toFixed(1),
+          reason: `+${dKg} kg on your top set vs last time${tail}`,
           type: 'progress'
         };
       }
-      if (repsUp) {
-        const delta = latest.totalReps - earliestReps;
+      if (topRepsUp) {
+        const dReps = latest.topSetRepsHit - prevSession.topSetRepsHit;
+        const targetNote = plannedRepTarget && latest.topSetRepsHit >= plannedRepTarget ? ` — target hit, add 2.5 kg` : ` — push for one more`;
+        return {
+          weight: plannedRepTarget && latest.topSetRepsHit >= plannedRepTarget ? roundToHalf(lastWeight + 2.5).toFixed(1) : lastWeight.toFixed(1),
+          reason: `+${dReps} rep${dReps > 1 ? 's' : ''} on your top set vs last time${targetNote}`,
+          type: 'rep-up'
+        };
+      }
+      if (volumeUp) {
+        const delta = Math.round(latest.totalVolume - prevSession.totalVolume);
         return {
           weight: lastWeight.toFixed(1),
-          reason: `+${delta} total rep${delta > 1 ? 's' : ''} vs your baseline — keep climbing`,
-          type: 'rep-up'
+          reason: `+${delta} kg total volume vs last time — solid progress, push for more weight`,
+          type: 'progress'
         };
       }
     }
@@ -3077,7 +3166,18 @@ const WorkoutTracker = () => {
       energyLevel: null,
       exercises: workout.exercises.map(ex => {
         const prefillUnit = getExerciseUnit(ex);
-        const lastWeight = prefillUnit === 'reps' ? getLastWeight(ex.name) : '';
+        const hasWeight = UNIT_CONFIG[prefillUnit].hasWeight;
+        // Prefill each set with the weight used for that same set last session, so
+        // ramping/drop schemes come back as they were logged. Falls back to the
+        // last set that had a weight when last session ran fewer sets.
+        const lastSets = hasWeight ? getLastSessionSets(ex.name) : null;
+        const lastWeightFor = setIdx => {
+          if (!lastSets) return '';
+          const exact = lastSets[setIdx];
+          if (exact && exact.weight) return exact.weight;
+          const withWeight = lastSets.filter(s => s.weight);
+          return withWeight.length ? withWeight[withWeight.length - 1].weight : '';
+        };
         return {
           name: ex.name,
           plannedSets: ex.sets,
@@ -3089,8 +3189,8 @@ const WorkoutTracker = () => {
           // explicit override only; undefined => history reader auto-detects
           difficulty: null,
           // User can optionally rate difficulty
-          sets: Array(ex.sets).fill(null).map(() => ({
-            weight: lastWeight,
+          sets: Array(ex.sets).fill(null).map((_, setIdx) => ({
+            weight: lastWeightFor(setIdx),
             reps: ex.reps
           }))
         };
@@ -3941,37 +4041,62 @@ const WorkoutTracker = () => {
         return s + (w > 0 ? w * r : 0);
       }, 0);
     }, 0);
+
+    // Volume is dominated by which workout day it was (a leg/pull day always
+    // out-volumes an arm/push day), so raw means across energy levels mostly
+    // measure day-type mix, not energy. Normalize every session against its OWN
+    // workout day's mean volume, then compare those relative figures.
+    const mean = arr => arr.length === 0 ? null : arr.reduce((a, b) => a + b, 0) / arr.length;
+    const dayVolumes = {};
+    rated.forEach(w => {
+      const key = w.workoutName || w.workoutId;
+      (dayVolumes[key] = dayVolumes[key] || []).push(getWorkoutVolume(w));
+    });
     const groups = {
       low: [],
       medium: [],
       high: []
     };
-    rated.forEach(w => groups[w.energyLevel].push(getWorkoutVolume(w)));
-    const mean = arr => arr.length === 0 ? null : arr.reduce((a, b) => a + b, 0) / arr.length;
-    const meanLow = mean(groups.low);
-    const meanMedium = mean(groups.medium);
-    const meanHigh = mean(groups.high);
-    const baseline = meanMedium ?? meanLow ?? meanHigh ?? 1;
+    rated.forEach(w => {
+      const key = w.workoutName || w.workoutId;
+      const dayMean = mean(dayVolumes[key]);
+      // Need at least 2 sessions of a day type to have a meaningful day baseline
+      if (dayVolumes[key].length < 2 || !dayMean) return;
+      groups[w.energyLevel].push(getWorkoutVolume(w) / dayMean);
+    });
+
+    // Require a real sample per level before reporting it. Below this, a single
+    // heavy or light session swings the whole bar and the chart misleads.
+    const MIN_PER_LEVEL = 5;
+    const relMean = lvl => groups[lvl].length >= MIN_PER_LEVEL ? mean(groups[lvl]) : null;
+    const relLow = relMean('low');
+    const relMedium = relMean('medium');
+    const relHigh = relMean('high');
+    const shown = [relLow, relMedium, relHigh].filter(v => v !== null);
+    if (shown.length < 2) return null; // nothing to compare against
+
+    const baseline = relMedium ?? mean(shown);
     const pct = val => val === null ? null : Math.round((val - baseline) / baseline * 100);
+    const counted = ['low', 'medium', 'high'].reduce((n, lvl) => n + (relMean(lvl) === null ? 0 : groups[lvl].length), 0);
     return {
-      total: rated.length,
+      total: counted,
       rows: [{
         level: 'high',
         label: 'High',
-        mean: meanHigh,
-        delta: pct(meanHigh)
+        mean: relHigh,
+        delta: pct(relHigh)
       }, {
         level: 'medium',
         label: 'Medium',
-        mean: meanMedium,
-        delta: pct(meanMedium)
+        mean: relMedium,
+        delta: pct(relMedium)
       }, {
         level: 'low',
         label: 'Low',
-        mean: meanLow,
-        delta: pct(meanLow)
+        mean: relLow,
+        delta: pct(relLow)
       }].filter(r => r.mean !== null),
-      maxMean: Math.max(meanLow ?? 0, meanMedium ?? 0, meanHigh ?? 0)
+      maxMean: Math.max(relLow ?? 0, relMedium ?? 0, relHigh ?? 0)
     };
   };
   const getTimelineData = () => {
@@ -4737,7 +4862,7 @@ const WorkoutTracker = () => {
       className: `w-12 text-right text-sm font-medium ${row.delta === null || row.delta === 0 ? darkMode ? 'text-gray-400' : 'text-gray-500' : row.delta > 0 ? 'text-green-500' : 'text-red-500'}`
     }, row.delta === null || row.delta === 0 ? 'avg' : `${row.delta > 0 ? '+' : ''}${row.delta}%`)))), /*#__PURE__*/React.createElement("div", {
       className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'} mt-3`
-    }, "Based on ", stats.total, " rated workouts \xB7 vs your average volume"));
+    }, "Based on ", stats.total, " rated workouts \xB7 each compared to that workout day's own average volume"));
   })(), (() => {
     const bestSets = getMainLiftsBestSets();
     const hasLifts = Object.keys(bestSets).length > 0;
@@ -5242,12 +5367,16 @@ const WorkoutTracker = () => {
     };
     const colorClass = typeColors[suggestion.type] || typeColors.info;
     const unit = getExerciseUnit(exercise);
-    const suggestionText = unit !== 'reps' ? `${suggestion.reps} ${UNIT_CONFIG[unit].label} — ${suggestion.reason}` : suggestion.weight ? `${suggestion.weight} kg — ${suggestion.reason}` : suggestion.reason;
+    const suggestionText = unit !== 'reps' ? suggestion.weight ? `${suggestion.weight} kg × ${suggestion.reps} ${UNIT_CONFIG[unit].label} — ${suggestion.reason}` : `${suggestion.reps} ${UNIT_CONFIG[unit].label} — ${suggestion.reason}` : suggestion.weight ? `${suggestion.weight} kg — ${suggestion.reason}` : suggestion.reason;
     return /*#__PURE__*/React.createElement("div", {
-      className: `text-xs ${colorClass} mb-4 flex items-center gap-1`
+      className: "mb-4"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: `text-xs ${colorClass} flex items-center gap-1`
     }, /*#__PURE__*/React.createElement(Zap, {
       size: 14
-    }), /*#__PURE__*/React.createElement("span", null, "Suggestion: ", suggestionText));
+    }), /*#__PURE__*/React.createElement("span", null, "Suggestion: ", suggestionText)), suggestion.lastSummary && /*#__PURE__*/React.createElement("div", {
+      className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'} mt-1 ml-5`
+    }, suggestion.lastSummary));
   })(), /*#__PURE__*/React.createElement("div", {
     className: "space-y-3"
   }, exercise.sets.map((set, setIdx) => /*#__PURE__*/React.createElement("div", {
