@@ -1,184 +1,172 @@
 # 💪 Workout Pro
 
-A modern, feature-rich Progressive Web App (PWA) for tracking workouts with offline support, statistics, and progress monitoring.
+A React-based Progressive Web App (PWA) for tracking workouts — offline-first, with programs, statistics, strength standards, and coaching-style recommendations. All data stays on your device.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![PWA](https://img.shields.io/badge/PWA-enabled-brightgreen.svg)
 
 ## ✨ Features
 
-- 📊 **Detailed Statistics** - Track volume, reps, personal records, and progress over time
-- 💪 **Personal Records** - Monitor strength gains on main compound lifts (competition-style variants only — Leg Press, RDL, Dumbbell variants are excluded from main-lift totals to keep Strength Standards accurate)
-- 🧠 **Proactive Recommendations** - Multi-workout coaching: plateau detection, deload cues, exercise-swap suggestions, "+1 rep last time, push for one more" prompts, and bodyweight-aware progress (same lift at lower bodyweight is flagged as a strength gain)
-- 📏 **Per-Exercise Units** - Reps, seconds, or meters per exercise (auto-detected by name; override per template). Time/distance work is counted separately from weighted volume
-- ⚖️ **Body Weight & Strength Standards** - Gender-specific Symmetric Strength bands (Untrained → Elite) computed from estimated 1RM relative to current bodyweight
-- 📱 **Progressive Web App** - Install on Android/iOS as a native app
-- 💾 **Offline Support** - Works completely offline with IndexedDB storage
-- 🌓 **Dark/Light Mode** - Comfortable viewing in any lighting condition
-- 📈 **Progress Tracking** - Weekly and monthly analytics with trend comparisons
-- 📥 **CSV Export & JSON Backup** - Export history to CSV; full backup/restore via JSON (workouts, history, bodyweight, gender)
-- ⚡ **Progressive Overload** - Pre-fills weights from previous workouts and adjusts suggestions by your difficulty rating
-- 🔒 **Privacy First** - All data stays on your device, no backend required
+- 🗂️ **Multiple Programs** - Keep several training programs side by side, switch the active one, rename/delete, import a markdown file as a new program, and export a program back out. Workout history is tagged with the program it was logged under, so stats can be filtered per program or viewed across all
+- 📊 **Detailed Statistics** - Volume, reps, sets, personal records, weekly (Mon–Sun calendar week) and monthly comparisons, all-time totals
+- 💪 **Strength Standards** - Gender-specific Symmetric Strength bands (Untrained → Elite) from estimated 1RM relative to bodyweight. Only competition-style barbell variants count toward main lifts (Squat, Bench Press, Deadlift, Overhead Press) — Leg Press, RDL, dumbbell variants are deliberately excluded to keep the bands meaningful
+- 🧠 **Proactive Recommendations** - Progress detection, plateau detection, deload cues, exercise-swap suggestions, "+1 rep last time, push for one more" prompts, and bodyweight-aware progress (same lift at lower bodyweight is a strength gain)
+- 🔋 **Energy Level Logging** - Rate a session low / medium / high; energy shows on the volume timeline and feeds an energy-vs-volume stats section (which only renders once there's enough data to say anything honest)
+- ⏱️ **Live Workout Timer** - Elapsed session time in the logging header
+- 📏 **Per-Exercise Units** - Reps, seconds, or meters per exercise (auto-detected by name, overridable per template). Time and distance work is counted separately from weighted volume
+- 📝 **Exercise Notes** - Free-text notes from the markdown import or default program, shown read-only while logging
+- ⚖️ **Body Weight Tracking** - Per-session bodyweight snapshot, used for bodyweight-relative strength metrics
+- 📈 **Progress Timeline** - Daily volume and rep charts with hover tooltips and clickable points (2 weeks → all time)
+- 📱 **Progressive Web App** - Install on Android/iOS, works fully offline via IndexedDB
+- 🌓 **Dark/Light Mode**
+- 📥 **CSV Export & JSON Backup** - Export history to CSV; full backup/restore via JSON (programs, history, bodyweight, gender)
+- 🔒 **Privacy First** - No backend, no accounts, no analytics
 
 ## 🚀 Quick Start
 
-### Option 1: Use the Live App (Recommended)
+### Use the live app
 
-1. Visit the deployed app: [Your Netlify URL]
-2. On Android: Tap menu (⋮) → "Install app" or "Add to Home screen"
-3. On iOS: Tap share icon → "Add to Home Screen"
+1. Open the deployed Netlify URL on your phone
+2. Android: menu (⋮) → "Install app" / "Add to Home screen"
+3. iOS: share icon → "Add to Home Screen"
 
-### Option 2: Run Locally
+### Run locally
 
 ```bash
-# Clone the repository
 git clone https://github.com/niksaderek/workout-app.git
 cd workout-app
+npm install
 
-# Open index.html in your browser
-# Or use a local server:
+# Build styles.css (purged Tailwind) and app.js (Babel-compiled JSX)
+npm run build
+
+# Serve the root directory
 python -m http.server 8000
-# Then visit http://localhost:8000
+# → http://localhost:8000
 ```
-
-## 📱 Installation as PWA
-
-### Android (Chrome/Edge)
-1. Open the app URL in Chrome
-2. Tap the menu (⋮) in the top right
-3. Select "Install app" or "Add to Home screen"
-4. Tap "Install"
-5. The app will appear on your home screen
-
-### iOS (Safari)
-1. Open the app URL in Safari
-2. Tap the share icon (box with arrow)
-3. Scroll down and tap "Add to Home Screen"
-4. Tap "Add"
 
 ## 🏋️ Usage
 
-### Home Screen
-- View your weekly stats (workouts, volume, reps, core sets)
-- Access your workout program
-- Start a workout with one tap
-- Edit or delete workout days
-- Add custom workout days
+### Home
+- Weekly stats (workouts, volume, reps, core sets)
+- Active program selector — switch, create, rename, delete programs
+- Workout day cards: start, edit, delete, reorder exercises, add custom days
+- Import a markdown routine as a new program
 
-### During Workout
-- Track sets, reps, and weights in real-time
-- Weights automatically pre-filled from last session
-- Mark sets as completed
-- Core exercises (plank, hanging leg raises) have weight input disabled
-- Decimal weight support (use comma or dot: 22,5kg or 22.5kg)
+### During a workout
+- Sets pre-filled per set from the last session (ramps preserved); reps pre-filled from the planned target
+- Live elapsed timer in the header
+- Weight and reps/seconds/meters per set, marked completed as you go
+- Smart weight suggestion with the reason (progress / plateau / deload / rep-up)
+- Mid-workout exercise substitution from same-muscle-group alternatives
+- Optional difficulty rating and end-of-session energy level
+- Decimal weights accept comma or dot (`22,5` or `22.5`)
 
 ### Statistics
-- **Weekly Progress**: Volume, reps, sets with week-over-week comparison
-- **Monthly Overview**: Track monthly trends and improvements
-- **Personal Records**: Max weights for main lifts (deadlift, squat, bench, overhead press, lat pulldown)
-- **All-Time Stats**: Total workouts, volume, average workouts per week
+- Scope chip: all history or a single program
+- Weekly and monthly progress with period-over-period comparison
+- Personal records and estimated 1RM (Epley), tap a lift for its progression
+- Strength standards with 5-segment progress bars
+- Exercise progress charts per exercise
+- Progress timeline (volume + reps per day)
 
 ### History
-- View all completed workouts
-- Delete individual workout entries
-- Export all data to CSV
+- All completed workouts, editable (including fixing a mis-named exercise)
+- Delete individual entries
+- CSV export (`Date,Workout,Exercise,Set,Weight,Reps`, Croatian date locale)
 
 ## 🛠️ Tech Stack
 
-- **React 18** - UI framework (loaded via CDN)
-- **IndexedDB** - Local database for workout storage
-- **Tailwind CSS** - Utility-first styling (via CDN)
-- **Lucide React** - Icon library
-- **Service Worker** - Offline functionality
-- **Web App Manifest** - PWA capabilities
+- **React 18** — via CDN, no bundler
+- **Babel CLI** — precompiles `app.jsx` → `app.js` at build time
+- **Tailwind CSS** — precompiled, purged subset in `styles.css`
+- **IndexedDB** — local storage (`WorkoutTrackerDB` v3)
+- **Inline SVG icons** — no icon library, no CDN dependency
+- **Service Worker + Web App Manifest** — offline support and installability
 
 ## 📂 Project Structure
 
 ```
 workout-app/
-├── index.html              # Main HTML file with embedded React app
+├── app.jsx                 # All React source — edit this
+├── app.js                  # Build artifact (Babel output), committed
+├── index.html              # Static shell that loads /app.js
+├── input.css               # Tailwind entry
+├── styles.css              # Build artifact (purged Tailwind), committed
+├── tailwind.config.js      # Content glob — must cover every file with Tailwind classes
 ├── manifest.json           # PWA manifest
-├── sw.js                   # Service worker for offline support
-├── netlify.toml           # Netlify deployment configuration
-├── workout-tracker.tsx     # Original React component (reference)
-├── CLAUDE.md              # Development documentation
-└── README.md              # This file
+├── sw.js                   # Service worker (bump CACHE_NAME on deploy)
+├── netlify.toml            # Netlify build config
+├── PROJECT_REFERENCE.md    # Full technical reference
+└── README.md               # This file
 ```
 
-## 🎨 Customization
-
-### Adding New Workout Days
-
-1. Tap "Add Day" on the home screen
-2. Edit the workout name and emoji
-3. Add/remove exercises
-4. Set custom sets and reps
-
-### Modifying Default Workouts
-
-Edit the `workouts` state in `index.html` (lines 114-172) to change the default workout program.
-
-### Changing Theme Colors
-
-Modify the `theme_color` and `background_color` in `manifest.json` and update the CSS gradient classes in the component.
+**Edit `app.jsx`, never `app.js`.** After changes run `npm run build:js` (or `npm run build` for CSS too).
 
 ## 📊 Data Storage
 
-All data is stored locally using IndexedDB:
-- **Database Name**: `WorkoutTrackerDB`
-- **Stores**:
-  - `workouts` - Workout day templates
-  - `history` - Completed workout logs
+IndexedDB, database `WorkoutTrackerDB` (v3):
 
-**Privacy**: Your data never leaves your device. No backend, no tracking, no analytics.
+- `programs` — training programs, each holding its workout days (`{id, name, workouts: [...]}`)
+- `history` — completed workout logs (auto-increment)
+- `bodyWeight` — bodyweight entries (auto-increment)
+- `workouts` — dormant legacy store, kept only for one-time migration
+
+Backup JSON is at version 1.3 (carries `programs` + `activeProgramId`). Older flat-`workouts` backups still restore.
+
+**Privacy**: data never leaves your device. No backend, no tracking, no analytics.
 
 ## 🔄 Deployment
 
-### Netlify (Automatic)
+Netlify builds from `netlify.toml`: `npm install && npm run build`, publishing the root directory with an SPA redirect to `/index.html`. Every push to `master` deploys.
 
-1. Fork this repository
-2. Connect your GitHub repo to Netlify
-3. Netlify auto-detects settings from `netlify.toml`
-4. Deploy!
+After deploying, bump `CACHE_NAME` in `sw.js` so installed PWAs pick up the new build. HTML is served stale-while-revalidate — a new version appears on the second launch, or immediately via the "Update Now" toast.
 
-Every push to `master` automatically deploys.
+Works on any static host (Vercel, GitHub Pages, Cloudflare Pages, Firebase) as long as the build step runs.
 
-### Other Platforms
+## 📥 Importing Workouts
 
-This is a static site - works on any static hosting:
-- Vercel
-- GitHub Pages
-- Cloudflare Pages
-- Firebase Hosting
+Import a markdown routine as a new program. Supported formats are auto-detected:
 
-Just deploy the root directory.
+- `## Exercise` with `Sets: 3` / `Reps: 8`
+- Bulleted lists (`- Sets: 3`)
+- Tables (`| Exercise | Sets | Reps |`)
+- Compact notation (`3x8`)
 
-## 📥 Data Export
+```markdown
+# Leg Day 🦵
+## Squat
+Sets: 4
+Reps: 8
 
-Export your workout history to CSV:
-1. Go to History tab
-2. Tap the download icon
-3. CSV file downloads with format: `Date,Workout,Exercise,Set,Weight,Reps`
+## Leg Press
+3x10
 
-Use exported data in Excel, Google Sheets, or data analysis tools.
+# Upper Body 💪
+| Exercise | Sets | Reps |
+|----------|------|------|
+| Bench Press | 3 | 8 |
+| Rows | 3 | 10 |
+```
+
+Emoji in a day header selects its icon; missing fields default to 3 sets × 10 reps.
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Pull requests welcome.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+3. Commit your changes
+4. Push and open a Pull Request
+
+Read `PROJECT_REFERENCE.md` first — several behaviors that look like bugs are deliberate (the main-lift whitelist, the ordered muscle-group rules, stats sections that render nothing on small samples).
 
 ## 📝 License
 
-This project is licensed under the MIT License - see below for details:
-
-```
 MIT License
 
+```
 Copyright (c) 2025 Nikša Derek
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -202,30 +190,21 @@ SOFTWARE.
 
 ## 🐛 Known Issues
 
-- Service worker may need manual refresh on first install
-- Icons (192x192 and 512x512) not included - add your own to `/icon-192.png` and `/icon-512.png`
+- A new deploy is visible on the second app launch (stale-while-revalidate), unless you tap "Update Now"
+- App icons are SVG-only (`favicon.svg`); no raster 192/512 PNGs
 
 ## 🚧 Roadmap
 
-- [ ] Add workout templates library
-- [ ] Exercise instruction videos/GIFs
 - [ ] Rest timer between sets
 - [ ] Workout calendar view
-- [ ] Social sharing of PRs
+- [ ] Exercise instruction videos/GIFs
 - [ ] Import CSV data
 - [ ] Workout streaks and achievements
 
 ## 💬 Support
 
-If you encounter any issues or have questions:
 - Open an [Issue](https://github.com/niksaderek/workout-app/issues)
-- Check the [CLAUDE.md](CLAUDE.md) file for technical documentation
-
-## 🙏 Acknowledgments
-
-- Built with React and modern web technologies
-- Icons by [Lucide](https://lucide.dev/)
-- Styling with [Tailwind CSS](https://tailwindcss.com/)
+- Technical details in [PROJECT_REFERENCE.md](PROJECT_REFERENCE.md)
 
 ---
 
