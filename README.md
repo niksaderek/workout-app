@@ -5,6 +5,12 @@ A React-based Progressive Web App (PWA) for tracking workouts — offline-first,
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![PWA](https://img.shields.io/badge/PWA-enabled-brightgreen.svg)
 
+## 📸 Screenshots
+
+| Home | Statistics | History |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/home.png" alt="Home screen showing weekly stats and the active program" width="260"> | <img src="docs/screenshots/stats.png" alt="Statistics view with bodyweight, program filter, and performance overview" width="260"> | <img src="docs/screenshots/history.png" alt="History view showing logged sessions with duration and energy level" width="260"> |
+
 ## ✨ Features
 
 - 🗂️ **Multiple Programs** - Keep several training programs side by side, switch the active one, rename/delete, import a markdown file as a new program, and export a program back out. Workout history is tagged with the program it was logged under, so stats can be filtered per program or viewed across all
